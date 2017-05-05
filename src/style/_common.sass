@@ -1,0 +1,160 @@
+*
+	box-sizing: border-box
+
+$twitter-colors: #41ABE1
+$facebook: #4867AA
+$vkontakte: #5B7AA8
+$base-gap: 4px
+
+body
+	line-height: 1.4
+	font-family: 'Roboto',sans-serif
+	weight: normal
+h1
+	padding: 30px 0px 10px
+h2
+	padding: 30px 0px 10px
+	font-size: 20px 
+h3
+	padding: 30px 0px 10px
+	font-size: 20px 
+	color: rgb(173, 65, 65)
+p
+	padding: 10px 0px
+
+section
+	margin: 10px 10px
+	padding: 20px
+	background: #f5f5f5
+	border: 1px solid #e3e3e3
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05)
+
+.f
+	&
+	&-box
+	&-grid
+	&-fill
+		display: flex
+
+	&-fill
+		> *
+			flex: 1 0 auto
+
+	&-wrap
+		flex-wrap: wrap
+
+	&-gap
+		@for $i from 1 through 10
+			&-#{$i}
+				$half-gap: $base-gap * $i * 0.5
+
+				margin-left: - $half-gap
+				margin-right: - $half-gap
+				> *
+					margin-left: $half-gap
+					margin-right: $half-gap
+	&-v-gap
+		@for $i from 1 through 10
+			&-#{$i}
+				$gap: $base-gap * $i
+				
+				margin-bottom: - $gap
+				> *
+					margin-bottom: $gap
+
++flex-alignment()
+
+.u
+	// margins and paddings
+	@for $i from 0 through 10
+		$gap: $base-gap * $i
+		&-mt-#{$i},
+		&-my-#{$i},
+		&-m-#{$i}
+			margin-top: $gap
+
+		&-mb-#{$i},
+		&-my-#{$i},
+		&-m-#{$i}
+			margin-bottom: $gap
+
+		&-ml-#{$i},
+		&-mx-#{$i},
+		&-m-#{$i}
+			margin-left: $gap
+
+		&-mr-#{$i},
+		&-mx-#{$i},
+		&-m-#{$i}
+			margin-right: $gap
+
+		&-pt-#{$i},
+		&-py-#{$i},
+		&-p-#{$i}
+			padding-top: $gap
+
+		&-pb-#{$i},
+		&-py-#{$i},
+		&-p-#{$i}
+			padding-bottom: $gap
+
+		&-pl-#{$i},
+		&-px-#{$i},
+		&-p-#{$i}
+			padding-left: $gap
+
+		&-pr-#{$i},
+		&-px-#{$i},
+		&-p-#{$i}
+			padding-right: $gap
+
+	&-mx-auto
+		margin-left: auto
+		margin-right: auto
+
+  // text utitlites
+	&-text
+
+		&-nowrap
+			white-space: nowrap
+
+		&-upper
+			text-transform: uppercase
+
+		&-capital
+			text-transform: capitalize
+
+		&-right
+			text-align: right
+
+		&-center
+			text-align: center
+
+		&-left
+			text-align: left
+
+  // gaps
+
+	@for $i from 1 through 10
+		&-v-gap-#{$i}
+			$gap: $base-gap * $i
+			> *:first-child
+				margin-top: 0
+			> *:last-child
+				margin-bottom: 0
+			> *
+				margin-top: $gap
+				margin-bottom: $gap
+
+  @for $i from 1 through 10
+		&-h-gap-#{$i}
+			$gap: $base-gap * $i
+			margin-left: - $gap
+			> *
+				margin-left: $gap
+
+
+
+	@each $prop in (block, inline-block, inline) 
+		&-#{$prop}
+			display: #{$prop}

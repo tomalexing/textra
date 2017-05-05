@@ -1,0 +1,25 @@
+input[type="email"]
+	background: transparent
+	line-height: 35px
+	font-size: 18px
+	font-weight: 100
+	color: white 
+	margin: 0 11px 0 20px
+	width: 160px
+	+tr(width .5s)
+	&:focus
+		width: 180px
+		opacity: .6
+	&::input-placeholder
+		color: rgba(255, 255, 255, .3)
+	&:focus::input-placeholder
+		color: rgba(255, 255, 255, .7)
+	&:-webkit-autofill
+		box-shadow: 0 0 0px 1000px #000 inset 
+		-webkit-text-fill-color: rgba(255, 255, 255, .5)
+	&:-webkit-autofill:focus
+		-webkit-text-fill-color: rgba(255, 255, 255, .7)
+	+r(840)
+		&:focus
+			width: 160px
+					
