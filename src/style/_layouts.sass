@@ -1,26 +1,69 @@
-.App 
-  text-align: center
+.outer
+  position: absolute
+  height: 100%
+  width: 100%
+  min-height: 700px
+  .sidebar
+    z-index: 100
+    padding: 28px
+    flex-direction: column
+    flex: 0 1 344px
+    overflow: hidden
+    &-regist__logo
+      flex-basis: 27%
+    &-regist__form
+      flex-basis: 73%
 
+  .main
+    z-index: 1
+    flex: 1 0 auto
+    background-size: cover
+    &-toregister
+      display: block
+      margin-top: 25%
+      width: 190px
+      text-decoration: none
+    &-regist__form
+      width: 327px
+      height: 418px
+      padding: 20px
+      border-radius: 4px
+      background-color: rgba(255, 255, 255, 0.8)
 
-.App-logo 
-  animation: App-logo-spin infinite 20s linear
-  height: 80px
-
-
-.App-header 
-  background-color: #222
-  height: 150px
-  padding: 20px
-  color: white
-
-
-.App-intro 
-  font-size: large
-
-
-@keyframes App-logo-spin 
-  from  
-    transform: rotate(0deg)
-  to  
-    transform: rotate(360deg)
+.registform
+    &-delimiter
+      width: 100%
+      position: relative
+      z-index: 102
+      text-align: center
+      margin: 40px 0
+      &:before,
+      &:after
+        position: absolute
+        top: 50%
+        width: 100%
+        z-index: 101
+        content: ''
+        width: 106px
+        height: 1px
+        background: rgba($text-light, .5)
+      &:after
+        left: 1px
+      &:before
+        right: 1px
+      span
+        height: 14px
+        color: #9ca9b2
+        font-size: 12px
+        font-weight: 400
+        letter-spacing: -0.06px
+        line-height: 14px
+    &-textlink
+      font-size: 12px
+      font-weight: 400
+      letter-spacing: -0.05px
+      line-height: 14px
+      color: #9ca9b2
+      &__blue
+        color: #1e7bcf
 

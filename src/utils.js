@@ -1,6 +1,5 @@
 // @flow
 import React from 'react';
-
 const util = {};
 
 
@@ -14,13 +13,13 @@ export class Bundle extends React.Component {
   componentWillMount() {
     this.load(this.props)
   }
-
+  
   componentWillReceiveProps(nextProps) {
     if (nextProps.load !== this.props.load) {
       this.load(nextProps)
     }
   }
-
+  
   load(props) {
       let self = this;
       require([], function() {
@@ -38,5 +37,8 @@ export class Bundle extends React.Component {
   }
 }
 
+export const dump = (props) => Object.keys(props).map((prop, i) => <pre style={{'paddingLeft': '10px'}}key={i}>{prop + ':'} {(typeof props[prop] === "object"  ? dump(props[prop])  : props[prop])  }</pre> )
+
+util.dump = dump
 util.Bundle = Bundle
 export default util 

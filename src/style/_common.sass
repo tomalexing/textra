@@ -4,45 +4,156 @@
 $twitter-colors: #41ABE1
 $facebook: #4867AA
 $vkontakte: #5B7AA8
-$base-gap: 4px
-
+$base-gap: 6px
+$text-dark: #414141
+$text-light: #6f6f6f
+$blue: #007ACF // 0,122,207
 body
 	line-height: 1.4
 	font-family: 'Roboto',sans-serif
 	weight: normal
-h1
-	padding: 30px 0px 10px
-h2
-	padding: 30px 0px 10px
+.h1
+	font-size: 22px
+	color: $text-dark
+.h2
 	font-size: 20px 
-h3
-	padding: 30px 0px 10px
-	font-size: 20px 
-	color: rgb(173, 65, 65)
+		color: $text-dark
+.h3
+	font-size: 16px
+	color: $text-dark
 p
-	padding: 10px 0px
+	font-size: 14px 
+	color: $text-light
+	font-weight: 400
+	letter-spacing: -0.05px
+	line-height: 14px
 
-section
-	margin: 10px 10px
-	padding: 20px
-	background: #f5f5f5
-	border: 1px solid #e3e3e3
-	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05)
+.btn
+	border-radius: 4px
+	color: #ffffff
+	font-family: Roboto
+
+.btn-primiry
+	background-color: rgba($blue, 0.85)
+	font-size: 16px
+	font-weight: 400
+	letter-spacing: -0.05px
+	+tr(background-color .3s linear)
+	&:hover
+		+tr(background-color .3s linear)
+		background-color: rgba($blue, 1)
+
+.btn-normal
+	height: 34px
+	line-height: 34px
+.btn-mini
+	height: 20px
+	line-height: 20px
+.btn-block
+	display: block
+	width: 100%
+.fb-color
+	background-color: rgba($facebook, 0.85)
+	&:hover
+		+tr(background-color .3s linear)
+		background-color: rgba($facebook, 1)
+.vk-color
+	background-color: rgba($vkontakte, 0.85)
+	&:hover
+		+tr(background-color .3s linear)
+		background-color: rgba($vkontakte, 1)
+
+
+input[type="email"],
+input[type="text"],
+input[type="password"]
+	background: transparent
+	height: 34px
+	font-weight: 100
+	border-radius: 4px
+	border: 1px solid #c8ced3
+	color: #6f6f6f
+	font-size: 14px
+	font-weight: 400
+	letter-spacing: -0.04px
+	line-height: 16px
+	padding: 0 12px
+	opacity: .8
+	&:focus
+		opacity: 1
+		box-shadow: 0 0 0px 1000px #fff inset 
+	&::input-placeholder
+		color: rgba(#6f6f6f, .7)
+		box-shadow: 0 0 0px 1000px #fff inset 
+	&:focus::input-placeholder
+		color: rgba(#6f6f6f, 1)
+		box-shadow: 0 0 0px 1000px #fff inset 
+	&:-webkit-autofill
+		color: rgba(#6f6f6f,.7)
+		box-shadow: 0 0 0px 1000px #fff inset 
+		-webkit-text-fill-color: rgba(#6f6f6f,.7)
+	&:-webkit-autofill:focus
+		-webkit-text-fill-color: rgba(#111, 1)
+	&.success
+		border: 1px solid rgb(106, 173, 133)
+		box-shadow: 0 0 0px 1000px #fff inset 
+	&.fail
+		border: 1px solid rgb(189, 120, 132)
+		box-shadow: 0 0 0px 1000px #fff inset
+	& .help-message
+		height: 0
+		width: 100%
+
+.field-block
+	width: 100%
+	display: block
+
+.loading__screen
+	+hide-text
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .f
-	&
-	&-box
-	&-grid
-	&-fill
-		display: flex
-
+	display: flex
+	flex-wrap: nowrap
 	&-fill
 		> *
 			flex: 1 0 auto
 
 	&-wrap
 		flex-wrap: wrap
-
+	&-row
+		flex-direction: row
+	&-col
+		flex-direction: column
 	&-gap
 		@for $i from 1 through 10
 			&-#{$i}
@@ -62,7 +173,50 @@ section
 				> *
 					margin-bottom: $gap
 
+
+=flex-alignment($base : '.f-align')
+  #{$base}-1-1,
+  #{$base}-1-2,
+  #{$base}-1-3
+    justify-content: flex-start
+
+  #{$base}-2-1,
+  #{$base}-2-2,
+  #{$base}-2-3
+    justify-content: center
+
+  #{$base}-3-1,
+  #{$base}-3-2,
+  #{$base}-3-3
+    justify-content: flex-end
+
+  #{$base}-13-1,
+  #{$base}-13-2,
+  #{$base}-13-3
+    justify-content: space-between
+
+  #{$base}-1-1,
+  #{$base}-2-1,
+  #{$base}-3-1
+    align-items: flex-start
+
+  #{$base}-1-2,
+  #{$base}-2-2,
+  #{$base}-3-2
+    align-items: center
+
+  #{$base}-1-22,
+  #{$base}-2-22,
+  #{$base}-3-22
+    align-items: baseline
+
+  #{$base}-1-3,
+  #{$base}-2-3,
+  #{$base}-3-3
+    align-items: flex-end
+
 +flex-alignment()
+
 
 .u
 	// margins and paddings
@@ -132,7 +286,9 @@ section
 
 		&-left
 			text-align: left
-
+		
+		&-undecor
+			text-decoration: none
   // gaps
 
 	@for $i from 1 through 10

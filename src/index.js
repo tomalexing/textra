@@ -1,6 +1,7 @@
 // @flow
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactCSSTransitionGroup  from 'react-addons-css-transition-group';
 import './style/app.css';
 import './style/index.css';
 
@@ -20,13 +21,13 @@ import {Bundle} from './utils';
 
 const Login = () => (
   <Bundle load={'./Login'}>
-    {<div>loading</div>}
+    {<div className='loading__screen'>loading</div>}
   </Bundle>
 )
 
 const Registration = () => (
   <Bundle load={'./Registration'}>
-    {<div>loading</div>}
+    {<div className='loading__screen'>loading</div>}
   </Bundle>
 )
 // ====================================
@@ -53,15 +54,22 @@ const App = () => (
   
   <Router>
     <div>
-      <AuthButton />
+      {/*<AuthButton />
       <ul>
         <li><Link to="/public">Public Page</Link></li>
         <li><Link to="/registration">registration</Link></li>
-      </ul>
-      <PrivateRoute exact path="/" component={Protected} />
-      <Route path="/registration" component={Registration} />
-      <Route path="/login" component={Login} />
-      <PrivateRoute path="/protected" component={Protected} />
+      </ul>*/}
+      
+      <ReactCSSTransitionGroup
+            transitionName="fade"
+            transitionEnterTimeout={300}
+            transitionLeaveTimeout={300}
+      >
+        <PrivateRoute exact path="/" component={Protected} />
+        <Route path="/registration" component={Registration} />
+        <Route path="/login" component={Login} />
+        <PrivateRoute path="/protected" component={Protected} />
+       </ReactCSSTransitionGroup>
     </div>
   </Router>
 
@@ -79,11 +87,11 @@ const AuthButton = withRouter(({ history }) => (
       <p>You are not logged in.</p>
     )
 ))
-
+ 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
     fakeAuth.isAuthenticated ? (
-      <Component {...props} />
+        <Component {...props} />
     ) : (
         <Redirect to={{
           pathname: '/login',
@@ -94,7 +102,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 )
 
 
-ReactDOM.render(
+ReactDOM.render(  
   <App />,
-  document.getElementById('root')
+  document.getElementById('tx')
 );
