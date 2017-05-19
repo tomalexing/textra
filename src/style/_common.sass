@@ -30,11 +30,11 @@ p
 
 .btn
 	border-radius: 4px
-	color: #ffffff
 	font-family: Roboto
 
 .btn-primiry
 	background-color: rgba($blue, 0.85)
+	color: #ffffff
 	font-size: 16px
 	font-weight: 400
 	letter-spacing: -0.05px
@@ -46,9 +46,17 @@ p
 .btn-normal
 	height: 34px
 	line-height: 34px
+
 .btn-mini
 	height: 20px
 	line-height: 20px
+
+.btn-flat
+	background-color: transparent
+	color: rgba(0, 122, 207, 0.85)
+	text-decoration: underline
+	font-weight: 700
+
 .btn-block
 	display: block
 	width: 100%
@@ -78,22 +86,23 @@ input[type="password"]
 	letter-spacing: -0.04px
 	line-height: 16px
 	padding: 0 12px
-	opacity: .8
+	opacity: 1
 	&:focus
 		opacity: 1
-		box-shadow: 0 0 0px 1000px #fff inset 
-	&::input-placeholder
+		color: rgba(black, .7)
+		box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.8) inset 
+	&::placeholder
 		color: rgba(#6f6f6f, .7)
-		box-shadow: 0 0 0px 1000px #fff inset 
-	&:focus::input-placeholder
+		box-shadow: 0 0 0px 1000px transparent inset 
+	&:focus::placeholder
 		color: rgba(#6f6f6f, 1)
 		box-shadow: 0 0 0px 1000px #fff inset 
 	&:-webkit-autofill
-		color: rgba(#6f6f6f,.7)
+		box-shadow: 0 0 0px 1000px rgb(240, 240, 240) inset 
+		-webkit-text-fill-color: #6f6f6f
+	&:focus:-webkit-autofill
+		-webkit-text-fill-color: rgba(black, .7)
 		box-shadow: 0 0 0px 1000px #fff inset 
-		-webkit-text-fill-color: rgba(#6f6f6f,.7)
-	&:-webkit-autofill:focus
-		-webkit-text-fill-color: rgba(#111, 1)
 	&.success
 		border: 1px solid rgb(106, 173, 133)
 		box-shadow: 0 0 0px 1000px #fff inset 
@@ -113,8 +122,22 @@ input[type="password"]
 
 
 
+.fade-enter 
+  opacity: 0.01
 
 
+.fade-enter.fade-enter-active 
+  opacity: 1
+  transition: opacity 500ms ease-in
+
+
+.fade-leave 
+  opacity: 1
+
+
+.fade-leave.fade-leave-active 
+  opacity: 0.01
+  transition: opacity 300ms ease-in
 
 
 

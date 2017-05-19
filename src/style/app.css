@@ -27,11 +27,11 @@ p {
 
 .btn {
   border-radius: 4px;
-  color: #ffffff;
   font-family: Roboto; }
 
 .btn-primiry {
   background-color: rgba(0, 122, 207, 0.85);
+  color: #ffffff;
   font-size: 16px;
   font-weight: 400;
   letter-spacing: -0.05px;
@@ -56,6 +56,12 @@ p {
 .btn-mini {
   height: 20px;
   line-height: 20px; }
+
+.btn-flat {
+  background-color: transparent;
+  color: rgba(0, 122, 207, 0.85);
+  text-decoration: underline;
+  font-weight: 700; }
 
 .btn-block {
   display: block;
@@ -97,37 +103,38 @@ input[type="password"] {
   letter-spacing: -0.04px;
   line-height: 16px;
   padding: 0 12px;
-  opacity: .8; }
+  opacity: 1; }
 
 input[type="email"]:focus,
 input[type="text"]:focus,
 input[type="password"]:focus {
   opacity: 1;
-  box-shadow: 0 0 0px 1000px #fff inset; }
+  color: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.8) inset; }
 
-input[type="email"]::input-placeholder,
-input[type="text"]::input-placeholder,
-input[type="password"]::input-placeholder {
+input[type="email"]::placeholder,
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
   color: rgba(111, 111, 111, 0.7);
-  box-shadow: 0 0 0px 1000px #fff inset; }
+  box-shadow: 0 0 0px 1000px transparent inset; }
 
-input[type="email"]:focus::input-placeholder,
-input[type="text"]:focus::input-placeholder,
-input[type="password"]:focus::input-placeholder {
+input[type="email"]:focus::placeholder,
+input[type="text"]:focus::placeholder,
+input[type="password"]:focus::placeholder {
   color: #6f6f6f;
   box-shadow: 0 0 0px 1000px #fff inset; }
 
 input[type="email"]:-webkit-autofill,
 input[type="text"]:-webkit-autofill,
 input[type="password"]:-webkit-autofill {
-  color: rgba(111, 111, 111, 0.7);
-  box-shadow: 0 0 0px 1000px #fff inset;
-  -webkit-text-fill-color: rgba(111, 111, 111, 0.7); }
+  box-shadow: 0 0 0px 1000px #f0f0f0 inset;
+  -webkit-text-fill-color: #6f6f6f; }
 
-input[type="email"]:-webkit-autofill:focus,
-input[type="text"]:-webkit-autofill:focus,
-input[type="password"]:-webkit-autofill:focus {
-  -webkit-text-fill-color: #111111; }
+input[type="email"]:focus:-webkit-autofill,
+input[type="text"]:focus:-webkit-autofill,
+input[type="password"]:focus:-webkit-autofill {
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0px 1000px #fff inset; }
 
 input[type="email"].success,
 input[type="text"].success,
@@ -155,6 +162,20 @@ input[type="password"] .help-message {
   font: 0/0 a;
   text-shadow: none;
   color: transparent; }
+
+.fade-enter {
+  opacity: 0.01; }
+
+.fade-enter.fade-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in; }
+
+.fade-leave {
+  opacity: 1; }
+
+.fade-leave.fade-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in; }
 
 .f {
   display: flex;
@@ -814,14 +835,45 @@ input[type="password"] .help-message {
   position: absolute;
   height: 100%;
   width: 100%;
-  min-height: 700px; }
+  min-height: 700px;
+  overflow: hidden; }
+
+.outer .outer-left {
+  min-width: 334px;
+  width: 334px;
+  z-index: 11; }
+
+@media only screen and (max-width: 768px) {
+  .outer .outer-left {
+    min-width: 100%;
+    width: 100%;
+    width-z-index: 10; } }
+
+.outer .outer-right {
+  flex: 1 0 auto;
+  z-index: 10; }
+
+@media only screen and (max-width: 768px) {
+  .outer .outer-right {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(100%);
+    transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 11; }
+  .outer .outer-right.toggled {
+    transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform: translateX(0); } }
 
 .outer .sidebar {
   z-index: 100;
   padding: 28px;
   flex-direction: column;
   flex: 0 1 344px;
-  overflow: hidden; }
+  overflow: hidden;
+  height: 100%; }
 
 .outer .sidebar-regist__logo {
   flex-basis: 27%; }

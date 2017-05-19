@@ -16,12 +16,12 @@
     "react-scripts": "0.9.5"
   },
   "scripts": {
-    "build-css": "node-sass src/style/ -o public/ --output-style=compressed && node-sass src/style/ -o src/style/ --output-style=compressed",
+    "build-css": "node-sass src/style/ -o public/ --output-style=compressed && node-sass src/style/ -o src/style/ --output-style=compressed && node-sass src/style/ -o build/  --output-style=compressed",
     "watch-css": "npm run build-css && node-sass src/style/ -o src/style/ --watch --recursive",
     "start-js": "react-scripts start",
     "start": "npm-run-all -p watch-css start-js",
     "build": "npm run build-css && react-scripts build",
-    "test": "node scripts/test.js --env=jsdom",
+    "test": "react-scripts test --env=jsdom",
     "flow": "flow"
   }
 }
