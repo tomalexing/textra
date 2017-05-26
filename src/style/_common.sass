@@ -4,6 +4,7 @@
 $twitter-colors: #41ABE1
 $facebook: #4867AA
 $vkontakte: #5B7AA8
+$google: #dd4f43
 $base-gap: 6px
 $text-dark: #414141
 $text-light: #6f6f6f
@@ -17,7 +18,7 @@ body
 	color: $text-dark
 .h2
 	font-size: 20px 
-		color: $text-dark
+	color: $text-dark
 .h3
 	font-size: 16px
 	color: $text-dark
@@ -65,11 +66,11 @@ p
 	&:hover
 		+tr(background-color .3s linear)
 		background-color: rgba($facebook, 1)
-.vk-color
-	background-color: rgba($vkontakte, 0.85)
+.google-color
+	background-color: rgba($google, 0.85)
 	&:hover
 		+tr(background-color .3s linear)
-		background-color: rgba($vkontakte, 1)
+		background-color: rgba($google, 1)
 
 
 input[type="email"],
@@ -104,11 +105,13 @@ input[type="password"]
 		-webkit-text-fill-color: rgba(black, .7)
 		box-shadow: 0 0 0px 1000px #fff inset 
 	&.success
-		border: 1px solid rgb(106, 173, 133)
-		box-shadow: 0 0 0px 1000px #fff inset 
+		//border: 1px solid rgba(30,50,20,.3)
+		//box-shadow: 0 0 0px 1000px #fff inset 
 	&.fail
-		border: 1px solid rgb(189, 120, 132)
-		box-shadow: 0 0 0px 1000px #fff inset
+		border: 1px solid #E16666
+		box-shadow: 0 0 0px 1000px rgba(#E16666, .1) inset
+	&.fail:focus::placeholder
+		box-shadow: 0 0 0px 1000px rgba(#E16666, .02) inset
 	& .help-message
 		height: 0
 		width: 100%
@@ -119,6 +122,18 @@ input[type="password"]
 
 .loading__screen
 	+hide-text
+
+.field-error
+	display: block
+	background: rgba(#E16666, .1)
+	border-radius: 4px
+	color: #6F6F6F
+	font-size: 10px
+	text-align: left
+	&.form-error__active
+		padding: 10px
+	& > div
+		margin: 4px
 
 
 
@@ -137,11 +152,7 @@ input[type="password"]
 
 .fade-leave.fade-leave-active 
   opacity: 0.01
-  transition: opacity 300ms ease-in
-
-
-
-
+  transition: opacity 500ms ease-in
 
 
 

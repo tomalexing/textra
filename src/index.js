@@ -1,10 +1,10 @@
-  // @flow
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactCSSTransitionGroup  from 'react-addons-css-transition-group';
 import './style/app.css';
 import './style/index.css';
-
+import injectTapEventPlugin from 'react-tap-event-plugin';
 import {
   BrowserRouter as Router,
   Route,
@@ -13,24 +13,24 @@ import {
   withRouter
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
-import  {Bundle, getUniqueKey} from './utils';
+import  { Lazy, getUniqueKey } from './utils';
 
 
+injectTapEventPlugin();
 // ====================================
 // ========= Lazy loadin ==============
 // ====================================
 
-const Login = () => (
-  <Bundle load={'./Login'}>
-    {<div className='loading__screen'>loading</div>}
-  </Bundle>
-)
+// import Login from './Login' ;
+// import Registration from './Registration';
 
-const Registration = () => (
-  <Bundle load={'./Registration'}>
-    {<div className='loading__screen'>loading</div>}
-  </Bundle>
-)
+  // eslint-disable-next-line
+const Registration = () => <Lazy load={() => import('./Registration')}/>
+
+  // eslint-disable-next-line
+const Login = () => <Lazy load={() => import('./Login')}/>
+
+
 // ====================================
 // ========= Lazy loadin end ==========
 // ====================================

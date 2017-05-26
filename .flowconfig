@@ -1,7 +1,11 @@
 [ignore]
-
+.*/build/.*
+.*/node_modules/.*
+.*/public/.*
 [include]
-
+./src
 [libs]
-
+.*/build/.*
+.*/node_modules/.*
+.*/public/.*
 [options]

@@ -3,39 +3,36 @@ import React from 'react';
 const util = {};
 
 
-export class Bundle extends React.Component {
-
+export class Lazy extends React.Component {
   state = {
     // short for "module" but that's a keyword in js, so "mod"
-    mod: 'div'
+    mod: null
   }
-
+  
   componentWillMount() {
     this.load(this.props)
   }
-  
-  componentWillReceiveProps(nextProps) {
+
+ componentWillReceiveProps(nextProps) {
     if (nextProps.load !== this.props.load) {
       this.load(nextProps)
     }
   }
-  
-  load(props) {
-      let self = this;
-      require([], function() {
-        let loaded = require(props.load);
-        self.setState({ 
-          // handle both es imports and cjs
-          mod: loaded.default ? loaded.default : loaded
-        })
-      });
 
+  load(props) {
+    props.load().then((mod) => {
+      this.setState({
+        // handle both es imports and cjs
+        mod: mod.default ? mod.default : mod
+      })
+    })
   }
 
   render() {
-    return React.createElement( this.state.mod, null, this.props.children);
+    return  React.createElement('div', null, this.state.mod && React.createElement(this.state.mod, null, null))
   }
 }
+
 
 export const dump = (props) => Object.keys(props).map((prop, i) => <pre style={{'paddingLeft': '10px'}}key={i}>{prop + ':'} {(typeof props[prop] === "object"  ? dump(props[prop])  : props[prop])  }</pre> )
 
@@ -108,8 +105,6 @@ export function delegate(target, type, selector, handler, capture) {
 export function listener(target, type, handler, capture) {
     const dispatchEvent = (event) => {
         handler.call(this, event);
-
-        // console.timeEnd('delegate');
     };
 
     target.addEventListener(type, dispatchEvent, !!capture);
@@ -117,6 +112,7 @@ export function listener(target, type, handler, capture) {
     return () => target.removeEventListener(type, dispatchEvent, !!capture);
 
 };
+
 util.listener = listener
 util.delegate = delegate
 util.removeClass = removeClass
@@ -124,5 +120,5 @@ util.hasClass = hasClass
 util.addClass = addClass
 util.debounce = debounce
 util.dump = dump
-util.Bundle = Bundle
+util.Lazy = Lazy
 export default util 

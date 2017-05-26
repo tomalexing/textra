@@ -4,9 +4,10 @@ import {fakeAuth} from './index';
 import mainbg from './assets/main.png';
 import logo from './assets/logo.png';
 import fb from './assets/fb.svg';
-import vk from './assets/vk.svg';
+import google from './assets/google.svg';
 
-import { findDOMNode } from 'react-dom';
+import TxInput from './components/TxInput';
+import TxForm from './components/TxForm';
 import { hasClass, addClass , removeClass, debounce, listener} from './utils';
 import {
 //   BrowserRouter as Router,
@@ -16,33 +17,29 @@ import {
     withRouter
 } from 'react-router-dom';
 
-const TxForm = (props) => (
-    <form onSubmit={props.login} className="registform-regist__inputs ">
-      <input type="email" name="email" className="field-block u-mb-3" placeholder="Email"/>
-      <input type="password" name="password" className="field-block  u-my-3" placeholder="Пароль"/>
-      <input tabIndex='1' type="submit" className="btn btn-primiry btn-normal btn-block" onClick={props.login} ref={(s) => { props.submit = s; }}  value="Войти"/>
-    </form>
-)
-
 class Login extends React.Component {
 
  constructor(props){
    super(props);
    this.removeMe = [];
+   this.doAtDidMount = [];
  }
 
   componentDidMount(){
-    this.submit.focus(); // press Enter to pass
     this.removeMe.push(
           listener(window, 'resize', debounce((e) => {
             let isTablet = e.target.innerWidth < 768 ? true : false;
             if(this.state.isTablet !==  isTablet ) this.setState({isTablet})
           }, 200, false), false)
-        )
+        );
+    this.doAtDidMount.forEach(func => func());
+  }
+
+  setSubmit(input){
+    this.doAtDidMount.push();
   }
 
   componentWillUnmount(){ 
-    removeClass(this.toggleElem, 'toggled');
     this.removeMe.forEach(removeEventListener => removeEventListener())
   }
 
@@ -52,6 +49,7 @@ class Login extends React.Component {
   }
 
   login = (e) => {
+    console.log(e);
     e.preventDefault();
     fakeAuth.authenticate(() => {
       this.setState({ redirectToReferrer: true })
@@ -60,9 +58,7 @@ class Login extends React.Component {
   }
 
   switchPanel = (e) => {
-
     !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
-
   }
 
   loginVk = () => {
@@ -77,19 +73,12 @@ class Login extends React.Component {
     const { from } = this.props.location.state || { from: { pathname: '/' } }
     const { redirectToReferrer } = this.state
 
-    if (redirectToReferrer) {
-      return (
-        <Redirect to={from} />
-      )
-    }
-
     const bgPic = {
       backgroundImage : `url(${mainbg})`
     }
 
-
-
     return (
+      (redirectToReferrer) ? <Redirect to={from} /> :
       <div className="f outer">
         <div className="f f-align-2-2 outer-left">
           <div className="f sidebar">
@@ -106,11 +95,18 @@ class Login extends React.Component {
                     )
                 )}</p>
                 <div className="f f-gap-2 registform-regist__social"> 
-                  <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img src={fb} alt="fb"/></button>
-                  <button onClick={this.loginVk} className="btn btn-primiry btn-normal btn-block vk-color"><img src={vk} alt="vk"/></button>
+                  <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button>
+                  <button onClick={this.loginVk} className="btn btn-primiry btn-normal btn-block google-color"><img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/></button>
                 </div>
                 <div className="registform-delimiter " ><span>или</span></div>
-                <TxForm login={this.login} submit={this.submit}/>
+
+                {/* Login Form */}
+                <TxForm submit={this.login} >
+                  <TxInput ref='name' tabIndex='1' setFocusToInput={true} type="email" name="email" validate={['email', 'required']}   className="field-block u-mb-3" placeholder="Email"/>
+                  <TxInput type="password" name="password" validate={[{'minLength':6}, 'required']}  className="field-block  u-my-3" placeholder="Пароль"/>
+                  <TxInput type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
+                </TxForm>
+
                 <p className="f f-align-3-3 u-mt-1">Забыли пароль?</p>
               </div>
           </div>
