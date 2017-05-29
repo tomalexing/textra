@@ -13,7 +13,7 @@ import {
   withRouter
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
-import  { Lazy, getUniqueKey } from './utils';
+import  { Lazy, getUniqueKey, dump } from './utils';
 
 
 injectTapEventPlugin();
@@ -30,6 +30,8 @@ const Registration = () => <Lazy load={() => import('./Registration')}/>
   // eslint-disable-next-line
 const Login = () => <Lazy load={() => import('./Login')}/>
 
+  // eslint-disable-next-line
+const DashBoard = () => <Lazy load={() => import('./Dashboard')}/>
 
 // ====================================
 // ========= Lazy loadin end ==========
@@ -71,8 +73,7 @@ const App = () => (
                 <NavLink to="/registration">registration</NavLink>
                 <NavLink to="/login">login</NavLink>
                 <NavLink to="/public">public</NavLink>
-                <NavLink to="/protected">Protected</NavLink>
-          
+                <NavLink to="/">DashBoard</NavLink>
               </ul>
               <div style={styles.content}>
                   <ReactCSSTransitionGroup
@@ -80,7 +81,7 @@ const App = () => (
                     transitionEnterTimeout={300}
                     transitionLeaveTimeout={300}
                   >
-                  <PrivateRoute exact path="/" component={Protected} location={location}  key={getUniqueKey()}/>
+                  <DoNotReload exact path="/" component={DashBoard} location={location}  key={getUniqueKey()}/>
                   <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
                   <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
                   <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
@@ -176,6 +177,14 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
+const DoNotReload = ({ component: Component, ...rest }) => (
+  <Route {...rest} render={props => (
+<div> 
+       <div> {dump(props)}</div> 
+        <Component {...props} /></div> 
+    ) 
+  } />
+)
 
 ReactDOM.render(  
   <App />,

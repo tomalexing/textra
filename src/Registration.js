@@ -7,6 +7,7 @@ import google from './assets/google.svg';
 
 import TxInput from './components/TxInput';
 import TxForm from './components/TxForm';
+import { getUniqueKey } from './utils'
 import {
 //   BrowserRouter as Router,
 //   Route,
@@ -15,23 +16,28 @@ import {
   withRouter
 } from 'react-router-dom';
 import { dump } from './utils'
+
 class Login extends React.Component {
   state = {
     redirectToReferrer: false
   }
 
   login = () => {
+    console.log('registretion')
     fakeAuth.authenticate(() => {
       this.setState({ redirectToReferrer: true })
     })
   }
+  
 
   render() {
     const { from } = this.props.location.state || { from: { pathname: '/' } }
     const bgPic = {
       backgroundImage : `url(${mainbg})`
     }
+    let ukey = getUniqueKey('for-input');
     return (
+      (this.state.redirectToReferrer) ? <Redirect to={from} /> :
       <div className="f outer">
         <div className="f f-align-2-2 main" style={bgPic}>
             <div className="f f-col main-regist__form">
@@ -45,9 +51,9 @@ class Login extends React.Component {
                {/* Login Form */}
                 <TxForm submit={this.login} >
                   <TxInput tabIndex='1' type="email" name="email" validate={['email', 'required']}  setFocusToInput={true}  className="field-block u-mb-3" placeholder="Email"/>
-                  <TxInput tabIndex='1' type="password" name="password" validate={[{'minLength':6}, 'required', {'emit':'password'} ]}  className="field-block  u-my-3" placeholder="Пароль"/>
-                  <TxInput tabIndex='1' type="password" validate={[{'minLength':6}, 'required', {'listen':'password'}]} className="field-block  u-my-3" placeholder="Повторить пароль"/>
-                  <TxInput tabIndex='1' type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
+                  <TxInput tabIndex='1' type="password" name="password" validate={[{'minLength':6}, 'required', {'emit': `${ukey}-password`} ]} ukey={`${ukey}-password`} className="field-block  u-my-3" placeholder="Пароль"/>
+                  <TxInput tabIndex='1' type="password" validate={[{'minLength':6}, 'required', {'listen': `${ukey}-password`}]} ukey={`${ukey}-password`} className="field-block  u-my-3" placeholder="Повторить пароль"/>
+                  <TxInput tabIndex='1' type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Зарегистрироваться"/>
                 </TxForm>
 
               <div className="u-mt-1 registform-textlink">Регистрируясь, вы принимаете <Link to='/' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>

@@ -23,6 +23,7 @@ class Login extends React.Component {
    super(props);
    this.removeMe = [];
    this.doAtDidMount = [];
+   this.login = this.login.bind(this);
  }
 
   componentDidMount(){

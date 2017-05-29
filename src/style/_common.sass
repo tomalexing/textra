@@ -115,7 +115,10 @@ input[type="password"]
 	& .help-message
 		height: 0
 		width: 100%
-
+input[disabled='true']
+	opacity: 0.5
+	cursor: not-allowed !important
+	
 .field-block
 	width: 100%
 	display: block
@@ -125,15 +128,31 @@ input[type="password"]
 
 .field-error
 	display: block
-	background: rgba(#E16666, .1)
 	border-radius: 4px
 	color: #6F6F6F
-	font-size: 10px
 	text-align: left
-	&.form-error__active
-		padding: 10px
-	& > div
-		margin: 4px
+	overflow: auto
+	& > div p
+		margin: 0
+		font-size: 10px
+	& > div:empty
+		transition: all .5s
+		max-height: 0px
+		overflow: hidden
+		padding: 0px 10px
+	& > div:not(:empty)
+		max-height: 150px
+		transition: all .5s
+		padding: 10px 10px
+		background: rgba(#E16666, .1)
+	& > div p:empty
+		transition: all .5s
+		max-height: 0px
+		overflow: hidden
+	& > div p:not(:empty)
+		max-height: 50px
+		transition: all .5s
+
 
 
 

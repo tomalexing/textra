@@ -1,7 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types';
-import { debounce, listener, dump} from './../utils';
+import { debounce, listener} from './../utils';
 import formSerialize from 'form-serialize';
 
 const call = (fn, ...args) => {
@@ -19,6 +18,7 @@ export default class TxForm extends React.Component{
         this._getChildInstance = this._getChildInstance.bind(this);
         this.fields = [];
         this._updateState = this._updateState.bind(this);
+        this.serialize = this.serialize.bind(this)
     }
 
     state={
@@ -30,7 +30,7 @@ export default class TxForm extends React.Component{
     }
 
     componentDidMount(){
-
+      console.log('componentDidMount')
         let _self = this;
         this.setState({mounted: true},
          () => {
@@ -42,6 +42,7 @@ export default class TxForm extends React.Component{
         );
     }
     componentWillUnmount(){
+              console.log('componentWillUnmount')
         this.listeners.forEach(removeEventListener => removeEventListener());
     }
 
@@ -83,7 +84,6 @@ export default class TxForm extends React.Component{
     setInvalidState() {
       this.element.classList.add(this.props.invalidClass);
       this.submit.setAttribute('disabled', true);
-      this.errorField.classList.add(this.props.invalidClassErrorField);
     }
 
     setLoadingState() {
@@ -100,14 +100,13 @@ export default class TxForm extends React.Component{
     }
 
     resetState() {
-      const { invalidClass, loadingClass, successClass, errorClass, invalidClassErrorField } = this.props;
+      const { invalidClass, loadingClass, successClass, errorClass } = this.props;
 
       if(this.element){
         this.element.classList.remove(invalidClass);
         this.element.classList.remove(loadingClass);
         this.element.classList.remove(successClass);
         this.element.classList.remove(errorClass);
-        this.errorField.classList.remove(invalidClassErrorField);
         this.submit.removeAttribute('disabled');
       }
       
@@ -133,8 +132,8 @@ export default class TxForm extends React.Component{
     _submitHandler(e) {
         e.preventDefault();
         if(this.element){
-            if(this.validate() == true){ 
-                //call(this.props.onSubmit, e, this)
+            if(this.validate() === true){ 
+                call(this.props.submit, e, this, this.serialize())
             }else{
                 this.setInvalidState()
             }
@@ -142,9 +141,9 @@ export default class TxForm extends React.Component{
     }
 
     _bindEvents() {
-      this.listeners.push(() =>
-        listener(this.element, 'submit', debounce((e) => this._submitHandler(e), 0, false), false)
-      );
+    //   this.listeners.push(() =>
+    //     listener(this.element, 'submit', debounce((e) => this._submitHandler(e), 0, false), false)
+    //   );
       
       if (!this.props.autoValidate) return;
 
@@ -164,7 +163,7 @@ export default class TxForm extends React.Component{
         let { children } = this.props;
         let { mounted } = this.state;
         return(
-             <form onSubmit={this._submitHandler} ref={(n) => this.element = n} className="registform-regist__inputs ">
+             <form onSubmit={this._submitHandler.bind(this)} ref={(n) => this.element = n} className="registform-regist__inputs ">
                 <div className={"field-error u-mb-2"} ref={ (n) => this.errorField = n} />
                 {  !!mounted && 
                     Object.values(children).map((child, i) =>(
@@ -182,7 +181,6 @@ TxForm.defaultProps = {
   loadingClass: 'form-loading',
   successClass: 'form-success', 
   errorClass: 'form-error',
-  invalidClassErrorField: 'form-error__active',
   autoValidate: true,
   onValid: () => {},
   onError: () => {}
@@ -192,7 +190,6 @@ TxForm.propTypes = {
   invalidClass: PropTypes.string, 
   loadingClass: PropTypes.string, 
   successClass: PropTypes.string, 
-  invalidClassErrorField: PropTypes.string,
   errorClass: PropTypes.string,
   autoValidate: PropTypes.bool,
   onValid: PropTypes.func,

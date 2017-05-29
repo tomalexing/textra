@@ -12,20 +12,51 @@ var EventEmitterSingleton = (function () {
         return emitter;
     }
 
+
     /**
      * @return {Array}
      */
-    function getEvents() {
-      let eventsName = events.map( e => {
-        if(typeof e === "object"  ){
-          let name  = Object.entries(e)[0][0];
-          return name
+    function getEvents(start = '', remove = false) {
+
+      if (start === '') return []
+      let eventsName = events.reduce((acc, e, currentIndex) => {
+        switch(typeof e){
+          case("object"): 
+            let name  = Object.entries(e)[0][0];
+            if(name.startsWith(start)){
+              if( remove ) events.splice(currentIndex,1);
+              return acc.concat(name)
+            }else{
+              return acc
+            }
+          case("string"): 
+            if(e.startsWith(start)){
+              if( remove ) events.splice(currentIndex,1);
+              return acc.concat(e)
+            }else{
+              return acc
+            }
         }
-        return e
-      })
+      }, [])
       return eventsName;
     }
 
+    /**
+     * @return {Array}
+     */
+    function getAllEvents() {
+
+      let eventsName = events.reduce((acc, e) => {
+        switch(typeof e){
+          case("object"): 
+            let name  = Object.entries(e)[0][0];
+            return acc.concat(name)
+          case("string"): 
+            return acc.concat(e)
+        }
+      }, [])
+      return eventsName;
+    }
     /**
      * @return {Bool|String}
      */
@@ -74,8 +105,9 @@ var EventEmitterSingleton = (function () {
           return true
         }else{
           events[searchIndex] = e
+          return true
         }
-        return false
+
     }
 
     /**
@@ -132,7 +164,7 @@ const validationRules = {
  * @param  {Object|String} rule
  * @return {Object}
  */
-const parseRuleFromParam = (rule) => {
+const parseRuleFromParam = (rule ,ukey) => {
   let name, params;
 
   if (typeof rule === "string") {
@@ -186,16 +218,24 @@ export default class TxInput extends React.Component{
   }
 
   componentWillMount(){
+    console.log('componentWillMount')
+    
     this._bindEvents();
     this._setupValitator();
   }
 
   componentDidMount(){
     this.doAtDidMount.forEach(func => func.call(this));
+        console.log('componentDidMount')
+
   }
 
   componentWillUnmount(){ 
-    EventEmitterSingleton.getInstance().removeAllListeners(EventEmitterSingleton.getEvents()); //Do not use EventEmitterSingleton in other files
+   
+    let removeEventList =  EventEmitterSingleton.getEvents(this.ukey, true)
+    console.log('componentWillUnmount')
+
+    EventEmitterSingleton.getInstance().removeAllListeners(removeEventList); 
     this.listeners.forEach(removeEventListener => removeEventListener())
   }
 
@@ -212,6 +252,8 @@ export default class TxInput extends React.Component{
  * @return {Boolean|Array} true if valid or array of error messages
  */
   validate() {
+    if( !this.input.value ) return false;
+
     const { value } = this.input;
     this.reset();
 
@@ -224,7 +266,7 @@ export default class TxInput extends React.Component{
     } else {
       this.setError(result);
     }
-
+    
     return result;
   }
 
@@ -235,7 +277,7 @@ export default class TxInput extends React.Component{
     
     if (this.errorElement) {
       this.input.classList.add(this.props.errorClass);
-      this.errorElement.innerHTML = this.errors.map(m => `<img src=${warningMark} alt='warning'/> ${m}`).join('<br>') //this.errors[0];
+      this.errorElement.innerHTML = this.errors.map(m => `<p><img src=${warningMark} alt='warning'/> ${m}</p>`).join('') //this.errors[0];
     }
 
     this._hasError = true;
@@ -279,9 +321,11 @@ export default class TxInput extends React.Component{
         errorClass,
         errorElementOuter,
         getChildInstance,
+        ukey,
         ...fieldAttr
       } = this.props;
       this.fieldAttr = fieldAttr;
+      this.ukey = ukey;
 
       if ( errorElementOuter ){
         this.errorElement =  (() => {
@@ -334,7 +378,7 @@ export default class TxInput extends React.Component{
       const type = typeof validate;
       if (type === 'string' || Array.isArray(validate)) {
         [].concat(validate).forEach(rule => {
-          let { name, params } = parseRuleFromParam(rule);
+          let { name, params } = parseRuleFromParam(rule, this.ukey);
           const fn = validationRules[name];
 
           if (fn) {
@@ -347,7 +391,6 @@ export default class TxInput extends React.Component{
 
         });
       }
-
       if (typeof customValidator === 'function') {
         this.rules.push({
           name: 'custom',
@@ -411,7 +454,8 @@ TxInput.defaultProps = {
   validClass: 'success',
   errorClass: 'fail',
   errorElementOuter: false,
-  getChildInstance: null
+  getChildInstance: null,
+  ukey: ''
 };
 
 TxInput.propTypes = {
@@ -431,6 +475,7 @@ TxInput.propTypes = {
     PropTypes.bool,
     PropTypes.object
   ]),
-  getChildInstance: PropTypes.func
+  getChildInstance: PropTypes.func,
+  ukey: PropTypes.string
 };
 

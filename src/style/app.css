@@ -142,6 +142,10 @@ input[type="password"] {
     height: 0;
     width: 100%; }
 
+input[disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed !important; }
+
 .field-block {
   width: 100%;
   display: block; }
@@ -153,15 +157,30 @@ input[type="password"] {
 
 .field-error {
   display: block;
-  background: rgba(225, 102, 102, 0.1);
   border-radius: 4px;
   color: #6F6F6F;
-  font-size: 10px;
-  text-align: left; }
-  .field-error.form-error__active {
-    padding: 10px; }
-  .field-error > div {
-    margin: 4px; }
+  text-align: left;
+  overflow: auto; }
+  .field-error > div p {
+    margin: 0;
+    font-size: 10px; }
+  .field-error > div:empty {
+    transition: all .5s;
+    max-height: 0px;
+    overflow: hidden;
+    padding: 0px 10px; }
+  .field-error > div:not(:empty) {
+    max-height: 150px;
+    transition: all .5s;
+    padding: 10px 10px;
+    background: rgba(225, 102, 102, 0.1); }
+  .field-error > div p:empty {
+    transition: all .5s;
+    max-height: 0px;
+    overflow: hidden; }
+  .field-error > div p:not(:empty) {
+    max-height: 50px;
+    transition: all .5s; }
 
 .fade-enter {
   opacity: 0.01; }
@@ -791,7 +810,7 @@ input[type="password"] {
       .outer .outer-left {
         min-width: 100%;
         width: 100%;
-          width-z-index: 10; } }
+        z-index: 10; } }
   .outer .outer-right {
     flex: 1 0 auto;
     z-index: 10; }
