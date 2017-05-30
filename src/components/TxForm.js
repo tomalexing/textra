@@ -30,7 +30,6 @@ export default class TxForm extends React.Component{
     }
 
     componentDidMount(){
-      console.log('componentDidMount')
         let _self = this;
         this.setState({mounted: true},
          () => {
@@ -42,7 +41,7 @@ export default class TxForm extends React.Component{
         );
     }
     componentWillUnmount(){
-              console.log('componentWillUnmount')
+
         this.listeners.forEach(removeEventListener => removeEventListener());
     }
 

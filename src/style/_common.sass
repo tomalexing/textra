@@ -8,7 +8,15 @@ $google: #dd4f43
 $base-gap: 6px
 $text-dark: #414141
 $text-light: #6f6f6f
+$grey: #eaeaea
+$selected-blue: #228fd8
 $blue: #007ACF // 0,122,207
+$bg-blue: #f2faff
+$grey-light: #9ca9b2
+$font-size: 14px
+$line-height: 1.4
+$lines-to-show: 2
+
 body
 	line-height: 1.4
 	font-family: 'Roboto',sans-serif
@@ -197,10 +205,15 @@ input[disabled='true']
 .f
 	display: flex
 	flex-wrap: nowrap
+	&-init
+		> *
+			flex: 0 1 auto
 	&-fill
 		> *
-			flex: 1 0 auto
-
+			flex: 1 1 auto
+	&-noflex
+		> *
+			flex: 0 0 auto
 	&-wrap
 		flex-wrap: wrap
 	&-row

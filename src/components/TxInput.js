@@ -146,7 +146,7 @@ const messages = {
     maxLength: 'Это поле должно содержать максимум {n} символов',
     required: 'Ви не заполнили все поле',
     number: 'Поле должно содержать только числа',
-    listen: 'Поля {n} должны совпадать'
+    listen: 'Поля должны совпадать'
 };
 
 const validationRules = {
@@ -156,7 +156,7 @@ const validationRules = {
     required: (s) => !! escapeRegex(s).length || messages.required,
     number: (s) => NUMBER_RE.test(escapeRegex(s)) || messages.number,
     emit: (s, event, emit) =>  emit(event, escapeRegex(s)) || true, // Always true because if emitter will not be able to sent event its not a field error 
-    listen: (s, event) => s === EventEmitterSingleton.getLastMessageFromEvent(event) || messages.listen.replace('{n}', event)
+    listen: (s, event) => s === EventEmitterSingleton.getLastMessageFromEvent(event) || messages.listen
   };
 
 /**
@@ -218,22 +218,18 @@ export default class TxInput extends React.Component{
   }
 
   componentWillMount(){
-    console.log('componentWillMount')
-    
     this._bindEvents();
     this._setupValitator();
   }
 
   componentDidMount(){
     this.doAtDidMount.forEach(func => func.call(this));
-        console.log('componentDidMount')
 
   }
 
   componentWillUnmount(){ 
    
     let removeEventList =  EventEmitterSingleton.getEvents(this.ukey, true)
-    console.log('componentWillUnmount')
 
     EventEmitterSingleton.getInstance().removeAllListeners(removeEventList); 
     this.listeners.forEach(removeEventListener => removeEventListener())

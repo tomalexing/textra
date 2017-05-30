@@ -86,8 +86,8 @@ class Login extends React.Component {
               <div className="f f-align-2-2 sidebar-regist__logo">
                 <Link to={'/'} ><img src={logo} alt="Textra"/> </Link>
               </div>
-              <div className="f f-col sidebar-regist__form registform">
-                <h3 className="u-mb-5" >Войти</h3>
+              <div className="f f-col registform">
+                <h3 className="u-mb-5 u-text-center" >Войти</h3>
                 <p className="u-mb-4"> Нужен акакаунт? {(
                   this.state.isTablet ? (
                       <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this),500,false)} > Создать аккаунт</button>
@@ -120,7 +120,7 @@ class Login extends React.Component {
                         Нет аккаунта? <br/>
                         Присоединяйтесь к нам!
                     </h1>
-                    <p className="u-mb-1">После регистрации у вас будет возможность получать быстрые переводы </p>
+                    <p className="u-mb-2">После регистрации у вас будет возможность получать быстрые переводы </p>
                     <button  className="btn btn-primiry btn-block btn-normal">Зарегистрироваться</button>
                   </div>
             </div>

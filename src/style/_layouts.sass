@@ -25,15 +25,10 @@
         transform: translateX(0)
   .sidebar
     z-index: 100
-    padding: 28px
     flex-direction: column
     flex: 0 1 344px
     overflow: hidden
     height: 100%
-    &-regist__logo
-      flex-basis: 27%
-    &-regist__form
-      flex-basis: 73%
 
   .main
     z-index: 1
@@ -51,7 +46,16 @@
       border-radius: 4px
       background-color: rgba(255, 255, 255, 0.8)
 
+// registr
+.sidebar-regist__logo
+  flex-basis: 27%
+  padding: 28px
+  padding-bottom: 0px
+
 .registform
+    flex-basis: 73%
+    padding: 28px
+    padding-top: 0px
     &-delimiter
       width: 100%
       position: relative
@@ -87,4 +91,215 @@
       color: #9ca9b2
       &__blue
         color: #1e7bcf
+// registr end
 
+.dashboard-user
+  &__header
+    height: 70px
+    width: 100%
+    background-color: #ffffff
+    box-shadow: 0 0 8px rgba(33, 143, 216, 0.3)
+    padding: 16px
+    .header-logo
+      max-width: 164px
+      flex: 1 1 auto
+    .header-menu
+      flex: 0 1 auto
+      li
+        position: relative
+        padding: 18px
+        font-size: 16px
+        font-weight: 400
+        +tr(background .5s)
+        &:hover
+          +tr(background .5s)
+          background: rgba(33, 143, 216, 0.08)
+      a
+        text-decoration: none
+        white-space: nowrap
+        line-height: 34px
+        color: $text-dark
+        +tr(color .5s)
+        &:hover
+          +tr(color .5s)
+          color: darken($text-dark, 20%)
+        &.active:after
+          height: 3px
+        &:after
+          content: ""
+          position: absolute
+          top: calc(100% - 3px)
+          left: 0
+          width: 100%
+          height: 0px
+          background-color: $selected-blue
+          +tr(height .5s)
+
+    .header-account
+      margin-left: auto
+      .header-details
+         margin-right: 7px
+      .header-email
+        height: 16px
+        color: $text-dark
+        font-size: 14px
+        font-weight: 400
+        line-height: 16px
+        margin-bottom: 7px
+      .header-details__more
+      .header-replenish
+        text-decoration: none
+        height: 14px
+        color: $grey-light
+        font-size: 12px
+        font-weight: 400
+        line-height: 14px
+        &:hover
+          text-decoration: underline
+      .header-balance
+        height: 21px
+        margin-left: 20px
+        color: $text-dark
+        font-size: 18px
+        font-weight: 400
+        line-height: 21px
+      .header-avatar
+        position: relative
+        +tr(opacity .5s)
+        &:hover .header-avatar__in
+          +tr(opacity .5s)
+          opacity: .3
+        &:hover .header-logout
+          visibility: visible
+          opacity: 1
+          +tr(opacity .5s)
+        .header-avatar__in
+          width: 50px
+          height: 50px
+          border-radius: 50%
+          overflow: hidden
+          border: 1px solid $grey 
+        .header-logout
+          cursor: pointer
+          position: absolute
+          color: $text-dark
+          background: linear-gradient(to right ,#28c9f4, #5370ee)
+          -webkit-background-clip: text
+          -webkit-text-fill-color: transparent
+          visibility: hidden
+          opacity: 0
+          font-size: 13px
+          +nosel
+          +tr(opacity .5s)
+
+.dashboard-user__create-tab
+    height: 100px
+    background: $bg-blue
+    width: 100%
+    text-decoration: none
+    color: $selected-blue
+    &-plus
+      position: relative
+      background: $selected-blue //$blue
+      width: 50px
+      height: 50px
+      border-radius: 50%
+      overflow: hidden
+      border: 1px solid $grey 
+      margin-left: 15px 
+      &:after,
+      &:before
+        content: ''
+        position: absolute
+        width: 2px
+        height: 23px
+        border-radius: 1px
+        background-color: #ffffff
+      &:before
+        top: 13px
+        left: 24px
+        width: 2px
+        height: 23px
+      &:after
+        top: 23px
+        left: 13px
+        width: 23px
+        height: 2px
+    &-content
+      margin-left: 20px 
+.dashboard-user__search-tab
+  height: 66px
+  text-decoration: none
+  color: $selected-blue
+  padding: 7px
+  &-avatar
+    flex: 0 1 65px
+  &-details
+    flex: 0 1 198px
+    min-width: 0
+    overflow: hidden
+  &-info
+    flex: 0 1  62px
+    min-width: 0
+  &-title
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+    width: 100%
+  &-content
+    display: block
+    display: -webkit-box
+    max-width: 204px
+    height: 12px*$line-height*$lines-to-show
+    margin: 0 auto
+    font-size: 12px
+    line-height: $line-height
+    -webkit-line-clamp: $lines-to-show
+    -webkit-box-orient: vertical
+    overflow: hidden
+    text-overflow: ellipsis
+  &-info-time
+    time
+      width: 30px
+      height: 11px
+      color: $grey-light
+      font-size: 10px
+      font-weight: 400
+      line-height: 11px
+      letter-spacing: -0.05px
+  &-info-lang
+    width: 46px
+    height: 15px
+    border-radius: 4px
+    background-color: #9ca9b2
+    line-height: 5px
+    vertical-align: top
+    padding: 0 1px
+    &-from
+      border-radius: 4px 0 0 4px
+      height: 15px
+      color: #9ca9b2
+      font-size: 7px
+      font-weight: 500
+      letter-spacing: -0.04px
+      line-height: 17px
+      color: white
+      width: 21px
+      display: inline-block
+      text-align: center
+      vertical-align: middle
+    &-to
+      border-radius: 0 4px 4px 0
+      height: 11px
+      color: #9ca9b2
+      font-size: 8px
+      font-weight: 500
+      letter-spacing: -0.04px
+      line-height: 14px
+      width: 22px
+      display: inline-block
+      text-align: center
+      background: #fff
+      vertical-align: middle
+
+  &-info-money
