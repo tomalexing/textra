@@ -326,9 +326,9 @@ export default class TxInput extends React.Component{
       if ( errorElementOuter ){
         this.errorElement =  (() => {
           var newDiv = document.createElement("div"); 
-          errorElementOuter.appendChild(newDiv);
+          errorElementOuter.appendChild(newDiv); 
           return newDiv
-        })();
+        })();  
       }
 
       if (!autoValidate) return;

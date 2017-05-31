@@ -90,10 +90,39 @@ export default class DashBoard extends React.Component {
   }
 
   render() {
+    const START = Math.PI * 0.5;
+    const TAU = Math.PI * 2;
+    const radius = 6;
+    const percentage = .8;
+    const targetX = radius - Math.cos(START + (percentage * TAU)) * radius;
+    const targetY = radius - Math.sin(START - (percentage * TAU)) * radius;
+    const largeArcFlag = percentage > 0.5 ? 1 : 0;
+    const points = [
+      // Top center.
+      `M ${radius} 0`,
+
+      // Arc round to wherever the percentage implies.
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${targetX} ${targetY}`,
+
+      // Back to the center.
+      `L ${radius} ${radius}`,
+      
+      'Z'
+    ];
+
+    const Tabs=[
+      {
+      '1':{
+        name: ''
+      }
+      }
+
+    ]
+
     return (
       <div className="f f-col outer dashboard-user">
         <Header/>
-        <div className="f">
+        <div className="f h100">
           <div className="f f-align-2-2 outer-left">
             <div className="f sidebar">
               <Link to={'/dashboard/create'} className="f f-align-1-2 dashboard-user__create-tab" >
@@ -109,15 +138,58 @@ export default class DashBoard extends React.Component {
                     <div className="dashboard-user__search-tab-content"> Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна перевод</div>
                 </div>
                 <div className="f  f-col f-align-2-2 dashboard-user__search-tab-info">
-                  <div className="dashboard-user__search-tab-info-time"><canvas width='9px' height='9px' /><time>13:17</time></div>
+                  <div className="dashboard-user__search-tab-info-time">
+                  
+                  <time>12.03.12</time></div>
                   <div className="dashboard-user__search-tab-info-lang">
-                    <span className="dashboard-user__search-tab-info-lang-from" >РУС</span>
+                    <span className="dashboard-user__search-tab-info-lang-from" >RUS</span>
                     <span className="dashboard-user__search-tab-info-lang-to" >ENG</span>
                   </div>
                   <div className="dashboard-user__search-tab-info-money">$0.33</div>
                 </div>
               </Link>
 
+              <Link to={'/dashboard/alex'} className="f f-align-1-2 dashboard-user__history-tab" >
+                 <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={avatar} alt="Textra" /> </figure>
+                 <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
+                   <div className="dashboard-user__history-tab-title"> Создать запрос на перевод </div>
+                    <div className="dashboard-user__history-tab-content"> Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна перевод</div>
+                </div>
+                <div className="f  f-col f-align-2-2 dashboard-user__history-tab-info">
+                  <div className="dashboard-user__history-tab-info-time">
+                    <svg xmlns="http://www.w3.org/2000/svg"> 
+                     <path d={points.join(' ')}/>
+                
+                  </svg>
+                  <time>13:17</time></div>
+                  <div className="dashboard-user__history-tab-info-lang">
+                    <span className="dashboard-user__history-tab-info-lang-from" >RUS</span>
+                    <span className="dashboard-user__history-tab-info-lang-to" >ENG</span>
+                  </div>
+                  <div className="dashboard-user__history-tab-info-money">$0.33</div>
+                </div>
+              </Link>
+
+              <Link to={'/dashboard/alex_alex'} className="f f-align-1-2 dashboard-user__history-tab dashboard-user__history-tab-selected" >
+                 <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={avatar} alt="Textra" /> </figure>
+                 <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
+                   <div className="dashboard-user__history-tab-title"> Создать запрос на перевод </div>
+                    <div className="dashboard-user__history-tab-content"> Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна перевод</div>
+                </div>
+                <div className="f  f-col f-align-2-2 dashboard-user__history-tab-info">
+                  <div className="dashboard-user__history-tab-info-time">
+                    <svg xmlns="http://www.w3.org/2000/svg"> 
+                     <path d={points.join(' ')}/>
+                
+                  </svg>
+                  <time>13:17</time></div>
+                  <div className="dashboard-user__history-tab-info-lang">
+                    <span className="dashboard-user__history-tab-info-lang-from" >RUS</span>
+                    <span className="dashboard-user__history-tab-info-lang-to" >ENG</span>
+                  </div>
+                  <div className="dashboard-user__history-tab-info-money">$0.33</div>
+                </div>
+              </Link>
               <div className="f f-col">
 
                 <p className="u-mb-4"> переключит? {(
@@ -134,15 +206,10 @@ export default class DashBoard extends React.Component {
             <div className="main f f-col f-fill f-align-2-2 u-text-undecor" >
                 <Router>
                   <Route render={({ location }) => (
-                          <ReactCSSTransitionGroup
-                            transitionName="fade"
-                            transitionEnterTimeout={300}
-                            transitionLeaveTimeout={300}
-                          >
+                          <div>
                           <Route path="/dashboard/create" component={Protected} location={location}  key={getUniqueKey()}/>
-       
-
-                          </ReactCSSTransitionGroup>
+                          <Route path="/dashboard/alex" component={Protected} location={location}  key={getUniqueKey()}/>
+                          </div>
                   )}/>
               </Router>
             </div>

@@ -29,7 +29,7 @@
     flex: 0 1 344px
     overflow: hidden
     height: 100%
-
+    border-right: 1px solid $grey
   .main
     z-index: 1
     flex: 1 0 auto
@@ -46,6 +46,8 @@
       border-radius: 4px
       background-color: rgba(255, 255, 255, 0.8)
 
+.h100
+  height: 100%
 // registr
 .sidebar-regist__logo
   flex-basis: 27%
@@ -128,7 +130,7 @@
         &:after
           content: ""
           position: absolute
-          top: calc(100% - 3px)
+          top: calc(100% - 5px)
           left: 0
           width: 100%
           height: 0px
@@ -198,6 +200,8 @@
     width: 100%
     text-decoration: none
     color: $selected-blue
+    &:hover
+      background: darken($bg-blue, 10%)
     &-plus
       position: relative
       background: $selected-blue //$blue
@@ -227,11 +231,14 @@
         height: 2px
     &-content
       margin-left: 20px 
+
 .dashboard-user__search-tab
   height: 66px
   text-decoration: none
-  color: $selected-blue
   padding: 7px
+  background: $bg-blue
+  &:hover
+    background: darken($bg-blue, 10%)
   &-avatar
     flex: 0 1 65px
   &-details
@@ -246,19 +253,28 @@
     text-overflow: ellipsis
     overflow: hidden
     width: 100%
+    color: #333333
+    font-size: 14px
+    font-weight: 400
+    letter-spacing: -0.06px
+    line-height: 16px
   &-content
     display: block
     display: -webkit-box
     max-width: 204px
     height: 12px*$line-height*$lines-to-show
     margin: 0 auto
+    color: $grey-light
     font-size: 12px
+    font-weight: 400
     line-height: $line-height
     -webkit-line-clamp: $lines-to-show
     -webkit-box-orient: vertical
     overflow: hidden
     text-overflow: ellipsis
+    letter-spacing: -0.05px
   &-info-time
+    align-self: flex-end
     time
       width: 30px
       height: 11px
@@ -267,6 +283,7 @@
       font-weight: 400
       line-height: 11px
       letter-spacing: -0.05px
+      margin-left: 7px
   &-info-lang
     width: 46px
     height: 15px
@@ -275,6 +292,7 @@
     line-height: 5px
     vertical-align: top
     padding: 0 1px
+    align-self: flex-end
     &-from
       border-radius: 4px 0 0 4px
       height: 15px
@@ -292,10 +310,10 @@
       border-radius: 0 4px 4px 0
       height: 11px
       color: #9ca9b2
-      font-size: 8px
-      font-weight: 500
+      font-size: 7px
+      font-weight: 100
       letter-spacing: -0.04px
-      line-height: 14px
+      line-height: 12px
       width: 22px
       display: inline-block
       text-align: center
@@ -303,3 +321,144 @@
       vertical-align: middle
 
   &-info-money
+    align-self: flex-end
+    margin-top: 3px
+    width: 84px
+    height: 14px
+    color: $text-dark
+    font-size: 12px
+    font-weight: 500
+    letter-spacing: -0.05px
+    line-height: 14px
+    text-align: right
+
+.dashboard-user__history-tab
+  height: 66px
+  text-decoration: none
+  color: $selected-blue
+  padding: 7px
+  &:hover
+    background: $bg-blue
+  &.dashboard-user__history-tab-selected
+    background: $selected-blue
+  &-avatar
+    flex: 0 1 65px
+  &-details
+    flex: 0 1 198px
+    min-width: 0
+    overflow: hidden
+  &-info
+    flex: 0 1  62px
+    min-width: 0
+  &-title
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+    width: 100%
+    color: #333333
+    font-size: 14px
+    font-weight: 400
+    letter-spacing: -0.06px
+    line-height: 16px
+    .dashboard-user__history-tab-selected &
+      color: #fff
+  &-content
+    display: block
+    display: -webkit-box
+    max-width: 204px
+    height: 12px*$line-height*$lines-to-show
+    margin: 0 auto
+    color: $grey-light
+    font-size: 12px
+    font-weight: 400
+    line-height: $line-height
+    -webkit-line-clamp: $lines-to-show
+    -webkit-box-orient: vertical
+    overflow: hidden
+    text-overflow: ellipsis
+    letter-spacing: -0.05px
+    .dashboard-user__history-tab-selected &
+      color: #fff
+  &-info-time
+    align-self: flex-end
+    svg
+      height: 14px
+      width: 14px
+      background: #9ca9b2
+      overflow: hidden
+      border-radius: 50%
+      border: 1px solid #fff
+      path
+        fill: $selected-blue
+      .dashboard-user__history-tab-selected &
+        background: $grey
+        border: 1px solid $selected-blue
+        path
+          fill: #fff
+    time
+      width: 30px
+      height: 11px
+      color: $grey-light
+      font-size: 10px
+      font-weight: 400
+      line-height: 11px
+      letter-spacing: -0.05px
+      margin-left: 7px
+      .dashboard-user__history-tab-selected &
+        color: #fff
+  &-info-lang
+    width: 46px
+    height: 15px
+    border-radius: 4px
+    background-color: #9ca9b2
+    line-height: 5px
+    vertical-align: top
+    padding: 0 1px
+    align-self: flex-end
+    .dashboard-user__history-tab-selected &
+      background-color: #fff
+    &-from
+      border-radius: 4px 0 0 4px
+      height: 15px
+      color: #9ca9b2
+      font-size: 7px
+      font-weight: 500
+      letter-spacing: -0.04px
+      line-height: 17px
+      color: white
+      width: 21px
+      display: inline-block
+      text-align: center
+      vertical-align: middle
+      .dashboard-user__history-tab-selected &
+        color: $selected-blue
+    &-to
+      border-radius: 0 4px 4px 0
+      height: 11px
+      color: #9ca9b2
+      font-size: 7px
+      font-weight: 100
+      letter-spacing: -0.04px
+      line-height: 12px
+      width: 22px
+      display: inline-block
+      text-align: center
+      background: #fff
+      vertical-align: middle
+      .dashboard-user__history-tab-selected &
+        background-color: $selected-blue
+        color: #fff
+
+  &-info-money
+    align-self: flex-end
+    margin-top: 3px
+    width: 84px
+    height: 14px
+    color: $text-dark
+    font-size: 12px
+    font-weight: 500
+    letter-spacing: -0.05px
+    line-height: 14px
+    text-align: right
+    .dashboard-user__history-tab-selected &
+      color: #fff
