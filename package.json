@@ -5,12 +5,15 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "events": "1.1.1",
+    "form-serialize": "^0.7.1",
+    "moment": "^2.18.1",
     "npm-run-all": "^4.0.2",
     "prop-types": "^15.5.10",
     "react": "^15.5.4",
     "react-addons-css-transition-group": "^15.5.2",
     "react-dom": "^15.5.4",
-    "react-router-dom": "^4.1.1"
+    "react-router-dom": "^4.1.1",
+    "react-select": "^1.0.0-rc.5"
   },
   "devDependencies": {
     "flow-bin": "^0.45.0",

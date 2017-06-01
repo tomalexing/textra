@@ -11,11 +11,13 @@ import {
   Route,
   Link,
   Redirect,
-  withRouter
+  withRouter,
+  Switch
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import { getUniqueKey, addClass, hasClass, removeClass, debounce, listener } from './utils';
-
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
 
 
 const Header = () => (
@@ -44,7 +46,6 @@ const Header = () => (
         </header>
 );
 
-const Protected = () => <h3>Protected</h3>
 
 
 const NavLink = (props) => (
@@ -53,7 +54,7 @@ const NavLink = (props) => (
   </li>
 )
 
-export default class DashBoard extends React.Component {
+class DashBoard extends React.Component {
 
   constructor(props) {
     super(props);
@@ -83,6 +84,7 @@ export default class DashBoard extends React.Component {
   componentDidMount() {
     console.log('componentDidMount')
 
+
   }
 
   componentWillUnmount() {
@@ -90,9 +92,14 @@ export default class DashBoard extends React.Component {
   }
 
   render() {
+    let {location:{pathname}}  = this.props;
+    let activeTabA = pathname.split('/');
+    let activeTab =  /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
+    let activeSearch =  /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
+
     const START = Math.PI * 0.5;
     const TAU = Math.PI * 2;
-    const radius = 6;
+    const radius = 5;
     const percentage = .8;
     const targetX = radius - Math.cos(START + (percentage * TAU)) * radius;
     const targetY = radius - Math.sin(START - (percentage * TAU)) * radius;
@@ -101,23 +108,71 @@ export default class DashBoard extends React.Component {
       // Top center.
       `M ${radius} 0`,
 
-      // Arc round to wherever the percentage implies.
+      // Arc are applied to whatever parcentage, swap flag equals 1 and I dont know what is mean. :)
       `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${targetX} ${targetY}`,
 
       // Back to the center.
       `L ${radius} ${radius}`,
-      
+
+      // Close path
       'Z'
     ];
 
-    const Tabs=[
-      {
-      '1':{
-        name: ''
+    const Searching = {
+      'wqefeq':{
+        uuid: 'wqefeq',
+        avatar: avatar,
+        title: 'Создать запрос на перевод',
+        content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+        publishTime: (new Date).toISOString(),
+        from: 'RUS',
+        to: 'ENG',
+        cost: '$0.33'
+      },
+      'wqerq':{
+          uuid: 'wqerq',
+          avatar: avatar,
+          title: 'Создать запрос на перевод',
+          content: 'Создать запрос на перевод',
+          publishTime:  (new Date).toISOString(),
+          from: 'ENG',
+          to: 'CHN',
+          cost: '$11.33'
+        }
+    }
+    const Tabs = {
+      'wqefeq':{
+        uuid: 'alex',
+        avatar: avatar,
+        title: 'Создать запрос на перевод',
+        content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+        contentFull: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+        opened: false,
+        publishTime: (new Date).toISOString(),
+        startTime: '12:32',
+        from: 'RUS',
+        to: 'ENG',
+        cost: '$0.33'
+      },
+      'wqerq':{
+        uuid: 'alex_alex',
+        avatar: avatar,
+        title: 'Создать запрос на перевод',
+        content: 'Создать запрос на перевод',
+        contentFull: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+        publishTime: (new Date).toISOString(),
+        startTime: '12:32',
+        duration: '12мин',
+        opened: false,
+        from: 'ENG',
+        to: 'CHN',
+        cost: '$11.33'
       }
-      }
+    }
 
-    ]
+    const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
+
+    let currentDate = activeTab ? find(Tabs,activeTab) : activeSearch ? find(Searching, activeSearch) : {};
 
     return (
       <div className="f f-col outer dashboard-user">
@@ -131,65 +186,55 @@ export default class DashBoard extends React.Component {
                  <div className="dashboard-user__create-tab-content">Создать запрос на перевод
                 </div>
               </Link>
-              <Link to={'/dashboard/searching'} className="f f-align-1-2 dashboard-user__search-tab" >
-                 <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={avatar} alt="Textra" /> </figure>
-                 <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
-                   <div className="dashboard-user__search-tab-title"> Создать запрос на перевод </div>
-                    <div className="dashboard-user__search-tab-content"> Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна перевод</div>
-                </div>
-                <div className="f  f-col f-align-2-2 dashboard-user__search-tab-info">
-                  <div className="dashboard-user__search-tab-info-time">
-                  
-                  <time>12.03.12</time></div>
-                  <div className="dashboard-user__search-tab-info-lang">
-                    <span className="dashboard-user__search-tab-info-lang-from" >RUS</span>
-                    <span className="dashboard-user__search-tab-info-lang-to" >ENG</span>
-                  </div>
-                  <div className="dashboard-user__search-tab-info-money">$0.33</div>
-                </div>
-              </Link>
 
-              <Link to={'/dashboard/alex'} className="f f-align-1-2 dashboard-user__history-tab" >
-                 <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={avatar} alt="Textra" /> </figure>
-                 <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
-                   <div className="dashboard-user__history-tab-title"> Создать запрос на перевод </div>
-                    <div className="dashboard-user__history-tab-content"> Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна перевод</div>
-                </div>
-                <div className="f  f-col f-align-2-2 dashboard-user__history-tab-info">
-                  <div className="dashboard-user__history-tab-info-time">
-                    <svg xmlns="http://www.w3.org/2000/svg"> 
-                     <path d={points.join(' ')}/>
-                
-                  </svg>
-                  <time>13:17</time></div>
-                  <div className="dashboard-user__history-tab-info-lang">
-                    <span className="dashboard-user__history-tab-info-lang-from" >RUS</span>
-                    <span className="dashboard-user__history-tab-info-lang-to" >ENG</span>
-                  </div>
-                  <div className="dashboard-user__history-tab-info-money">$0.33</div>
-                </div>
-              </Link>
+              {Object.values(Searching).map((tab, index) => {
+                let publishTime =  new Date(tab.publishTime);
+                return(
+                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch?'dashboard-user__search-tab-selected':''}`}  key={index}>
+                    <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
+                      <div className="dashboard-user__search-tab-title">{tab.title} </div>
+                      <div className="dashboard-user__search-tab-content"> {tab.content}</div>
+                    </div>
+                    <div className="f  f-col f-align-2-2 dashboard-user__search-tab-info">
+                      <div className="dashboard-user__search-tab-info-time">
+                      
+                      <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
+                      <div className="dashboard-user__search-tab-info-lang">
+                        <span className="dashboard-user__search-tab-info-lang-from" >{tab.from}</span>
+                        <span className="dashboard-user__search-tab-info-lang-to" >{tab.to}</span>
+                      </div>
+                      <div className="dashboard-user__search-tab-info-money">{tab.cost}</div>
+                    </div>
+                  </Link>
+               )
+              })}
 
-              <Link to={'/dashboard/alex_alex'} className="f f-align-1-2 dashboard-user__history-tab dashboard-user__history-tab-selected" >
-                 <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={avatar} alt="Textra" /> </figure>
-                 <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
-                   <div className="dashboard-user__history-tab-title"> Создать запрос на перевод </div>
-                    <div className="dashboard-user__history-tab-content"> Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна перевод</div>
-                </div>
-                <div className="f  f-col f-align-2-2 dashboard-user__history-tab-info">
-                  <div className="dashboard-user__history-tab-info-time">
-                    <svg xmlns="http://www.w3.org/2000/svg"> 
-                     <path d={points.join(' ')}/>
-                
-                  </svg>
-                  <time>13:17</time></div>
-                  <div className="dashboard-user__history-tab-info-lang">
-                    <span className="dashboard-user__history-tab-info-lang-from" >RUS</span>
-                    <span className="dashboard-user__history-tab-info-lang-to" >ENG</span>
-                  </div>
-                  <div className="dashboard-user__history-tab-info-money">$0.33</div>
-                </div>
-              </Link>
+              {Object.values(Tabs).map((tab, index) => {
+                let publishTime =  new Date(tab.publishTime);
+                return(
+                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab?'dashboard-user__history-tab-selected':''}`} key={index}>
+                    <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
+                      <div className="dashboard-user__history-tab-title"> {tab.title} </div>
+                        <div className="dashboard-user__history-tab-content"> {tab.content}</div>
+                    </div>
+                    <div className="f f-col f-align-2-2 dashboard-user__history-tab-info">
+                      <div className="dashboard-user__history-tab-info-time">
+                        <svg xmlns="http://www.w3.org/2000/svg"> 
+                        <path d={points.join(' ')}/>
+                      </svg>
+                      <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
+                      <div className="dashboard-user__history-tab-info-lang">
+                        <span className="dashboard-user__history-tab-info-lang-from" >{tab.from}</span>
+                        <span className="dashboard-user__history-tab-info-lang-to" >{tab.to}</span>
+                      </div>
+                      <div className="dashboard-user__history-tab-info-money">{tab.cost}</div>
+                    </div>
+                 </Link>
+                )
+              })}
+
               <div className="f f-col">
 
                 <p className="u-mb-4"> переключит? {(
@@ -203,15 +248,12 @@ export default class DashBoard extends React.Component {
             </div>
           </div>
           <div className="f outer-right" ref={n => this.toggleElem = n}>
-            <div className="main f f-col f-fill f-align-2-2 u-text-undecor" >
-                <Router>
-                  <Route render={({ location }) => (
-                          <div>
-                          <Route path="/dashboard/create" component={Protected} location={location}  key={getUniqueKey()}/>
-                          <Route path="/dashboard/alex" component={Protected} location={location}  key={getUniqueKey()}/>
-                          </div>
-                  )}/>
-              </Router>
+            <div className="main f f-col f-fill f-align-2-2" >
+                <Switch>
+                  <RoutePassProps path="/dashboard/create" component={Create}  currentDate={currentDate}/>
+                  <RoutePassProps path="/dashboard/searching/:id" component={Search}  currentDate={currentDate}/>
+                  <RoutePassProps path="/dashboard/user/:id" component={User} currentDate={currentDate} />
+                </Switch>
             </div>
           </div>
         </div>
@@ -221,6 +263,51 @@ export default class DashBoard extends React.Component {
 
 }
 
+const RoutePassProps = ({ component: Component, ...rest }) => (
+  <Route  {...rest} render={props => (
+      <Component  {...props} {...rest} />
+    ) 
+  } />
+)
+const Create = () => (
+  <div>
+    <h3>da</h3>
+    <Select
+        name="form-field-name"
+        value="one"
+        options={options}
+        onChange={logChange}
+      />
+  </div>
+)
+
+var options = [
+  { value: 'one', label: 'One' },
+  { value: 'two', label: 'Two' }
+];
+
+function logChange(val) {
+  console.log("Selected: " + val);
+}
+
+const Search = (props,dsa,dfa) => (
+  <div>
+    <h3>ID: {props}</h3>
+    <div><Select
+        name="form-field-name"
+        value="one"
+        options={options}
+        onChange={logChange}
+      />
+    </div>
+  </div>
+)
+
+const User = ({ match }) => (
+  <div>
+    <h3>ID: {match.params.id}</h3>
+  </div>
+)
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
     fakeAuth.isAuthenticated ? (
@@ -235,3 +322,4 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 )
 
 
+export default withRouter(DashBoard);
