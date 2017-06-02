@@ -11,9 +11,11 @@
     "prop-types": "^15.5.10",
     "react": "^15.5.4",
     "react-addons-css-transition-group": "^15.5.2",
+    "react-batch": "github:tj/react-batch",
     "react-dom": "^15.5.4",
     "react-router-dom": "^4.1.1",
-    "react-select": "^1.0.0-rc.5"
+    "react-select": "^1.0.0-rc.5",
+    "react-select-plus": "^1.0.0-rc.5"
   },
   "devDependencies": {
     "flow-bin": "^0.45.0",

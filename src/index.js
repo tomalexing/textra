@@ -33,6 +33,8 @@ const Login = () => <Lazy load={() => import('./Login')}/>
   // eslint-disable-next-line
 const DashBoard = () => <Lazy load={() => import('./Dashboard')}/>
 
+const Test = () => <Lazy load={() => import('./Test')}/>
+
 // ====================================
 // ========= Lazy loadin end ==========
 // ====================================
@@ -69,6 +71,7 @@ const App = () => (
             <Route path="/dashboard" component={DashBoard} location={location}  key={getUniqueKey()}/>
             <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
             <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
+            <Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} />
             <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
 
 

@@ -16,34 +16,37 @@ import {
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import { getUniqueKey, addClass, hasClass, removeClass, debounce, listener } from './utils';
-import Select from 'react-select';
-import 'react-select/dist/react-select.css';
 
+import Select from 'react-select-plus';
+
+// Be sure to include styles at some point, probably during your bootstrapping
+import 'react-select-plus/dist/react-select-plus.css';
+import Batch from './components/Batch';
 
 const Header = () => (
-      <header className="f dashboard-user__header">
-          <div className="f f-align-2-2 header-logo">
-            <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
-          </div>
-          <ul className="f f-align-2-2 header-menu">
-            <NavLink className={'active'} to={'/'} >Рабочий стол</NavLink>
-            <NavLink to={'/about'}>О нас</NavLink>
-            <NavLink to={'/help'}>Поддержка</NavLink>
-          </ul>
-          <div className="f f-align-2-2 header-account">
-            <div className="f f-col f-align-1-3 header-details">
-              <div className="header-email">mikehanser@gmail.com</div>
-              <div className="header-details__more">
-                <Link to={'/'} className="header-replenish">пополнить</Link>
-                <span className="header-balance">$0.91</span>
-              </div>
-            </div>
-            <div className="f f-align-2-2 header-avatar">
-              <figure className="f f-align-2-2 header-avatar__in"> <img src={avatar} alt="Textra" /> </figure>
-              <div className="header-logout">Выйти</div>
-            </div>
-          </div>
-        </header>
+  <header className="f dashboard-user__header">
+    <div className="f f-align-2-2 header-logo">
+      <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
+    </div>
+    <ul className="f f-align-2-2 header-menu">
+      <NavLink className={'active'} to={'/'} >Рабочий стол</NavLink>
+      <NavLink to={'/about'}>О нас</NavLink>
+      <NavLink to={'/help'}>Поддержка</NavLink>
+    </ul>
+    <div className="f f-align-2-2 header-account">
+      <div className="f f-col f-align-1-3 header-details">
+        <div className="header-email">mikehanser@gmail.com</div>
+        <div className="header-details__more">
+          <Link to={'/'} className="header-replenish">пополнить</Link>
+          <span className="header-balance">$0.91</span>
+        </div>
+      </div>
+      <div className="f f-align-2-2 header-avatar">
+        <figure className="f f-align-2-2 header-avatar__in"> <img src={avatar} alt="Textra" /> </figure>
+        <div className="header-logout">Выйти</div>
+      </div>
+    </div>
+  </header>
 );
 
 
@@ -54,21 +57,32 @@ const NavLink = (props) => (
   </li>
 )
 
+function sleep(timeout) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, timeout);
+  });
+};
+
+
 class DashBoard extends React.Component {
 
   constructor(props) {
     super(props);
     this.listeners = [];
     this.doAtDidMount = [];
+
+    this.list = this.list.bind(this)
+    this.renders = 0
   }
 
   state = {
     redirectToReferrer: false,
-    isTablet: false
+    isTablet: false,
+    items: []
   }
 
   switchPanel = (e) => {
-    !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
+    !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled') : removeClass(this.toggleElem, 'toggled');
   }
 
   componentWillMount() {
@@ -81,10 +95,26 @@ class DashBoard extends React.Component {
     this.doAtDidMount.forEach(func => func());
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     console.log('componentDidMount')
+    while (1) {
+      const prev = this.state.items
+      const items = [`Hello World #${prev.length}`, ...prev]
+      this.setState({ items })
+      await sleep(Math.random() * 3000000)
+    }
+  }
 
+  list() {
+    const { items } = this.state
 
+    return <div>
+      <p>Count: {items.length}</p>
+      <p>Renders: {this.renders++}</p>
+      <ul>
+        {items.map((v, i) => <li key={i}>{v}</li>)}
+      </ul>
+    </div>
   }
 
   componentWillUnmount() {
@@ -92,10 +122,10 @@ class DashBoard extends React.Component {
   }
 
   render() {
-    let {location:{pathname}}  = this.props;
+    let { location: { pathname } } = this.props;
     let activeTabA = pathname.split('/');
-    let activeTab =  /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
-    let activeSearch =  /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
+    let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
+    let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
 
     const START = Math.PI * 0.5;
     const TAU = Math.PI * 2;
@@ -119,7 +149,7 @@ class DashBoard extends React.Component {
     ];
 
     const Searching = {
-      'wqefeq':{
+      'wqefeq': {
         uuid: 'wqefeq',
         avatar: avatar,
         title: 'Создать запрос на перевод',
@@ -129,19 +159,19 @@ class DashBoard extends React.Component {
         to: 'ENG',
         cost: '$0.33'
       },
-      'wqerq':{
-          uuid: 'wqerq',
-          avatar: avatar,
-          title: 'Создать запрос на перевод',
-          content: 'Создать запрос на перевод',
-          publishTime:  (new Date).toISOString(),
-          from: 'ENG',
-          to: 'CHN',
-          cost: '$11.33'
-        }
+      'wqerq': {
+        uuid: 'wqerq',
+        avatar: avatar,
+        title: 'Создать запрос на перевод',
+        content: 'Создать запрос на перевод',
+        publishTime: (new Date).toISOString(),
+        from: 'ENG',
+        to: 'CHN',
+        cost: '$11.33'
+      }
     }
     const Tabs = {
-      'wqefeq':{
+      'wqefeq': {
         uuid: 'alex',
         avatar: avatar,
         title: 'Создать запрос на перевод',
@@ -154,7 +184,7 @@ class DashBoard extends React.Component {
         to: 'ENG',
         cost: '$0.33'
       },
-      'wqerq':{
+      'wqerq': {
         uuid: 'alex_alex',
         avatar: avatar,
         title: 'Создать запрос на перевод',
@@ -172,25 +202,33 @@ class DashBoard extends React.Component {
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
 
-    let currentDate = activeTab ? find(Tabs,activeTab) : activeSearch ? find(Searching, activeSearch) : {};
+    let currentDate = activeTab ? find(Tabs, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
 
     return (
       <div className="f f-col outer dashboard-user">
-        <Header/>
+        <Header />
         <div className="f h100">
           <div className="f f-align-2-2 outer-left">
             <div className="f sidebar">
               <Link to={'/dashboard/create'} className="f f-align-1-2 dashboard-user__create-tab" >
                 <div className="dashboard-user__create-tab-plus">
                 </div>
-                 <div className="dashboard-user__create-tab-content">Создать запрос на перевод
+                <div className="dashboard-user__create-tab-content">Создать запрос на перевод
                 </div>
               </Link>
 
+              <Batch
+                flushCount={10}
+                flushInterval={150}
+                count={this.state.items.length}
+                render={this.list}
+                debug
+              />
+
               {Object.values(Searching).map((tab, index) => {
-                let publishTime =  new Date(tab.publishTime);
-                return(
-                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch?'dashboard-user__search-tab-selected':''}`}  key={index}>
+                let publishTime = new Date(tab.publishTime);
+                return (
+                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'dashboard-user__search-tab-selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
                       <div className="dashboard-user__search-tab-title">{tab.title} </div>
@@ -198,8 +236,8 @@ class DashBoard extends React.Component {
                     </div>
                     <div className="f  f-col f-align-2-2 dashboard-user__search-tab-info">
                       <div className="dashboard-user__search-tab-info-time">
-                      
-                      <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
+
+                        <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
                       <div className="dashboard-user__search-tab-info-lang">
                         <span className="dashboard-user__search-tab-info-lang-from" >{tab.from}</span>
                         <span className="dashboard-user__search-tab-info-lang-to" >{tab.to}</span>
@@ -207,31 +245,31 @@ class DashBoard extends React.Component {
                       <div className="dashboard-user__search-tab-info-money">{tab.cost}</div>
                     </div>
                   </Link>
-               )
+                )
               })}
 
               {Object.values(Tabs).map((tab, index) => {
-                let publishTime =  new Date(tab.publishTime);
-                return(
-                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab?'dashboard-user__history-tab-selected':''}`} key={index}>
+                let publishTime = new Date(tab.publishTime);
+                return (
+                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab ? 'dashboard-user__history-tab-selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
                       <div className="dashboard-user__history-tab-title"> {tab.title} </div>
-                        <div className="dashboard-user__history-tab-content"> {tab.content}</div>
+                      <div className="dashboard-user__history-tab-content"> {tab.content}</div>
                     </div>
                     <div className="f f-col f-align-2-2 dashboard-user__history-tab-info">
                       <div className="dashboard-user__history-tab-info-time">
-                        <svg xmlns="http://www.w3.org/2000/svg"> 
-                        <path d={points.join(' ')}/>
-                      </svg>
-                      <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
+                        <svg xmlns="http://www.w3.org/2000/svg">
+                          <path d={points.join(' ')} />
+                        </svg>
+                        <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
                       <div className="dashboard-user__history-tab-info-lang">
                         <span className="dashboard-user__history-tab-info-lang-from" >{tab.from}</span>
                         <span className="dashboard-user__history-tab-info-lang-to" >{tab.to}</span>
                       </div>
                       <div className="dashboard-user__history-tab-info-money">{tab.cost}</div>
                     </div>
-                 </Link>
+                  </Link>
                 )
               })}
 
@@ -248,60 +286,72 @@ class DashBoard extends React.Component {
             </div>
           </div>
           <div className="f outer-right" ref={n => this.toggleElem = n}>
-            <div className="main f f-col f-fill f-align-2-2" >
-                <Switch>
-                  <RoutePassProps path="/dashboard/create" component={Create}  currentDate={currentDate}/>
-                  <RoutePassProps path="/dashboard/searching/:id" component={Search}  currentDate={currentDate}/>
-                  <RoutePassProps path="/dashboard/user/:id" component={User} currentDate={currentDate} />
-                </Switch>
+            <div className="main f f-col  f-align-2-2" >
+              <Switch>
+                <Route path="/dashboard/create" render={()=><Create/>}  />
+                <RoutePassProps path="/dashboard/searching/:id" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/dashboard/user/:id" component={User} currentDate={currentDate} />
+              </Switch>
             </div>
           </div>
         </div>
       </div>
-   )
+    )
   }
 
 }
 
 const RoutePassProps = ({ component: Component, ...rest }) => (
   <Route  {...rest} render={props => (
-      <Component  {...props} {...rest} />
-    ) 
+    <Component  {...props} {...rest} />
+  )
   } />
 )
-const Create = () => (
-  <div>
-    <h3>da</h3>
-    <Select
-        name="form-field-name"
-        value="one"
-        options={options}
-        onChange={logChange}
-      />
-  </div>
-)
 
-var options = [
-  { value: 'one', label: 'One' },
-  { value: 'two', label: 'Two' }
-];
 
-function logChange(val) {
-  console.log("Selected: " + val);
+class Create extends React.Component {
+
+    state = {
+        multi: true,
+        multiValue: [],
+        options: [
+            { value: 'R', label: 'Red' },
+            { value: 'G', label: 'Green' },
+            { value: 'B', label: 'Blue' }
+        ],
+        value: undefined
+    }
+
+
+    handleOnChange (value) {
+      const { multi } = this.state;
+      if (multi) {
+        this.setState({ multiValue: value });
+      } else {
+        this.setState({ value });
+      }
+    }
+
+    render() {
+
+
+        function logChange(val) {
+            console.log(val);
+        }
+        const { multi, multiValue, options, value } = this.state;
+         console.log(options);
+        return (
+            <Select.Creatable
+                multi={multi}
+                options={options}
+                onChange={this.handleOnChange.bind(this)}
+                value={multi ? multiValue : value}
+            />
+        )
+
+
+    }
 }
-
-const Search = (props,dsa,dfa) => (
-  <div>
-    <h3>ID: {props}</h3>
-    <div><Select
-        name="form-field-name"
-        value="one"
-        options={options}
-        onChange={logChange}
-      />
-    </div>
-  </div>
-)
 
 const User = ({ match }) => (
   <div>
