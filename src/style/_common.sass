@@ -32,19 +32,23 @@ body
 	color: $text-dark
 p
 	font-size: 14px 
-	color: $text-light
+	color: $text-dark
 	font-weight: 400
 	letter-spacing: -0.05px
 	line-height: 14px
+a
+	color: $text-dark
+	text-decoration: none
+
 
 .btn
 	border-radius: 4px
 	font-family: Roboto
+	padding: 0 5px
 
 .btn-primiry
 	background-color: rgba($blue, 0.85)
 	color: #ffffff
-	font-size: 16px
 	font-weight: 400
 	letter-spacing: -0.05px
 	+tr(background-color .3s linear)
@@ -55,10 +59,12 @@ p
 .btn-normal
 	height: 34px
 	line-height: 34px
+	font-size: 16px
 
 .btn-mini
-	height: 20px
-	line-height: 20px
+	height: 22px
+	line-height: 22px
+	font-size: 12px
 
 .btn-flat
 	background-color: transparent
@@ -126,7 +132,12 @@ input[type="password"]
 input[disabled='true']
 	opacity: 0.5
 	cursor: not-allowed !important
-	
+
+input[type='submit']
+	&:focus
+		+tr(background-color .3s linear)
+		background-color: rgba($blue, 1)
+
 .field-block
 	width: 100%
 	display: block
@@ -234,10 +245,21 @@ input[disabled='true']
 		@for $i from 1 through 10
 			&-#{$i}
 				$gap: $base-gap * $i
-				
-				margin-bottom: - $gap
+				> *:first-child
+					margin-top: 0
+				> *:last-child
+					margin-bottom: 0
 				> *
+					margin-top: $gap
 					margin-bottom: $gap
+
+	&-v-gap
+		@for $i from 1 through 10
+			&-#{$i}
+			$gap: $base-gap * $i
+			margin-left: - $gap
+			> *
+				margin-left: $gap
 
 
 =flex-alignment($base : '.f-align')
@@ -355,25 +377,6 @@ input[disabled='true']
 		
 		&-undecor
 			text-decoration: none
-  // gaps
-
-	@for $i from 1 through 10
-		&-v-gap-#{$i}
-			$gap: $base-gap * $i
-			> *:first-child
-				margin-top: 0
-			> *:last-child
-				margin-bottom: 0
-			> *
-				margin-top: $gap
-				margin-bottom: $gap
-
-  @for $i from 1 through 10
-		&-h-gap-#{$i}
-			$gap: $base-gap * $i
-			margin-left: - $gap
-			> *
-				margin-left: $gap
 
 
 

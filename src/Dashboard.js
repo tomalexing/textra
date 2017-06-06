@@ -1,10 +1,16 @@
-import React from 'react';
+import React,{ Component } from 'react';
 import ReactDOM from 'react-dom';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import './style/app.css';
 import './style/index.css';
 import logo from './assets/logo.png';
 import avatar from './assets/default-avatar.png';
+import icon_arrow from './assets/arrow-down.png';
+import icon_cost from  './assets/cost-of-translation.png';
+import icon_dur from  './assets/duration-of-translation.svg';
+import icon_letternum from  './assets/letter-number.svg';
+
+import sl from './assets/swap-lang.svg';
 import { fakeAuth } from './index'
 import {
   BrowserRouter as Router,
@@ -18,6 +24,10 @@ import { createBrowserHistory } from 'history'
 import { getUniqueKey, addClass, hasClass, removeClass, debounce, listener } from './utils';
 
 import Select from 'react-select-plus';
+
+import RichTextEditor from 'react-rte';
+import PropTypes from 'prop-types';
+
 
 // Be sure to include styles at some point, probably during your bootstrapping
 import 'react-select-plus/dist/react-select-plus.css';
@@ -217,13 +227,13 @@ class DashBoard extends React.Component {
                 </div>
               </Link>
 
-              <Batch
+              {/*<Batch
                 flushCount={10}
                 flushInterval={150}
                 count={this.state.items.length}
                 render={this.list}
                 debug
-              />
+              />*/}
 
               {Object.values(Searching).map((tab, index) => {
                 let publishTime = new Date(tab.publishTime);
@@ -286,9 +296,9 @@ class DashBoard extends React.Component {
             </div>
           </div>
           <div className="f outer-right" ref={n => this.toggleElem = n}>
-            <div className="main f f-col  f-align-2-2" >
+            <div className="main f f-col  f-align-2-2">
               <Switch>
-                <Route path="/dashboard/create" render={()=><Create/>}  />
+                <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate}/>
                 <RoutePassProps path="/dashboard/searching/:id" component={Create} currentDate={currentDate} />
                 <RoutePassProps path="/dashboard/user/:id" component={User} currentDate={currentDate} />
               </Switch>
@@ -310,18 +320,24 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
 
 
 class Create extends React.Component {
-
+    constructor(props){
+      super(props);
+      this.cleanInput = this.cleanInput.bind(this);
+    }
     state = {
         multi: true,
         multiValue: [],
         options: [
-            { value: 'R', label: 'Red' },
-            { value: 'G', label: 'Green' },
-            { value: 'B', label: 'Blue' }
+            { value: 'Eng', label: 'Английский' },
+            { value: 'Rus', label: 'Русский' },
         ],
-        value: undefined
+        value: undefined,
+        currentNumberOfChar: 0
     }
 
+    currentNumberOfChar(currentNumberOfChar){
+      this.setState({currentNumberOfChar})
+    }
 
     handleOnChange (value) {
       const { multi } = this.state;
@@ -332,25 +348,129 @@ class Create extends React.Component {
       }
     }
 
+    cleanInput(inputValue) {
+    // Strip all non-number characters from the input
+      return inputValue.replace(/[^0-9]/g, "");
+    }   
+
     render() {
 
-
-        function logChange(val) {
-            console.log(val);
-        }
-        const { multi, multiValue, options, value } = this.state;
-         console.log(options);
+        const { multi, multiValue, options, value, currentNumberOfChar } = this.state;
+        console.log(options);
         return (
-            <Select.Creatable
-                multi={multi}
-                options={options}
-                onChange={this.handleOnChange.bind(this)}
-                value={multi ? multiValue : value}
-            />
+          <form className={'f f-col dashboard-user__create-forms'}>
+              <div className={'dashboard-user__create-topbar f f-align-1-2 f-row f-gap-4'}>
+              <Select 
+                    ref="create-from"
+                    name="create[from]"
+                    autofocus
+                    options={options} 
+                    onInputChange={this.cleanInput}
+                    disabled={false} 
+                    value={value || 'Rus'} 
+                    onChange={this.updateValue} 
+                    searchable={true} />
+              <div className={'dashboard-user__create-swaplang'}><img src={sl} alt="swap language"/></div>
+              <Select 
+                    ref="create-to"
+                    name="create[to]"
+                    autofocus
+                    options={options} 
+                    simpleValue 
+                    disabled={false} 
+                    value={value || 'Eng'} 
+                    onChange={this.updateValue} 
+                    searchable={true} />
+    
+              </div>
+              <div className={'dashboard-user__create-posteditor'}>
+              <StatefulEditor
+                  type="text"
+                  tabindex={1} 
+                  name="create[posteditor]" 
+                  placeholder={'Ваш запрос на перевод...'}
+                  currentNumberOfChar={this.currentNumberOfChar.bind(this)}
+                    />
+              </div>
+              <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
+
+                <Inditator icon={icon_dur} value={humanReadableTime(currentNumberOfChar*1)} hint={'Длительность перевода'}/>
+                <Inditator icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'}/>
+                <Inditator icon={icon_cost} value={`$${Number(0.05*currentNumberOfChar).toFixed(2) }`} hint={'Стоимость перевода'}/>
+
+                <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
+              </div>
+            </form>
         )
 
 
     }
+}
+const Inditator = ({icon, value, hint }) => (
+  <div className={'f f-align-2-2 dashboard-user__create-bottombar__indicator'}>
+    <img src={icon} alt={hint} />
+    <span>{value}</span>
+  </div>
+);
+
+const toolbarConfig = {
+  // Optionally specify the groups to display (displayed in the order listed).
+  display: ['INLINE_STYLE_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
+  INLINE_STYLE_BUTTONS: [
+    {label: 'Bold', style: 'BOLD', className: 'custom-css-class'},
+    {label: 'Italic', style: 'ITALIC'},
+    {label: 'Underline', style: 'UNDERLINE'}
+  ],
+  BLOCK_TYPE_DROPDOWN: [
+    {label: 'Normal', style: 'unstyled'},
+    {label: 'Heading Large', style: 'header-one'},
+    {label: 'Heading Medium', style: 'header-two'},
+    {label: 'Heading Small', style: 'header-three'}
+  ],
+  BLOCK_TYPE_BUTTONS: [
+    {label: 'UL', style: 'unordered-list-item'},
+    {label: 'OL', style: 'ordered-list-item'}
+  ],
+  HISTORY_BUTTONS: [
+    {label: 'Bold', style: 'BOLD', className: 'custom-css-class1'},
+    {label: 'Bold', style: 'BOLD', className: 'custom-css-class2'}
+  ]
+};
+
+class StatefulEditor extends Component {
+
+  state = {
+    value: RichTextEditor.createEmptyValue()
+  }
+
+  letterNumber(value){
+    
+    value = value.toString('html')
+                    .replace(/<.?\/?\b[^>]*>/gi,'') // strip html
+                    .replace(/\n/gi,'') // do not count new line
+                    .replace(/&nbsp;/gi,' '); // space like one char
+
+    if(this.props.currentNumberOfChar){
+      this.props.currentNumberOfChar(value.length)
+    }
+  }
+
+  onChange = (value) => {
+    this.setState({value});
+    debounce(this.letterNumber.bind(this, value), 1000, false)() //actually trottling, because dynamic args
+  }
+
+  render () {
+    return (
+      <RichTextEditor
+        {...this.props}
+        value={this.state.value}
+        onChange={this.onChange.bind(this)}
+        toolbarConfig={toolbarConfig}
+        
+      />
+    );
+  }
 }
 
 const User = ({ match }) => (
@@ -373,3 +493,38 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 
 
 export default withRouter(DashBoard);
+
+
+
+export function humanReadableTimeDiff(date) {
+  var dateDiff = Date.now() - date;
+  if (dateDiff <= 0 || Math.floor(dateDiff / 1000) == 0) {
+    return 'now';
+  }
+  if (dateDiff < 1000 * 60) {
+    return Math.floor(dateDiff / 1000) + 's';
+  }
+  if (dateDiff < 1000 * 60 * 60) {
+    return Math.floor(dateDiff / (1000 * 60)) + 'm';
+  }
+  if (dateDiff < 1000 * 60 * 60 * 24) {
+    return Math.floor(dateDiff / (1000 * 60 * 60)) + 'h';
+  }
+  return Math.floor(dateDiff / (1000 * 60 * 60 * 24)) + 'd';
+}
+
+export function humanReadableTime(date) {
+  if (date <= 0 || Math.floor(date  ) == 0) {
+    return '0';
+  }
+  if (date <  60) {
+    return Math.floor(date)  + 'с';
+  }
+  if (date <  60 * 60) {
+    return Math.floor(date / 60) + 'м' + humanReadableTime(date - Math.floor(date / 60) * 60);
+  }
+  if (date <  60 * 60 * 24) {
+    return Math.floor(date / ( 60 * 60)) + 'ч' + humanReadableTime(date - Math.floor(date / ( 60 * 60) ) * 60 * 60);
+  }
+  return Math.floor(date / ( 60 * 60 * 24)) + 'д' + humanReadableTime(date - Math.floor(date / ( 60 * 60 * 24) ) * 60 * 60 * 24);
+}

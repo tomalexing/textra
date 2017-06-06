@@ -14,6 +14,7 @@
       z-index: 10
   .outer-right
     flex: 1 0 auto
+    width: calc(100% -  334px)
     z-index: 10
     +r(768)
       +coverdiv
@@ -34,6 +35,7 @@
     z-index: 1
     flex: 1 0 auto
     background-size: cover
+    width: 100%
     &-toregister
       display: block
       margin-top: 25%
@@ -194,43 +196,84 @@
           +nosel
           +tr(opacity .5s)
 
-.dashboard-user__create-tab
-    height: 100px
-    background: $bg-blue
-    width: 100%
-    text-decoration: none
-    color: $selected-blue
+
+.dashboard-user__create-bottombar,
+.dashboard-user__create-topbar
+  height: 65px
+  flex: 0 0 auto
+  z-index: 101
+  padding: 0 20px
+.dashboard-user__create-topbar
+  img
+    vertical-align: middle
+.dashboard-user__create-bottombar
+  .submit-post
+    margin-left: auto
+  &__indicator span
+    margin-left: 8px 
+
+.dashboard-user__create-forms
+  flex: 1 0 100%
+  width: 100%
+.dashboard-user__create-posteditor
+  flex: 1 1 auto
+  height: 100%
+  z-index: 100
+  border-top: 1px solid $grey
+  border-bottom: 1px solid $grey
+  padding: 18px
+  // textarea
+  //   display: block
+  //   font-size: 16px
+  //   resize: none
+  //   width: 100%
+  //   height: 100%
+  //   border: 0
+  //   position: relative
+  //   z-index: 100
+  button
+    background: #fff
     &:hover
-      background: darken($bg-blue, 10%)
-    &-plus
-      position: relative
-      background: $selected-blue //$blue
-      width: 50px
-      height: 50px
-      border-radius: 50%
-      overflow: hidden
-      border: 1px solid $grey 
-      margin-left: 15px 
-      &:after,
-      &:before
-        content: ''
-        position: absolute
-        width: 2px
-        height: 23px
-        border-radius: 1px
-        background-color: #ffffff
-      &:before
-        top: 13px
-        left: 24px
-        width: 2px
-        height: 23px
-      &:after
-        top: 23px
-        left: 13px
-        width: 23px
-        height: 2px
-    &-content
-      margin-left: 20px 
+      background: $bg-blue
+  // [class*="RichTextEditor__paragraph"]
+  //   margin: 0
+.dashboard-user__create-tab
+  height: 100px
+  background: $bg-blue
+  width: 100%
+  text-decoration: none
+  color: $selected-blue
+  &:hover
+    background: darken($bg-blue, 10%)
+  &-plus
+    position: relative
+    background: $selected-blue //$blue
+    width: 50px
+    height: 50px
+    border-radius: 50%
+    overflow: hidden
+    border: 1px solid $grey 
+    margin-left: 15px 
+    &:after,
+    &:before
+      content: ''
+      position: absolute
+      width: 2px
+      height: 23px
+      border-radius: 1px
+      background-color: #ffffff
+    &:before
+      top: 13px
+      left: 24px
+      width: 2px
+      height: 23px
+    &:after
+      top: 23px
+      left: 13px
+      width: 23px
+      height: 2px
+  &-content
+    margin-left: 20px 
 
 .dashboard-user__search-tab
   height: 66px
@@ -477,3 +520,5 @@
     text-align: right
     .dashboard-user__history-tab-selected &
       color: #fff
+
+      
