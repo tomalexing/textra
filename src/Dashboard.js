@@ -9,7 +9,7 @@ import icon_arrow from './assets/arrow-down.png';
 import icon_cost from  './assets/cost-of-translation.png';
 import icon_dur from  './assets/duration-of-translation.svg';
 import icon_letternum from  './assets/letter-number.svg';
-
+import icon_search from  './assets/search.svg';
 import sl from './assets/swap-lang.svg';
 import { fakeAuth } from './index'
 import {
@@ -322,75 +322,182 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
 class Create extends React.Component {
     constructor(props){
       super(props);
-      this.cleanInput = this.cleanInput.bind(this);
+      this.currentNumberOfChar = this.currentNumberOfChar.bind(this);
+      this.updateValueLangFrom = this.updateValueLangFrom.bind(this);
+      this.updateValueLangTo = this.updateValueLangTo.bind(this);
+      this.optionTranslatorField = this.optionTranslatorField.bind(this);
+      this.valueTranslatorField = this.valueTranslatorField.bind(this);
+      this.updateValueTranslator = this.updateValueTranslator.bind(this);
+      this.swapLang = this.swapLang.bind(this);
+      this.callTranslatorSearchNenu = this.callTranslatorSearchNenu.bind(this);
+      this.makeSearchMenuTranslatorUnnisible = this.makeSearchMenuTranslatorUnnisible.bind(this)
     }
+
     state = {
-        multi: true,
-        multiValue: [],
-        options: [
+        optionsLang: [
             { value: 'Eng', label: 'Английский' },
             { value: 'Rus', label: 'Русский' },
         ],
-        value: undefined,
-        currentNumberOfChar: 0
+        valueLangFrom: 'Rus',
+        valueLangTo: 'Eng',
+        valueTranslator: undefined,
+        currentNumberOfChar: 0,
+        isSearchMenuTranslatorVisible: false
     }
 
     currentNumberOfChar(currentNumberOfChar){
       this.setState({currentNumberOfChar})
     }
 
-    handleOnChange (value) {
-      const { multi } = this.state;
-      if (multi) {
-        this.setState({ multiValue: value });
-      } else {
-        this.setState({ value });
-      }
+    updateValueLangFrom (valueLangFrom) {
+        this.setState({ valueLangFrom });
     }
 
-    cleanInput(inputValue) {
-    // Strip all non-number characters from the input
-      return inputValue.replace(/[^0-9]/g, "");
-    }   
+    updateValueLangTo (valueLangTo) {
+        this.setState({ valueLangTo });
+    }
+
+    updateValueTranslator (valueTranslator) {
+      if(Object.prototype.toString.call(valueTranslator) === "[object Array]"){
+        valueTranslator = undefined
+      }
+        
+      this.setState({ valueTranslator, isSearchMenuTranslatorVisible: false });
+      
+    }
+
+    optionTranslatorField(v){
+      if(!(v.login||v.value)) return <div><img style={{width: '30px' }} src={avatar} /> <span>Переводчик</span></div>;
+      let customInput =  <div> <img style={{width: '30px' }} src={avatar} /><span style={{marginLeft: '10px' }}>{v.login||v.value}</span></div>
+      return customInput;
+    }
+
+    valueTranslatorField(v){  
+ 
+    }
+   
+    callTranslatorSearchNenu(){
+      this.setState({
+        isSearchMenuTranslatorVisible: true
+      })
+      this.createTranslatorMenu.focus();
+    }
+
+    makeSearchMenuTranslatorUnnisible(){
+       this.setState({
+        isSearchMenuTranslatorVisible: false
+      })
+    }
+
+    getUsers (input) {
+      if (!input) {
+        return Promise.resolve({ options: [] });
+      }
+
+      return fetch(`https://api.github.com/search/users?q=${input}`)
+      .then((response) => response.json())
+      .then((json) => {
+        return { options: json.items };
+      });
+    }
+
+    arrowElementTranslator(){
+     return  <img  src={icon_search} />
+    }
+
+    arrowElementLangs({ isOpen }){
+      if(isOpen)
+        return  <img style={{transform: 'rotate(-90deg)' }} src={icon_arrow} />
+      else
+        return  <img style={{transform: 'rotate(90deg)' }} src={icon_arrow} />
+    }
+
+    swapLang(){
+      let to = this.state.valueLangTo,
+          from = this.state.valueLangFrom;
+    
+      this.setState({
+        valueLangFrom: to,
+        valueLangTo: from
+        })
+    }
 
     render() {
-
-        const { multi, multiValue, options, value, currentNumberOfChar } = this.state;
-        console.log(options);
+        const {optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar, 
+              valueTranslator, isSearchMenuTranslatorVisible } = this.state;
         return (
-          <form className={'f f-col dashboard-user__create-forms'}>
+          <form  ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
               <div className={'dashboard-user__create-topbar f f-align-1-2 f-row f-gap-4'}>
-              <Select 
-                    ref="create-from"
-                    name="create[from]"
-                    autofocus
-                    options={options} 
-                    onInputChange={this.cleanInput}
-                    disabled={false} 
-                    value={value || 'Rus'} 
-                    onChange={this.updateValue} 
-                    searchable={true} />
-              <div className={'dashboard-user__create-swaplang'}><img src={sl} alt="swap language"/></div>
-              <Select 
-                    ref="create-to"
-                    name="create[to]"
-                    autofocus
-                    options={options} 
-                    simpleValue 
-                    disabled={false} 
-                    value={value || 'Eng'} 
-                    onChange={this.updateValue} 
-                    searchable={true} />
-    
+                <Select 
+                      ref={(n) => this.createLangFrom = n}
+                      name="create[from]"
+                      autofocus
+                      options={optionsLang} 
+                      disabled={false} 
+                      simpleValue
+                      value={valueLangFrom} 
+                      onChange={this.updateValueLangFrom} 
+                      searchable={true}
+                      autosize={false}
+                      clearable={false}
+                      arrowRenderer={this.arrowElementLangs} />
+                <div className={'dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language"/></div>
+                <Select 
+                      ref={(n) => this.createLangTo = n}
+                      name="create[to]"
+                      autofocus
+                      options={optionsLang} 
+                      simpleValue 
+                      disabled={false} 
+                      value={valueLangTo} 
+                      onChange={this.updateValueLangTo} 
+                      searchable={true}
+                      autosize={false}
+                      clearable={false}
+                      arrowRenderer={this.arrowElementLangs}
+                      />
+                <div className={'dashboard-user__create-topbar__chooser'}  >
+                  <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'}  onClick={this.callTranslatorSearchNenu} >
+                    <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{width: '30px' }} src={avatar} /> 
+                    <span className={'dashboard-user__create-topbar__chooser-trigger__name'} >{(!!valueTranslator  && (valueTranslator.login || valueTranslator.value)) || 'Переводчик' }</span>
+                    <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({isOpen:isSearchMenuTranslatorVisible})}</span>
+                  </div>
+                  <div className={`dashboard-user__create-topbar__chooser-menu ${isSearchMenuTranslatorVisible?'show-chooser-menu':''}`}>
+                    <Select.Async
+                          ref={(n) => this.createTranslatorMenu = n}
+                          name="create[translator]"
+                          autofocus
+                          options={optionsLang} 
+                          disabled={false} 
+                          value={valueTranslator } 
+                          onChange={this.updateValueTranslator} 
+                          searchable={true}
+                          autosize={false}
+                          clearable={false}
+                          openOnFocus={true}
+                          placeholder={'Переводчик'}
+                          searchPromptText={'Начните вводить имя'}
+                          noResultsText={'Не найдено'}
+                          className='dashboard-user__create-topbar__translator'
+                          valueRenderer={this.valueTranslatorField}
+                          optionRenderer={this.optionTranslatorField}
+                          arrowRenderer={this.arrowElementTranslator}
+                          loadOptions={this.getUsers} 
+                          onBlur={this.makeSearchMenuTranslatorUnnisible}
+                          onValueClick={this.makeSearchMenuTranslatorUnnisible}
+                          
+                          />
+                    </div>
+                </div>
               </div>
               <div className={'dashboard-user__create-posteditor'}>
-              <StatefulEditor
-                  type="text"
-                  tabindex={1} 
-                  name="create[posteditor]" 
-                  placeholder={'Ваш запрос на перевод...'}
-                  currentNumberOfChar={this.currentNumberOfChar.bind(this)}
-                    />
+                <StatefulEditor
+                    type="text"
+                    tabindex={1} 
+                    name="create[posteditor]" 
+                    placeholder={'Ваш запрос на перевод...'}
+                    currentNumberOfChar={this.currentNumberOfChar.bind(this)}
+                      />
               </div>
               <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
 
@@ -417,18 +524,18 @@ const toolbarConfig = {
   // Optionally specify the groups to display (displayed in the order listed).
   display: ['INLINE_STYLE_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
   INLINE_STYLE_BUTTONS: [
-    {label: 'Bold', style: 'BOLD', className: 'custom-css-class'},
-    {label: 'Italic', style: 'ITALIC'},
-    {label: 'Underline', style: 'UNDERLINE'}
+    {label: 'Жырный', style: 'BOLD', className: 'custom-css-class'},
+    {label: 'Курсив', style: 'ITALIC'},
+    {label: 'Подчеркнутый', style: 'UNDERLINE'}
   ],
   BLOCK_TYPE_DROPDOWN: [
-    {label: 'Normal', style: 'unstyled'},
-    {label: 'Heading Large', style: 'header-one'},
-    {label: 'Heading Medium', style: 'header-two'},
-    {label: 'Heading Small', style: 'header-three'}
+    {label: 'Нормальный', style: 'unstyled'},
+    {label: 'Большое заглявье', style: 'header-one'},
+    {label: 'Средние заглявье', style: 'header-two'},
+    {label: 'Маленькое заглявье', style: 'header-three'}
   ],
   BLOCK_TYPE_BUTTONS: [
-    {label: 'UL', style: 'unordered-list-item'},
+    {label: '', style: 'unordered-list-item'},
     {label: 'OL', style: 'ordered-list-item'}
   ],
   HISTORY_BUTTONS: [
@@ -467,7 +574,6 @@ class StatefulEditor extends Component {
         value={this.state.value}
         onChange={this.onChange.bind(this)}
         toolbarConfig={toolbarConfig}
-        
       />
     );
   }
@@ -515,16 +621,16 @@ export function humanReadableTimeDiff(date) {
 
 export function humanReadableTime(date) {
   if (date <= 0 || Math.floor(date  ) == 0) {
-    return '0';
+    return '0'; // not sure
   }
   if (date <  60) {
-    return Math.floor(date)  + 'с';
+    return Math.floor(date)  + 'с ';
   }
   if (date <  60 * 60) {
-    return Math.floor(date / 60) + 'м' + humanReadableTime(date - Math.floor(date / 60) * 60);
+    return Math.floor(date / 60) + 'м ' + humanReadableTime(date - Math.floor(date / 60) * 60);
   }
   if (date <  60 * 60 * 24) {
-    return Math.floor(date / ( 60 * 60)) + 'ч' + humanReadableTime(date - Math.floor(date / ( 60 * 60) ) * 60 * 60);
+    return Math.floor(date / ( 60 * 60)) + 'ч ' + humanReadableTime(date - Math.floor(date / ( 60 * 60) ) * 60 * 60);
   }
-  return Math.floor(date / ( 60 * 60 * 24)) + 'д' + humanReadableTime(date - Math.floor(date / ( 60 * 60 * 24) ) * 60 * 60 * 24);
+  return Math.floor(date / ( 60 * 60 * 24)) + 'д ' + humanReadableTime(date - Math.floor(date / ( 60 * 60 * 24) ) * 60 * 60 * 24);
 }
