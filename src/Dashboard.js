@@ -11,6 +11,8 @@ import icon_dur from  './assets/duration-of-translation.svg';
 import icon_letternum from  './assets/letter-number.svg';
 import icon_search from  './assets/search.svg';
 import sl from './assets/swap-lang.svg';
+import copy from './assets/icon-copy.svg';
+
 import { fakeAuth } from './index'
 import {
   BrowserRouter as Router,
@@ -137,27 +139,6 @@ class DashBoard extends React.Component {
     let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
 
-    const START = Math.PI * 0.5;
-    const TAU = Math.PI * 2;
-    const radius = 5;
-    const percentage = .8;
-    const targetX = radius - Math.cos(START + (percentage * TAU)) * radius;
-    const targetY = radius - Math.sin(START - (percentage * TAU)) * radius;
-    const largeArcFlag = percentage > 0.5 ? 1 : 0;
-    const points = [
-      // Top center.
-      `M ${radius} 0`,
-
-      // Arc are applied to whatever parcentage, swap flag equals 1 and I dont know what is mean. :)
-      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${targetX} ${targetY}`,
-
-      // Back to the center.
-      `L ${radius} ${radius}`,
-
-      // Close path
-      'Z'
-    ];
-
     const Searching = {
       'wqefeq': {
         uuid: 'wqefeq',
@@ -165,6 +146,9 @@ class DashBoard extends React.Component {
         title: 'Создать запрос на перевод',
         content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
         publishTime: (new Date).toISOString(),
+        startWorkingTime: (new Date(new Date - 1000000)).toISOString(),
+        duration: 1341,
+        letterNumber: 213,
         from: 'RUS',
         to: 'ENG',
         cost: '$0.33'
@@ -175,20 +159,26 @@ class DashBoard extends React.Component {
         title: 'Создать запрос на перевод',
         content: 'Создать запрос на перевод',
         publishTime: (new Date).toISOString(),
+        startWorkingTime: (new Date).toISOString(),
+        duration: 431241,
+        letterNumber: 123,
         from: 'ENG',
         to: 'CHN',
         cost: '$11.33'
       }
     }
-    const Tabs = {
+    const Users = {
       'wqefeq': {
         uuid: 'alex',
+        nickname: 'alex',
         avatar: avatar,
         title: 'Создать запрос на перевод',
-        content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
-        contentFull: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+        content: 'Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d',
+        contentFull: 'Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d',
         opened: false,
-        publishTime: (new Date).toISOString(),
+        publishTime: (new Date(new Date - 100000)).toISOString(),
+        startWorkingTime: (new Date).toISOString(),
+        duration: 241,
         startTime: '12:32',
         from: 'RUS',
         to: 'ENG',
@@ -196,13 +186,15 @@ class DashBoard extends React.Component {
       },
       'wqerq': {
         uuid: 'alex_alex',
+        nickname: 'alex_alex',
         avatar: avatar,
         title: 'Создать запрос на перевод',
         content: 'Создать запрос на перевод',
         contentFull: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
-        publishTime: (new Date).toISOString(),
+        publishTime: (new Date(new Date - 100000)).toISOString(),
+        startWorkingTime: (new Date(new Date - 100000)).toISOString(),
+        duration: 634,
         startTime: '12:32',
-        duration: '12мин',
         opened: false,
         from: 'ENG',
         to: 'CHN',
@@ -212,7 +204,7 @@ class DashBoard extends React.Component {
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
 
-    let currentDate = activeTab ? find(Tabs, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
+    let currentDate = activeTab ? find(Users, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
 
     return (
       <div className="f f-col outer dashboard-user">
@@ -238,45 +230,36 @@ class DashBoard extends React.Component {
               {Object.values(Searching).map((tab, index) => {
                 let publishTime = new Date(tab.publishTime);
                 return (
-                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'dashboard-user__search-tab-selected' : ''}`} key={index}>
+                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
                       <div className="dashboard-user__search-tab-title">{tab.title} </div>
                       <div className="dashboard-user__search-tab-content"> {tab.content}</div>
                     </div>
-                    <div className="f  f-col f-align-2-2 dashboard-user__search-tab-info">
+                    <div className="f  f-col f-align-2-3 dashboard-user__search-tab-info">
                       <div className="dashboard-user__search-tab-info-time">
-
-                        <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
-                      <div className="dashboard-user__search-tab-info-lang">
-                        <span className="dashboard-user__search-tab-info-lang-from" >{tab.from}</span>
-                        <span className="dashboard-user__search-tab-info-lang-to" >{tab.to}</span>
-                      </div>
+                      <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
+                      <LangLabel  from={tab.from} to={tab.to} selected={tab.uuid === activeTab}/>
                       <div className="dashboard-user__search-tab-info-money">{tab.cost}</div>
                     </div>
                   </Link>
                 )
               })}
 
-              {Object.values(Tabs).map((tab, index) => {
+              {Object.values(Users).map((tab, index) => {
                 let publishTime = new Date(tab.publishTime);
                 return (
-                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab ? 'dashboard-user__history-tab-selected' : ''}`} key={index}>
+                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab ? 'selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
                       <div className="dashboard-user__history-tab-title"> {tab.title} </div>
                       <div className="dashboard-user__history-tab-content"> {tab.content}</div>
                     </div>
-                    <div className="f f-col f-align-2-2 dashboard-user__history-tab-info">
+                    <div className="f f-col f-align-2-3 dashboard-user__history-tab-info">
                       <div className="dashboard-user__history-tab-info-time">
-                        <svg xmlns="http://www.w3.org/2000/svg">
-                          <path d={points.join(' ')} />
-                        </svg>
-                        <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
-                      <div className="dashboard-user__history-tab-info-lang">
-                        <span className="dashboard-user__history-tab-info-lang-from" >{tab.from}</span>
-                        <span className="dashboard-user__history-tab-info-lang-to" >{tab.to}</span>
-                      </div>
+                        <Timer start={tab.startWorkingTime} duration={tab.duration}/>
+                        <time>{`${publishTime.getHours()}:${getFullMinutes(publishTime.getMinutes())}`}</time></div>
+                       <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === activeTab}/>
                       <div className="dashboard-user__history-tab-info-money">{tab.cost}</div>
                     </div>
                   </Link>
@@ -284,7 +267,6 @@ class DashBoard extends React.Component {
               })}
 
               <div className="f f-col">
-
                 <p className="u-mb-4"> переключит? {(
                   this.state.isTablet ? (
                     <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this), 500, false)} > переключит</button>
@@ -296,10 +278,10 @@ class DashBoard extends React.Component {
             </div>
           </div>
           <div className="f outer-right" ref={n => this.toggleElem = n}>
-            <div className="main f f-col  f-align-2-2">
+            <div className="main f f-col f-align-2-2">
               <Switch>
                 <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate}/>
-                <RoutePassProps path="/dashboard/searching/:id" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/dashboard/searching/:id" component={Search} currentDate={currentDate} />
                 <RoutePassProps path="/dashboard/user/:id" component={User} currentDate={currentDate} />
               </Switch>
             </div>
@@ -318,6 +300,218 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
   } />
 )
 
+const LangLabel = ({from = 'Rus', to= 'Eng', selected = false, className= ''} = {}) => {
+  return(
+      <div className={`LangLabel  ${ selected ? 'selected' : '' } ${className}`}>
+        <span className="LangLabel-from" >{from}</span>
+        <span className="LangLabel-to" >{to}</span>
+      </div>
+  )
+}
+
+const Timer = ({start , duration, isBig = false} = { }) => {
+
+    const percentage =  ( (new Date() - new Date(start)) ) / duration / 1000  ; 
+    console.log(percentage);
+    const START = Math.PI * 0.5;
+    const TAU = Math.PI * 2;
+    const radius = isBig?7:5;
+    //const percentage = .8;
+    const targetX = radius - Math.cos(START + (percentage * TAU)) * radius;
+    const targetY = radius - Math.sin(START - (percentage * TAU)) * radius;
+    const largeArcFlag = percentage > 0.5 ? 1 : 0;
+    const points = [
+      // Top center.
+      `M ${radius} 0`,
+
+      // Arc are applied to whatever parcentage, swap flag equals 1 and I dont know what is mean. :)
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${targetX} ${targetY}`,
+
+      // Back to the center.
+      `L ${radius} ${radius}`,
+
+      // Close path
+      'Z'
+    ];
+
+    return(
+      <svg className={`Timer ${isBig?'Timer-big':''}`} xmlns="http://www.w3.org/2000/svg">  
+        <path d={points.join(' ')} />
+      </svg>
+    )
+}
+
+class User extends React.Component {
+
+  render(){
+
+    let { currentDate } = this.props
+    let publishTime = new Date(currentDate.publishTime);
+    return(
+      <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
+          <div className={'dashboard-user__date-delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__searching-post '}>
+            <div className={'dashboard-user__searching-post__avatar'}>
+              <img src={currentDate.avatar} alt={currentDate.nickname}/>
+            </div>
+            <div className={'dashboard-user__searching-post__content'}>
+              <div className={'dashboard-user__searching-post__content__text'}>
+                {currentDate.content}
+              </div>
+              <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
+                <LangLabel from={currentDate.from} to={currentDate.to} />
+                <Inditator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
+                <Inditator 
+                  className={'f f-align-2-2'}
+                  icon={
+                    <Timer 
+                      start={currentDate.startWorkingTime} 
+                      duration={currentDate.duration} 
+                      isBig={true}/>
+                  } 
+                  value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime))/1000)} 
+                  hint={'Оставшееся время'} />
+                <Inditator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
+                <Inditator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
+
+              </div>
+            </div>
+            <div className={'dashboard-user__searching-post__constols'}>
+            </div>
+            <div className={'dashboard-user__searching-post__date'}>
+              {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            </div>
+          </div>
+
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__searching-reply'}>
+            <div className={'dashboard-user__searching-reply__avatar'}>
+               <img src={currentDate.avatar} alt={currentDate.nickname}/>
+            </div>
+            <div className={'dashboard-user__searching-reply__content'}>
+              <div className={'dashboard-user__searching-reply__content__text'}>
+                {currentDate.content}
+              </div>
+            </div>
+            <div className={'dashboard-user__searching-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'}>
+                <img src={copy} alt="copy"/>
+                <span>Копировать</span>
+              </button>
+            </div>
+            <div className={'dashboard-user__searching-post__date'}>
+               {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            </div>
+          </div>  
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__searching-reply'}>
+            <div className={'dashboard-user__searching-reply__avatar'}>
+              
+            </div>
+            <div className={'dashboard-user__searching-reply__content'}>
+              <div className={'dashboard-user__searching-reply__content__text'}>
+                {currentDate.content}
+              </div>
+            </div>
+            <div className={'dashboard-user__searching-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'}>
+                <img src={copy} alt="copy"/>
+                <span>Копировать</span>
+              </button>
+            </div>
+            <div className={'dashboard-user__searching-post__date'}>
+               {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            </div>
+          </div>  
+      </div>
+    )
+  }
+}
+
+
+
+class Search extends React.Component {
+
+  render(){
+
+    let { currentDate } = this.props
+    let publishTime = new Date(currentDate.publishTime);
+    return(
+      <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
+          <div className={'dashboard-user__date-delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__searching-post '}>
+            <div className={'dashboard-user__searching-post__avatar'}>
+              <img src={currentDate.avatar} alt={currentDate.nickname}/>
+            </div>
+            <div className={'dashboard-user__searching-post__content'}>
+              <div className={'dashboard-user__searching-post__content__text'}>
+                {currentDate.content}
+              </div>
+              <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
+                <LangLabel from={currentDate.from} to={currentDate.to} />
+                <Inditator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
+                <Inditator 
+                  className={'f f-align-2-2'}
+                  icon={
+                    <Timer 
+                      start={currentDate.startWorkingTime} 
+                      duration={currentDate.duration} 
+                      isBig={true}/>
+                  } 
+                  value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime))/1000)} 
+                  hint={'Оставшееся время'} />
+                <Inditator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
+                <Inditator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
+
+              </div>
+            </div>
+            <div className={'dashboard-user__searching-post__constols'}>
+            </div>
+            <div className={'dashboard-user__searching-post__date'}>
+              {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            </div>
+          </div>
+
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__searching-reply'}>
+            <div className={'dashboard-user__searching-reply__avatar'}>
+               <img src={currentDate.avatar} alt={currentDate.nickname}/>
+            </div>
+            <div className={'dashboard-user__searching-reply__content'}>
+              <div className={'dashboard-user__searching-reply__content__text'}>
+                {currentDate.content}
+              </div>
+            </div>
+            <div className={'dashboard-user__searching-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'}>
+                <img src={copy} alt="copy"/>
+                <span>Копировать</span>
+              </button>
+            </div>
+            <div className={'dashboard-user__searching-post__date'}>
+               {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            </div>
+          </div>  
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__searching-reply'}>
+            <div className={'dashboard-user__searching-reply__avatar'}>
+              
+            </div>
+            <div className={'dashboard-user__searching-reply__content'}>
+              <div className={'dashboard-user__searching-reply__content__text'}>
+                {currentDate.content}
+              </div>
+            </div>
+            <div className={'dashboard-user__searching-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'}>
+                <img src={copy} alt="copy"/>
+                <span>Копировать</span>
+              </button>
+            </div>
+            <div className={'dashboard-user__searching-post__date'}>
+               {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            </div>
+          </div>  
+      </div>
+    )
+  }
+}
 
 class Create extends React.Component {
     constructor(props){
@@ -402,7 +596,7 @@ class Create extends React.Component {
     }
 
     arrowElementTranslator(){
-     return  <img  src={icon_search} />
+     return  <img src={icon_search} />
     }
 
     arrowElementLangs({ isOpen }){
@@ -468,11 +662,11 @@ class Create extends React.Component {
                           name="create[translator]"
                           autofocus
                           options={optionsLang} 
-                          disabled={false} 
+                          disabled={false}
                           value={valueTranslator } 
                           onChange={this.updateValueTranslator} 
                           searchable={true}
-                          autosize={false}
+                          autosize={true}
                           clearable={false}
                           openOnFocus={true}
                           placeholder={'Переводчик'}
@@ -501,9 +695,9 @@ class Create extends React.Component {
               </div>
               <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
 
-                <Inditator icon={icon_dur} value={humanReadableTime(currentNumberOfChar*1)} hint={'Длительность перевода'}/>
-                <Inditator icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'}/>
-                <Inditator icon={icon_cost} value={`$${Number(0.05*currentNumberOfChar).toFixed(2) }`} hint={'Стоимость перевода'}/>
+                <Inditator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar*1)} hint={'Длительность перевода'}/>
+                <Inditator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'}/>
+                <Inditator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(0.05*currentNumberOfChar).toFixed(2) }`} hint={'Стоимость перевода'}/>
 
                 <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
               </div>
@@ -513,9 +707,10 @@ class Create extends React.Component {
 
     }
 }
-const Inditator = ({icon, value, hint }) => (
-  <div className={'f f-align-2-2 dashboard-user__create-bottombar__indicator'}>
-    <img src={icon} alt={hint} />
+
+const Inditator = ({icon:Icon = false, value= '' , hint = '', className= '' } = {}) => (
+  <div className={`String-indicator ${className} `}>
+    { (Icon === false) ? "" : ((typeof Icon === "string") ? <img src={Icon} alt={hint} /> : Icon )}
     <span>{value}</span>
   </div>
 );
@@ -579,11 +774,7 @@ class StatefulEditor extends Component {
   }
 }
 
-const User = ({ match }) => (
-  <div>
-    <h3>ID: {match.params.id}</h3>
-  </div>
-)
+
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
     fakeAuth.isAuthenticated ? (
@@ -633,4 +824,49 @@ export function humanReadableTime(date) {
     return Math.floor(date / ( 60 * 60)) + 'ч ' + humanReadableTime(date - Math.floor(date / ( 60 * 60) ) * 60 * 60);
   }
   return Math.floor(date / ( 60 * 60 * 24)) + 'д ' + humanReadableTime(date - Math.floor(date / ( 60 * 60 * 24) ) * 60 * 60 * 24);
+}
+const getMounthName = (numberOfMonth) => {
+  let Mounth = 'Янв';
+  switch(numberOfMonth){
+    case(0):
+      Mounth = 'Янв'
+      break;
+    case(1):
+      Mounth = 'Фев'
+      break;
+    case(2):
+      Mounth = 'Мрт'
+      break;
+    case(3):
+      Mounth = 'Апр'
+      break;
+    case(4):
+      Mounth = 'Май'
+      break;
+    case(5):
+      Mounth = 'Июн'
+      break;
+    case(6):
+      Mounth = 'Июл'
+      break;
+    case(7):
+      Mounth = 'Авг'
+      break;
+    case(8):
+      Mounth = 'Сен'
+      break;
+    case(9):
+      Mounth = 'Окт'
+      break;
+    case(10):
+      Mounth = 'Нбр'
+      break;
+    case(11):
+      Mounth = 'Дек'
+      break;
+  }
+  return Mounth
+}
+const getFullMinutes = (Minutes) => {
+  return (('' + Minutes).length == 1)? ('0' + Minutes) : Minutes
 }

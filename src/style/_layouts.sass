@@ -97,6 +97,8 @@
         color: #1e7bcf
 // registr end
 
+
+// Common User Dashboard Style
 .dashboard-user
   &__header
     height: 70px
@@ -196,72 +198,164 @@
           +nosel
           +tr(opacity .5s)
 
-
-.dashboard-user__create-bottombar,
-.dashboard-user__create-topbar
-  height: 65px
-  flex: 0 0 auto
-  z-index: 101
-  padding: 0 20px
-.dashboard-user__create-topbar
-  img
-    vertical-align: middle
-  &__chooser
-    position: relative
-    margin-left: auto
-    &-trigger
-      min-width: 156px
-      &__avatar
-        width: 30px
-      &__name
-        margin-left: 13px
-      &__arrow
-        margin-left: auto
-
-    &-menu
-      position: absolute
-      width: 120%
-      right: 0
-      top: 118%
-      opacity: 0
-      z-index: -1
-      +tr(opacity .5s)
-      &.show-chooser-menu
-        opacity: 1
-        +tr(opacity .5s)
-        z-index: 100
-.dashboard-user__create-bottombar
-  .submit-post
-    margin-left: auto
-  &__indicator span
-    margin-left: 8px 
-
-.dashboard-user__create-forms
-  flex: 1 0 100%
+.dashboard-user__date-delimiter
   width: 100%
-.dashboard-user__create-posteditor
-  flex: 1 1 auto
-  height: 100%
-  z-index: 100
-  border-top: 1px solid $grey
-  border-bottom: 1px solid $grey
-  padding: 20px
-  overflow: auto
-  // textarea
-  //   display: block
-  //   font-size: 16px
-  //   resize: none
-  //   width: 100%
-  //   height: 100%
-  //   border: 0
-  //   position: relative
-  //   z-index: 100
-  button
-    background: #fff
-    &:hover
-      background: $bg-blue
-  // [class*="RichTextEditor__paragraph"]
-  //   margin: 0
+  text-align: center
+  color: $grey-light
+  font-size: 12px
+  font-weight: 400
+  letter-spacing: -0.06px
+  line-height: 14px
+  padding: 10px
+  position: relative
+  &:after,
+  &:before
+    content: ''
+    display: block
+    position: absolute
+    top: 50%
+    background-color: #f5f5f5
+    height: 1px
+    width: calc(50% - 5vw)
+  &:after
+    right: 0
+  &:before
+    left: 0 
+
+
+// Create Window
+.dashboard-user
+  &__create-bottombar,
+  &__create-topbar
+    height: 65px
+    flex: 0 0 auto
+    z-index: 101
+    padding: 0 20px
+  &__create-topbar
+    .Select.is-open,
+    .Select.is-open .Select-menu-outer
+      box-shadow: 0 2px 6px rgba(29, 122, 184, 0.3)
+    
+    img
+      vertical-align: middle
+    &__chooser
+      position: relative
+      margin-left: auto
+      &-trigger
+        min-width: 170px
+        &__avatar
+          width: 30px
+        &__name
+          margin-left: 13px
+          max-width: 100px
+          overflow: hidden
+          text-overflow: ellipsis
+        &__arrow
+          margin-left: auto
+
+      &-menu
+        position: absolute
+        width: 120%
+        right: 0
+        top: 118%
+        opacity: 0
+        z-index: -1
+        +tr(opacity .5s)
+        &.show-chooser-menu
+          opacity: 1
+          +tr(opacity .5s)
+          z-index: 100
+  &__create-bottombar
+    .submit-post
+      margin-left: auto
+
+  &__create-forms
+    flex: 1 0 100%
+    width: 100%
+  &__create-posteditor
+    flex: 1 1 auto
+    height: 100%
+    z-index: 100
+    border-top: 1px solid $grey
+    border-bottom: 1px solid $grey
+    padding: 20px
+    overflow: auto
+    // textarea
+    //   display: block
+    //   font-size: 16px
+    //   resize: none
+    //   width: 100%
+    //   height: 100%
+    //   border: 0
+    //   position: relative
+    //   z-index: 100
+    button
+      background: #fff
+      &:hover
+        background: $bg-blue
+    // [class*="RichTextEditor__paragraph"]
+    //   margin: 0
+
+
+// Searching Window
+.dashboard-user__searching
+    flex: 1 0 100%
+    width: 100%
+    padding: 16px
+    &-post
+      width: 100%
+      margin-bottom: 25px
+    &-post__avatar
+      flex: 0 0 50px
+      width: 50px
+      height: 50px
+      border-radius: 50%
+      overflow: hidden
+      border: 1px solid $grey
+    &-post__content
+      border-radius: 4px
+      background-color: $bg-blue
+      padding: 9px 14px
+      flex: 1 1 auto
+      max-width: 70%
+      min-width: 450px
+      &__text
+        color: $text-middle
+      &__bottombar
+        color: $text-dark
+        margin-top: 10px
+    &-post__constols
+      flex: 1 1 auto
+    &-post__date
+      flex: 0 1 auto
+      text-align: right
+      color: $grey-light
+      font-size: 10px
+      font-weight: 400
+      line-height: 11px
+      letter-spacing: -0.05px
+    &-reply__avatar
+      flex: 0 0 50px
+    &-reply__content
+      border-radius: 4px
+      background-color: $bg-blue
+      padding: 9px 14px
+      flex: 1 1 auto
+      max-width: 70%
+      min-width: 450px
+      &__text
+        color: $text-middle
+    &-reply__constols
+      flex: 1 1 auto
+      align-self: flex-end
+      button
+        img
+          margin-left: 2px
+          margin-right: 4px
+
+
+
+// Tabs
 .dashboard-user__create-tab
   height: 100px
   background: $bg-blue
@@ -307,7 +401,7 @@
   background: $bg-blue
   &:hover
     background: darken($bg-blue, 10%)
-  &.dashboard-user__search-tab-selected
+  &.selected
     background: $selected-blue
   &-avatar
     flex: 0 1 65px
@@ -329,7 +423,7 @@
     letter-spacing: -0.06px
     line-height: 16px
     padding-bottom: 5px 
-    .dashboard-user__search-tab-selected &
+    .selected &
       color: #fff
   &-content
     display: block
@@ -345,7 +439,7 @@
     overflow: hidden
     text-overflow: ellipsis
     letter-spacing: -0.05px
-    .dashboard-user__search-tab-selected &
+    .selected &
       color: #fff
   &-info-time
     align-self: flex-end
@@ -358,52 +452,8 @@
       line-height: 11px
       letter-spacing: -0.05px
       margin-left: 7px
-      .dashboard-user__search-tab-selected &
+      .selected &
         color: #fff
-  &-info-lang
-    width: 51px
-    height: 17px
-    border-radius: 4px
-    background-color: #9ca9b2
-    line-height: 5px
-    vertical-align: top
-    padding: 0 1px
-    align-self: flex-end
-    .dashboard-user__search-tab-selected &
-      background-color: #fff
-    &-from
-      border-radius: 4px 0 0 4px
-      height: 15px
-      color: #9ca9b2
-      font-size: 9px
-      font-weight: 500
-      letter-spacing: -0.04px
-      line-height: 18px
-      color: white
-      width: 22px
-      display: inline-block
-      text-align: center
-      vertical-align: middle
-      .dashboard-user__search-tab-selected &
-        color: $selected-blue
-    &-to
-      border-radius: 0 4px 4px 0
-      height: 15px
-      color: #9ca9b2
-      font-size: 9px
-      font-weight: 100
-      letter-spacing: -0.04px
-      line-height: 16px
-      width: 27px
-      display: inline-block
-      text-align: center
-      background: #fff
-      vertical-align: middle
-      margin-top: 1px
-      .dashboard-user__search-tab-selected &
-          background-color: $selected-blue
-          color: #fff
-
   &-info-money
     align-self: flex-end
     margin-top: 3px
@@ -415,7 +465,7 @@
     letter-spacing: -0.05px
     line-height: 14px
     text-align: right
-    .dashboard-user__search-tab-selected &
+    .selected &
       color: #fff
 
 .dashboard-user__history-tab
@@ -425,7 +475,7 @@
   padding: 7px
   &:hover
     background: $bg-blue
-  &.dashboard-user__history-tab-selected
+  &.selected
     background: $selected-blue
   &-avatar
     flex: 0 1 65px
@@ -447,7 +497,7 @@
     letter-spacing: -0.06px
     line-height: 16px
     padding-bottom: 5px 
-    .dashboard-user__history-tab-selected &
+    .selected &
       color: #fff
   &-content
     display: block
@@ -463,25 +513,10 @@
     overflow: hidden
     text-overflow: ellipsis
     letter-spacing: -0.05px
-    .dashboard-user__history-tab-selected &
+    .selected &
       color: #fff
   &-info-time
     align-self: flex-end
-    svg
-      height: 12px
-      width: 12px
-      margin-bottom: -2px
-      background: #9ca9b2
-      overflow: hidden
-      border-radius: 50%
-      border: 1px solid #fff
-      path
-        fill: $selected-blue
-      .dashboard-user__history-tab-selected &
-        background: $grey
-        border: 1px solid $selected-blue
-        path
-          fill: #fff
     time
       width: 30px
       height: 11px
@@ -491,52 +526,8 @@
       line-height: 11px
       letter-spacing: -0.05px
       margin-left: 2px
-      .dashboard-user__history-tab-selected &
+      .selected &
         color: #fff
-  &-info-lang
-    width: 51px
-    height: 17px
-    border-radius: 4px
-    background-color: #9ca9b2
-    line-height: 5px
-    vertical-align: top
-    padding: 0 1px
-    align-self: flex-end
-    .dashboard-user__history-tab-selected &
-      background-color: #fff
-    &-from
-      border-radius: 4px 0 0 4px
-      height: 15px
-      color: #9ca9b2
-      font-size: 9px
-      font-weight: 500
-      letter-spacing: -0.04px
-      line-height: 17px
-      color: white
-      width: 22px
-      display: inline-block
-      text-align: center
-      vertical-align: middle
-      .dashboard-user__history-tab-selected &
-        color: $selected-blue
-    &-to
-      border-radius: 0 4px 4px 0
-      height: 15px
-      color: #9ca9b2
-      font-size: 9px
-      font-weight: 100
-      letter-spacing: -0.04px
-      line-height: 16px
-      width: 27px
-      display: inline-block
-      text-align: center
-      background: #fff
-      vertical-align: middle
-      margin-top: 1px
-      .dashboard-user__history-tab-selected &
-        background-color: $selected-blue
-        color: #fff
-
   &-info-money
     align-self: flex-end
     margin-top: 3px
@@ -548,7 +539,75 @@
     letter-spacing: -0.05px
     line-height: 14px
     text-align: right
-    .dashboard-user__history-tab-selected &
+    .selected &
       color: #fff
 
-      
+
+// LangLabel Element
+.LangLabel
+    width: 51px
+    height: 17px
+    border-radius: 4px
+    background-color: #9ca9b2
+    line-height: 5px
+    vertical-align: top
+    padding: 0 1px
+    font-weight: 900
+    font-size: 9px
+    letter-spacing: -0.04px
+    .selected &
+      background-color: #fff
+    &-from
+      border-radius: 4px 0 0 4px
+      height: 15px
+      color: #9ca9b2
+      line-height: 18px
+      color: white
+      width: 22px
+      display: inline-block
+      text-align: center
+      vertical-align: middle
+      text-transform: uppercase
+      .selected &
+        color: $selected-blue
+    &-to
+      border-radius: 0 4px 4px 0
+      height: 15px
+      color: #9ca9b2
+      line-height: 16px
+      width: 27px
+      display: inline-block
+      text-align: center
+      background: #fff
+      vertical-align: middle
+      margin-top: 1px
+      text-transform: uppercase
+      .selected &
+        background-color: $selected-blue
+        color: #fff
+
+// Indicator  Element
+.String-indicator 
+  font-size: 12px
+  span
+    margin-left: 8px
+
+.Timer
+    height: 12px
+    width: 12px
+    background: #9ca9b2
+    overflow: hidden
+    margin-bottom: -2px
+    border-radius: 50%
+    border: 1px solid #fff
+    &-big
+      height: 15px
+      width: 15px
+      margin-bottom: 0px
+    path
+      fill: $selected-blue
+    .selected &
+      background: $grey
+      border: 1px solid $selected-blue
+      path
+        fill: #fff
