@@ -153,7 +153,7 @@ const validationRules = {
     email: (s) => EMAIL_RE.test( s )|| messages.email,
     minLength: (s, len = 6) => escapeRegex(s).length >= len || messages.minLength.replace('{n}', len),
     maxLength: (s, len = 100) => escapeRegex(s).length <= len || messages.maxLength.replace('{n}', len),
-    required: (s) => !! escapeRegex(s).length || messages.required,
+    required: (s) => !! s.length || messages.required,
     number: (s) => NUMBER_RE.test(escapeRegex(s)) || messages.number,
     emit: (s, event, emit) =>  emit(event, escapeRegex(s)) || true, // Always true because if emitter will not be able to sent event its not a field error 
     listen: (s, event) => s === EventEmitterSingleton.getLastMessageFromEvent(event) || messages.listen
@@ -248,7 +248,7 @@ export default class TxInput extends React.Component{
  * @return {Boolean|Array} true if valid or array of error messages
  */
   validate() {
-    if( !this.input.value ) return false;
+    if( this.input === null ) return true;
 
     const { value } = this.input;
     this.reset();
@@ -408,6 +408,7 @@ export default class TxInput extends React.Component{
        */
       this._validate = (value) => {
         const errors = this.rules.reduce((acc, { name, fn, params = [] }) => {
+  
           const res = fn(value, ...params);
           // if valid
           if (res === true) return acc;

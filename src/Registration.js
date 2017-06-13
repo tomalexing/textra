@@ -7,7 +7,7 @@ import google from './assets/google.svg';
 
 import TxInput from './components/TxInput';
 import TxForm from './components/TxForm';
-import { getUniqueKey } from './utils'
+import { getUniqueKey, hasClass, addClass, removeClass } from './utils';
 import {
 //   BrowserRouter as Router,
 //   Route,
@@ -27,6 +27,10 @@ class Login extends React.Component {
     fakeAuth.authenticate(() => {
       this.setState({ redirectToReferrer: true })
     })
+  }
+
+  switchPanel = (e) => {
+    !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
   }
   
 

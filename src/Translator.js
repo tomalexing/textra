@@ -12,6 +12,9 @@ import icon_letternum from './assets/letter-number.svg';
 import icon_search from './assets/search.svg';
 import sl from './assets/swap-lang.svg';
 import copy from './assets/icon-copy.svg';
+import icon_posts from './assets/icon-posts.svg';
+import icon_history from './assets/icon-history.svg';
+
 import './polyfill'
 import { fakeAuth } from './index'
 import {
@@ -34,10 +37,10 @@ import PropTypes from 'prop-types';
 // Be sure to include styles at some point, probably during your bootstrapping
 import 'react-select-plus/dist/react-select-plus.css';
 import Batch from './components/Batch';
-import Header from './components/Header';
 
+import Header, { NavLink } from './components/Header';
 
-
+import Test from './Test'
 
 function sleep(timeout) {
   return new Promise(function (resolve) {
@@ -106,7 +109,7 @@ class DashBoard extends React.Component {
   render() {
     let { location: { pathname } } = this.props;
     let activeTabA = pathname.split('/');
-    let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
+    let activeTab = /reply/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
 
     const Searching = {
@@ -137,7 +140,7 @@ class DashBoard extends React.Component {
         cost: '$11.33'
       }
     }
-    const Users = {
+    const inProgress = {
       'wqefeq': {
         uuid: 'alex',
         nickname: 'alex',
@@ -176,21 +179,45 @@ class DashBoard extends React.Component {
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
 
-    let currentDate = activeTab ? find(Users, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
+    let currentDate = activeTab ? find(inProgress, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
 
     return (
-      <div className="f f-col outer dashboard-user">
+      <div className="f f-col outer translator">
         <Header />
         <div className="f h100">
-          <div className="f f-align-2-2 outer-left">
+          <div className="f f-align-2-2 outer-left__narrowed">
             <div className="f sidebar">
-              <Link to={'/dashboard/create'} className="f f-align-1-2 dashboard-user__create-tab" >
-                <div className="dashboard-user__create-tab-plus">
-                </div>
-                <div className="dashboard-user__create-tab-content">Создать запрос на перевод
-                </div>
-              </Link>
-
+                <ul className="f f-align-1-1 f-col translator-menu">
+                    <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1 active'} to={'/translator/feed'} > 
+                        <span className={'f f-align-2-2 translator-menu__item__icon'}><img src={icon_posts}/></span>
+                        <span>Запросы</span>
+                        <span className={'f f-align-2-2 translator-menu__item__info'}>3</span>
+                     </NavLink>
+                    <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-2'} to={'/translator/feed/all'}>
+                        <span className={'f f-align-2-2 translator-menu__item__icon'}></span>
+                        <span>Общие</span>
+                        <span className={'f f-align-2-2 translator-menu__item__info'}>2</span>
+                    </NavLink>
+                    <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-2'} to={'/translator/feed/personal'}>
+                        <span className={'f f-align-2-2 translator-menu__item__icon'}></span>
+                         <span>Персональные</span>
+                         <span className={'f f-align-2-2 translator-menu__item__info'}>1</span>
+                    </NavLink>
+                    <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1'} to={'/translator/hisroty'}>
+                        <span className={'f f-align-2-2 translator-menu__item__icon'}><img src={icon_history}/></span>
+                        <span>История</span>
+                    </NavLink>
+                    <div className="translator-menu__delimiter"></div>
+                </ul>
+            </div>
+          </div>
+          <div className="f f-align-2-2 outer-left__expanded">
+            <div className="f sidebar">
+              <div className="f f-align-1-2 translator-tab__topline">
+                <Link to={'/translator/feed'} className="f f-align-1-2 translator-tab__topline__back" ><svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12"><path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z"/></svg>Запросы</Link>
+                <span>В работе</span>
+              </div>
+        
               {/*<Batch
                 flushCount={10}
                 flushInterval={150}
@@ -199,44 +226,25 @@ class DashBoard extends React.Component {
                 debug
               />*/}
 
-              {Object.values(Searching).map((tab, index) => {
+              {Object.values(inProgress).map((tab, index) => {
                 let publishTime = new Date(tab.publishTime);
                 return (
-                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'selected' : ''}`} key={index}>
-                    <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
-                    <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
-                      <div className="dashboard-user__search-tab-title">{tab.title} </div>
-                      <div className="dashboard-user__search-tab-content"> {tab.content}</div>
+                  <Link to={`/translator/reply/${tab.uuid}`} className={`f f-align-1-2 translator-inwork__tab ${tab.uuid === activeTab ? 'selected' : ''}`} key={index}>
+                    <figure className="f f-align-2-2 translator-inwork__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <div className="f f-col f-align-1-1 translator-inwork__tab-details">
+                      <div className="translator-inwork__tab-title">{tab.title} </div>
+                      <div className="translator-inwork__tab-content"> {tab.content}</div>
                     </div>
-                    <div className="f  f-col f-align-2-3 dashboard-user__search-tab-info">
-                      <div className="dashboard-user__search-tab-info-time">
+                    <div className="f f-col f-align-2-3 translator-inwork__tab-info">
+                      <div className="translator-inwork__tab-info-time">
                         <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
                       <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === activeTab} />
-                      <div className="dashboard-user__search-tab-info-money">{tab.cost}</div>
+                      <div className="translator-inwork__tab-info-money">{tab.cost}</div>
                     </div>
                   </Link>
                 )
               })}
 
-              {Object.values(Users).map((tab, index) => {
-                let publishTime = new Date(tab.publishTime);
-                return (
-                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab ? 'selected' : ''}`} key={index}>
-                    <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
-                    <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
-                      <div className="dashboard-user__history-tab-title"> {tab.title} </div>
-                      <div className="dashboard-user__history-tab-content"> {tab.content}</div>
-                    </div>
-                    <div className="f f-col f-align-2-3 dashboard-user__history-tab-info">
-                      <div className="dashboard-user__history-tab-info-time">
-                        <Timer start={tab.startWorkingTime} duration={tab.duration} />
-                        <time>{`${publishTime.getHours()}:${getFullMinutes(publishTime.getMinutes())}`}</time></div>
-                      <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === activeTab} />
-                      <div className="dashboard-user__history-tab-info-money">{tab.cost}</div>
-                    </div>
-                  </Link>
-                )
-              })}
 
               <div className="f f-col">
                 <p className="u-mb-4"> переключит? {(
@@ -252,9 +260,12 @@ class DashBoard extends React.Component {
           <div className="f outer-right" ref={n => this.toggleElem = n}>
             <div className="main f f-col f-align-2-2">
               <Switch>
-                <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate} />
-                <RoutePassProps path="/dashboard/searching/:id" component={Search} currentDate={currentDate} />
-                <RoutePassProps path="/dashboard/user/:id" component={UserFromHistory} currentDate={currentDate} />
+                <RoutePassProps exact path="/translator" component={Test} currentDate={currentDate} />
+                <RoutePassProps path="/translator/feed" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/translator/feed/all" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/translator/feed/personal" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/translator/history" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/translator/reply/:id" component={Reply} currentDate={currentDate} />
               </Switch>
             </div>
           </div>
@@ -313,7 +324,7 @@ const Timer = ({ start, duration, isBig = false } = {}) => {
   )
 }
 
-class UserFromHistory extends React.Component { // !naming
+class Reply extends React.Component { 
 
   copy(e) {
     let textAreaSelector = null;
@@ -333,16 +344,13 @@ class UserFromHistory extends React.Component { // !naming
   }
 
   render() {
-
+    console.log(this.props);
     let { currentDate } = this.props
     let publishTime = new Date(currentDate.publishTime);
     return (
       <div className={'f f-col f-align-1-1 dashboard-user__history'}>
         <div className={'dashboard-user__date-delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
         <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
-          <div className={'dashboard-user__history-post__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
           <div className={'dashboard-user__history-post__content'}>
             <div className={'dashboard-user__history-post__content__text'}>
               {currentDate.content}
@@ -371,54 +379,13 @@ class UserFromHistory extends React.Component { // !naming
             {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
           </div>
         </div>
-
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
-          <div className={'dashboard-user__history-reply__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
-          <div className={'dashboard-user__history-reply__content'}>
-            <textarea className={'dashboard-user__history-reply__content__text'} disabled value={currentDate.content} />
-          </div>
-          <div className={'dashboard-user__history-reply__constols'}>
-            <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy}>
-              <img src={copy} alt="copy" />
-              <span>Копировать</span>
-
-            </button>
-          </div>
-          <div className={'dashboard-user__history-post__date'}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-          </div>
-        </div>
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
-          <div className={'dashboard-user__history-reply__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
-          <div className={'dashboard-user__history-reply__content'}>
-            <textarea className={'dashboard-user__history-reply__content__text'} disabled value={currentDate.content} />
-          </div>
-          <div className={'dashboard-user__history-reply__constols'}>
-            <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy} >
-              <img src={copy} alt="copy" />
-              <span>Копировать</span>
-              <input type="hidden" value={currentDate.content} />
-            </button>
-          </div>
-          <div className={'dashboard-user__history-post__date'}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-          </div>
-        </div>
-
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-create'}>
-          <div className={'dashboard-user__history-reply__avatar'}></div>
-          <Link to={'/dashboard/create'} className="f f-align-1-2 dashboard-user__history-create__content" >
-            <div className="dashboard-user__history-create__content__plus"></div>
-            <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
-          </Link>
-          <div className={'dashboard-user__history-reply__constols'}></div>
-          <div className={'dashboard-user__history-post__date'}></div>
-        </div>
-
+         <StatefulEditor
+            type="text"
+            tabindex={1}
+            name="create[posteditor]"
+            placeholder={'Ваш запрос на перевод...'}
+            
+          />
       </div>
     )
   }
@@ -769,19 +736,23 @@ export function humanReadableTimeDiff(date) {
 }
 
 export function humanReadableTime(date) {
-  if (date <= 0 || Math.floor(date) == 0) {
-    return '0'; // not sure
-  }
-  if (date < 60) {
-    return Math.floor(date) + 'с ';
-  }
-  if (date < 60 * 60) {
-    return Math.floor(date / 60) + 'м ' + humanReadableTime(date - Math.floor(date / 60) * 60);
-  }
-  if (date < 60 * 60 * 24) {
-    return Math.floor(date / (60 * 60)) + 'ч ' + humanReadableTime(date - Math.floor(date / (60 * 60)) * 60 * 60);
-  }
-  return Math.floor(date / (60 * 60 * 24)) + 'д ' + humanReadableTime(date - Math.floor(date / (60 * 60 * 24)) * 60 * 60 * 24);
+    try{
+        if (date <= 0 || Math.floor(date) == 0) {
+            return '0'; // not sure
+        }
+        if (date < 60) {
+            return Math.floor(date) + 'с ';
+        }
+        if (date < 60 * 60) {
+            return Math.floor(date / 60) + 'м ' + humanReadableTime(date - Math.floor(date / 60) * 60);
+        }
+        if (date < 60 * 60 * 24) {
+            return Math.floor(date / (60 * 60)) + 'ч ' + humanReadableTime(date - Math.floor(date / (60 * 60)) * 60 * 60);
+        }
+        return Math.floor(date / (60 * 60 * 24)) + 'д ' + humanReadableTime(date - Math.floor(date / (60 * 60 * 24)) * 60 * 60 * 24);
+    } catch(e){
+        return '';
+    }
 }
 const getMounthName = (numberOfMonth) => {
   let Mounth = 'Янв';

@@ -80,7 +80,7 @@ class Login extends React.Component {
 
     return (
       (redirectToReferrer) ? <Redirect to={from} /> :
-      <div className="f outer">
+      <div className="f outer login-layout">
         <div className="f f-align-2-2 outer-left">
           <div className="f sidebar">
               <div className="f f-align-2-2 sidebar-regist__logo">

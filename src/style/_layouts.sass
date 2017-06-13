@@ -1,56 +1,12 @@
-.outer
-  position: absolute
-  height: 100%
-  width: 100%
-  min-height: 700px
-  overflow: hidden
+// registr styles
+
+.login-layout
   .outer-left
     min-width: 334px
     width: 334px
-    z-index: 11
-    +r(768)
-      min-width: 100%
-      width: 100%
-      z-index: 10
   .outer-right
-    flex: 1 0 auto
     width: calc(100% -  334px)
-    z-index: 10
-    +r(768)
-      +coverdiv
-      transform: translateX(100%)
-      transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
-      z-index: 11
-      &.toggled
-        transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
-        transform: translateX(0)
-  .sidebar
-    z-index: 100
-    flex-direction: column
-    flex: 0 1 344px
-    overflow: hidden
-    height: 100%
-    border-right: 1px solid $grey
-  .main
-    z-index: 1
-    flex: 1 0 auto
-    background-size: cover
-    width: 100%
-    &-toregister
-      display: block
-      margin-top: 25%
-      width: 190px
-      text-decoration: none
-    &-regist__form
-      width: 327px
-      min-height: 418px
-      padding: 20px
-      border-radius: 4px
-      background-color: rgba(255, 255, 255, 0.8)
 
-.h100
-  height: 100%
-// registr
 .sidebar-regist__logo
   flex-basis: 27%
   padding: 28px
@@ -97,106 +53,16 @@
         color: #1e7bcf
 // registr end
 
-
+//
+// ALL USER DASHBOARD STYLES START HERE
+//
 // Common User Dashboard Style
 .dashboard-user
-  &__header
-    height: 70px
-    width: 100%
-    background-color: #ffffff
-    box-shadow: 0 0 8px rgba(33, 143, 216, 0.3)
-    padding: 16px
-    .header-logo
-      max-width: 164px
-      flex: 1 1 auto
-    .header-menu
-      flex: 0 1 auto
-      li
-        position: relative
-        padding: 18px
-        font-size: 16px
-        font-weight: 400
-        +tr(background .5s)
-        &:hover
-          +tr(background .5s)
-          background: rgba(33, 143, 216, 0.08)
-      a
-        text-decoration: none
-        white-space: nowrap
-        line-height: 34px
-        color: $text-dark
-        +tr(color .5s)
-        &:hover
-          +tr(color .5s)
-          color: darken($text-dark, 20%)
-        &.active:after
-          height: 3px
-        &:after
-          content: ""
-          position: absolute
-          top: calc(100% - 5px)
-          left: 0
-          width: 100%
-          height: 0px
-          background-color: $selected-blue
-          +tr(height .5s)
-
-    .header-account
-      margin-left: auto
-      .header-details
-         margin-right: 7px
-      .header-email
-        height: 16px
-        color: $text-dark
-        font-size: 14px
-        font-weight: 400
-        line-height: 16px
-        margin-bottom: 7px
-      .header-details__more
-      .header-replenish
-        text-decoration: none
-        height: 14px
-        color: $grey-light
-        font-size: 12px
-        font-weight: 400
-        line-height: 14px
-        &:hover
-          text-decoration: underline
-      .header-balance
-        height: 21px
-        margin-left: 20px
-        color: $text-dark
-        font-size: 18px
-        font-weight: 400
-        line-height: 21px
-      .header-avatar
-        position: relative
-        +tr(opacity .5s)
-        &:hover .header-avatar__in
-          +tr(opacity .5s)
-          opacity: .3
-        &:hover .header-logout
-          visibility: visible
-          opacity: 1
-          +tr(opacity .5s)
-        .header-avatar__in
-          width: 50px
-          height: 50px
-          border-radius: 50%
-          overflow: hidden
-          border: 1px solid $grey 
-        .header-logout
-          cursor: pointer
-          position: absolute
-          color: $text-dark
-          background: linear-gradient(to right ,#28c9f4, #5370ee)
-          -webkit-background-clip: text
-          -webkit-text-fill-color: transparent
-          visibility: hidden
-          opacity: 0
-          font-size: 13px
-          +nosel
-          +tr(opacity .5s)
+  .outer-left
+    min-width: 334px
+    width: 334px
+  .sidebar
+    flex: 0 1 344px
 
 .dashboard-user__date-delimiter
   width: 100%
@@ -207,6 +73,7 @@
   letter-spacing: -0.06px
   line-height: 14px
   padding: 10px
+  +nosel
   position: relative
   &:after,
   &:before
@@ -223,7 +90,7 @@
     left: 0 
 
 
-// Create Window
+// USER CREAT Window
 .dashboard-user
   &__create-bottombar,
   &__create-topbar
@@ -231,6 +98,7 @@
     flex: 0 0 auto
     z-index: 101
     padding: 0 20px
+    +nosel
   &__create-topbar
     .Select.is-open,
     .Select.is-open .Select-menu-outer
@@ -297,14 +165,17 @@
     //   margin: 0
 
 
-// Searching Window
+// USER SEARCHING Window
 .dashboard-user__searching
     flex: 1 0 100%
     width: 100%
     padding: 16px
+    overflow: auto
+    // Post
     &-post
       width: 100%
       margin-bottom: 25px
+      flex: 0 0 auto
     &-post__avatar
       flex: 0 0 50px
       width: 50px
@@ -312,20 +183,27 @@
       border-radius: 50%
       overflow: hidden
       border: 1px solid $grey
+      +nosel
     &-post__content
       border-radius: 4px
       background-color: $bg-blue
       padding: 9px 14px
-      flex: 1 1 auto
+      flex: 1 1 70%
       max-width: 70%
       min-width: 450px
       &__text
         color: $text-middle
+        font-weight: 400
+        letter-spacing: -0.06px
+        line-height: 20px
+        font-size: 14px
       &__bottombar
+        +nosel
         color: $text-dark
         margin-top: 10px
     &-post__constols
       flex: 1 1 auto
+      +nosel
     &-post__date
       flex: 0 1 auto
       text-align: right
@@ -334,34 +212,183 @@
       font-weight: 400
       line-height: 11px
       letter-spacing: -0.05px
+      +nosel
+      // Reply
+    &-reply
+      width: 100%
+      margin-bottom: 25px
+      flex: 0 0 auto
     &-reply__avatar
       flex: 0 0 50px
+      +nosel
     &-reply__content
       border-radius: 4px
-      background-color: $bg-blue
+      background-color: $selected-blue
       padding: 9px 14px
-      flex: 1 1 auto
+      flex: 1 1 70%
       max-width: 70%
       min-width: 450px
       &__text
-        color: $text-middle
+        color: #fff
+        background: transparent
+        display: block
+        font-size: 14px
+        resize: none
+        width: 100%
+        height: 100%
+        border: 0
+        font-weight: 100
+        letter-spacing: -0.06px
+        line-height: 20px
     &-reply__constols
       flex: 1 1 auto
       align-self: flex-end
+      +nosel
       button
         img
           margin-left: 2px
           margin-right: 4px
 
 
+// USER HISTORY Window
+.dashboard-user__history
+    flex: 1 0 100%
+    width: 100%
+    padding: 16px
+    overflow: auto
+    // Post
+    &-post
+      width: 100%
+      margin-bottom: 25px
+      flex: 0 0 auto
+    &-post__avatar
+      flex: 0 0 50px
+      width: 50px
+      height: 50px
+      border-radius: 50%
+      overflow: hidden
+      border: 1px solid $grey
+      +nosel
+    &-post__content
+      border-radius: 4px
+      background-color: $bg-blue
+      padding: 9px 14px
+      flex: 1 1 70%
+      max-width: 70%
+      min-width: 450px
+      &__text
+        color: $text-middle
+        font-weight: 400
+        letter-spacing: -0.06px
+        line-height: 20px
+        font-size: 14px
+      &__bottombar
+        +nosel
+        color: $text-dark
+        margin-top: 10px
+    &-post__constols
+      flex: 1 1 auto
+      +nosel
+    &-post__date
+      flex: 0 1 auto
+      text-align: right
+      color: $grey-light
+      font-size: 10px
+      font-weight: 400
+      line-height: 11px
+      letter-spacing: -0.05px
+      +nosel
+      // Reply
+    &-reply
+      width: 100%
+      margin-bottom: 25px
+      flex: 0 0 auto
+    &-reply__avatar
+      flex: 0 0 50px
+      +nosel
+    &-reply__content
+      border-radius: 4px
+      background-color: $selected-blue
+      padding: 9px 14px
+      flex: 1 1 70%
+      max-width: 70%
+      min-width: 450px
+      &__text
+        color: #fff
+        background: transparent
+        display: block
+        font-size: 14px
+        resize: none
+        width: 100%
+        height: 100%
+        border: 0
+        font-weight: 100
+        letter-spacing: -0.06px
+        line-height: 20px
+    &-reply__constols
+      flex: 1 1 auto
+      align-self: flex-end
+      +nosel
+      button
+        img
+          margin-left: 2px
+          margin-right: 4px
+    // Create new
+    user__history-create
+    &-create
+      width: 100%
+      margin-top: 25px
+      margin-bottom: 25px
+      flex: 0 0 auto
+      &__content
+        border-radius: 4px
+        background-color: $bg-blue
+        padding: 9px 14px
+        flex: 1 1 70%
+        max-width: 70%
+        min-width: 450px
+        height: 72px
+        +tr(background .5s)
+        &__plus
+          position: relative
+          background: $selected-blue //$blue
+          width: 50px
+          height: 50px
+          border-radius: 50%
+          overflow: hidden
+          border: 1px solid $grey 
+          &:after,
+          &:before
+            content: ''
+            position: absolute
+            width: 2px
+            height: 23px
+            border-radius: 1px
+            background-color: #ffffff
+          &:before
+            top: 13px
+            left: 24px
+            width: 2px
+            height: 23px
+          &:after
+            top: 23px
+            left: 13px
+            width: 23px
+            height: 2px
+        &__text
+          margin-left: 15px 
+          color: $selected-blue
+        &:hover
+          background-color: darken($bg-blue,5)
 
-// Tabs
+// USER Tabs 
 .dashboard-user__create-tab
   height: 100px
   background: $bg-blue
   width: 100%
   text-decoration: none
   color: $selected-blue
+  +nosel
   &:hover
     background: darken($bg-blue, 10%)
   &-plus
@@ -399,6 +426,7 @@
   text-decoration: none
   padding: 7px
   background: $bg-blue
+  +nosel
   &:hover
     background: darken($bg-blue, 10%)
   &.selected
@@ -409,6 +437,7 @@
     flex: 0 1 198px
     min-width: 0
     overflow: hidden
+    padding-left: 10px
   &-info
     flex: 0 1  62px
     min-width: 0
@@ -473,6 +502,7 @@
   text-decoration: none
   color: $selected-blue
   padding: 7px
+  +nosel
   &:hover
     background: $bg-blue
   &.selected
@@ -483,6 +513,7 @@
     flex: 0 1 198px
     min-width: 0
     overflow: hidden
+    padding-left: 10px
   &-info
     flex: 0 1  62px
     min-width: 0
@@ -541,8 +572,16 @@
     text-align: right
     .selected &
       color: #fff
+//
+// ALL USER DASHBOARD STYLES END HERE
+//
 
 
+
+
+//
+// USER Element 
+//
 // LangLabel Element
 .LangLabel
     width: 51px
@@ -611,3 +650,183 @@
       border: 1px solid $selected-blue
       path
         fill: #fff
+//
+// USER Element  END
+//
+
+
+//
+// ALL TRANSLATOR DASHBOARD STYLES START HERE
+//
+// Common User Dashboard Style
+//
+
+
+.translator
+  .outer-left__narrowed
+    min-width: 180px
+    width: 180px
+  .outer-left__expanded
+    min-width: 300px
+    width: 300px
+  .outer-right__expanded
+    width: calc(100% -  180px - 300px)
+  .outer-right__narrowed
+    min-width: 300px
+    width: 300px
+  .sidebar
+    position: relative
+
+.translator
+  &-menu
+    height: 100%
+    background-color: #353846
+    li
+      display: block
+      width: 100%
+      height: 36px
+    &__item
+      width: 100%
+      height: 100%
+      padding: 0 16px
+      color: #fff
+      font-size: 12px
+      font-weight: 500
+      letter-spacing: -0.05px
+      line-height: 20px
+      &__icon
+        margin-right: 12px
+        style: 0 0 17px
+        width: 17px
+        +nosel
+      &__info
+        margin-left: auto
+        width: 18px
+        height: 14px
+        border-radius: 8px
+        background-color: #fff
+        width: 18px
+        font-size: 8px
+        font-weight: 400
+        letter-spacing: -0.04px
+        line-height: 15px
+        text-align: center
+        +nosel
+      &__level-1
+        background-color: #353846
+        .translator-menu__item__info
+          background-color: #fff
+          color: #262b3a
+      &__level-2
+        background-color: #262b3a
+        .translator-menu__item__info
+          background-color: #0099ff
+          color: #fff
+    &__delimiter
+      width: 100%
+      height: 1px
+      background-color: #ffffff
+      opacity: 0.1
+
+  &-tab__topline
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 24px
+    color: #1ea5fc
+    background: #fff
+    font-family: Roboto
+    font-size: 12px
+    font-weight: 500
+    letter-spacing: -0.05px
+    line-height: 14px
+    +nosel
+    span
+      color: $grey-light
+      margin: auto
+    &__back
+      position: absolute
+      color: rgb(0, 192, 255)
+      margin-left: 10px
+      margin-right: 4px
+      &:hover
+         color: darken(rgb(0, 192, 255),10)
+  &-tab__topline ~ *:first-of-type
+    margin-top: 24px
+    
+.translator-inwork__tab
+  height: 66px
+  text-decoration: none
+  color: $selected-blue
+  padding: 7px
+  +nosel
+  &:hover
+    background: $bg-blue
+  &.selected
+    background: $selected-blue
+  &-avatar
+    flex: 0 1 65px
+  &-details
+    flex: 0 1 198px
+    min-width: 0
+    overflow: hidden
+    padding-left: 10px
+  &-info
+    flex: 0 1  62px
+    min-width: 0
+  &-title
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+    width: 100%
+    color: #333333
+    font-size: 14px
+    font-weight: 400
+    letter-spacing: -0.06px
+    line-height: 16px
+    padding-bottom: 5px 
+    .selected &
+      color: #fff
+  &-content
+    display: block
+    display: -webkit-box
+    max-width: 204px
+    height: 12px*$line-height*$lines-to-show
+    color: $grey-light
+    font-size: 12px
+    font-weight: 400
+    line-height: $line-height
+    -webkit-line-clamp: $lines-to-show
+    -webkit-box-orient: vertical
+    overflow: hidden
+    text-overflow: ellipsis
+    letter-spacing: -0.05px
+    .selected &
+      color: #fff
+  &-info-time
+    align-self: flex-end
+    time
+      width: 30px
+      height: 11px
+      color: $grey-light
+      font-size: 10px
+      font-weight: 400
+      line-height: 11px
+      letter-spacing: -0.05px
+      margin-left: 2px
+      .selected &
+        color: #fff
+  &-info-money
+    align-self: flex-end
+    margin-top: 3px
+    width: 84px
+    height: 14px
+    color: $text-dark
+    font-size: 12px
+    font-weight: 500
+    letter-spacing: -0.05px
+    line-height: 14px
+    text-align: right
+    .selected &
+      color: #fff
