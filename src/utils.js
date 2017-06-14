@@ -113,6 +113,95 @@ export function listener(target, type, handler, capture) {
 
 };
 
+export function sleep(timeout) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, timeout);
+  });
+};
+
+export function humanReadableTimeDiff(date) {
+  var dateDiff = Date.now() - date;
+  if (dateDiff <= 0 || Math.floor(dateDiff / 1000) == 0) {
+    return 'now';
+  }
+  if (dateDiff < 1000 * 60) {
+    return Math.floor(dateDiff / 1000) + 's';
+  }
+  if (dateDiff < 1000 * 60 * 60) {
+    return Math.floor(dateDiff / (1000 * 60)) + 'm';
+  }
+  if (dateDiff < 1000 * 60 * 60 * 24) {
+    return Math.floor(dateDiff / (1000 * 60 * 60)) + 'h';
+  }
+  return Math.floor(dateDiff / (1000 * 60 * 60 * 24)) + 'd';
+}
+
+export function humanReadableTime(date) {
+
+    try{
+        if (date <= 0 || Math.floor(date) == 0) {
+            return '0'; // not sure
+        }
+        if (date < 60) {
+            return Math.floor(date) + 'с ';
+        }
+        if (date < 60 * 60) {
+            return Math.floor(date / 60) + 'м ' + humanReadableTime(date - Math.floor(date / 60) * 60);
+        }
+        if (date < 60 * 60 * 24) {
+            return Math.floor(date / (60 * 60)) + 'ч ' + humanReadableTime(date - Math.floor(date / (60 * 60)) * 60 * 60);
+        }
+        return Math.floor(date / (60 * 60 * 24)) + 'д ' + humanReadableTime(date - Math.floor(date / (60 * 60 * 24)) * 60 * 60 * 24);
+    } catch(e){
+        return '';
+    }
+}
+export const getMounthName = (numberOfMonth) => {
+  let Mounth = 'Янв';
+  switch (numberOfMonth) {
+    case (0):
+      Mounth = 'Янв'
+      break;
+    case (1):
+      Mounth = 'Фев'
+      break;
+    case (2):
+      Mounth = 'Мрт'
+      break;
+    case (3):
+      Mounth = 'Апр'
+      break;
+    case (4):
+      Mounth = 'Май'
+      break;
+    case (5):
+      Mounth = 'Июн'
+      break;
+    case (6):
+      Mounth = 'Июл'
+      break;
+    case (7):
+      Mounth = 'Авг'
+      break;
+    case (8):
+      Mounth = 'Сен'
+      break;
+    case (9):
+      Mounth = 'Окт'
+      break;
+    case (10):
+      Mounth = 'Нбр'
+      break;
+    case (11):
+      Mounth = 'Дек'
+      break;
+  }
+  return Mounth
+}
+export const getFullMinutes = (Minutes) => {
+  return (('' + Minutes).length == 1) ? ('0' + Minutes) : Minutes
+}
+
 util.listener = listener
 util.delegate = delegate
 util.removeClass = removeClass
@@ -121,4 +210,8 @@ util.addClass = addClass
 util.debounce = debounce
 util.dump = dump
 util.Lazy = Lazy
+util.sleep = sleep
+util.humanReadableTime = humanReadableTime
+util.getFullMinutes = getFullMinutes
+util.getMounthName = getMounthName
 export default util 

@@ -12,8 +12,8 @@ import icon_letternum from './assets/letter-number.svg';
 import icon_search from './assets/search.svg';
 import sl from './assets/swap-lang.svg';
 import copy from './assets/icon-copy.svg';
-import './polyfill'
-import { fakeAuth } from './index'
+import './polyfill';
+import { fakeAuth } from './index';
 import {
   BrowserRouter as Router,
   Route,
@@ -22,29 +22,29 @@ import {
   withRouter,
   Switch
 } from 'react-router-dom';
-import { createBrowserHistory } from 'history'
-import { getUniqueKey, addClass, hasClass, removeClass, debounce, listener } from './utils';
+import { createBrowserHistory } from 'history';
+import { 
+    getUniqueKey, 
+    addClass, 
+    hasClass, 
+    removeClass, 
+    debounce, 
+    listener, 
+    sleep,
+    humanReadableTime,
+    getMounthName,
+    getFullMinutes
+} from './utils';
 
-import Select from 'react-select-plus';
-
-import RichTextEditor from 'react-rte';
+import Select from 'react-select';
 import PropTypes from 'prop-types';
 
-
-// Be sure to include styles at some point, probably during your bootstrapping
-import 'react-select-plus/dist/react-select-plus.css';
 import Batch from './components/Batch';
 import Header from './components/Header';
-
-
-
-
-function sleep(timeout) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, timeout);
-  });
-};
-
+import Indicator from './components/Indicator';
+import Timer from './components/Timer';
+import LangLabel from './components/LangLabel';
+import StatefulEditor from './components/StatefulEditor';
 
 class DashBoard extends React.Component {
 
@@ -209,10 +209,10 @@ class DashBoard extends React.Component {
                       <div className="dashboard-user__search-tab-content"> {tab.content}</div>
                     </div>
                     <div className="f  f-col f-align-2-3 dashboard-user__search-tab-info">
-                      <div className="dashboard-user__search-tab-info-time">
+                      <div className="dashboard-user__search-tab-info__time">
                         <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
                       <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === activeTab} />
-                      <div className="dashboard-user__search-tab-info-money">{tab.cost}</div>
+                      <div className="dashboard-user__search-tab-info__money">{tab.cost}</div>
                     </div>
                   </Link>
                 )
@@ -228,11 +228,11 @@ class DashBoard extends React.Component {
                       <div className="dashboard-user__history-tab-content"> {tab.content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__history-tab-info">
-                      <div className="dashboard-user__history-tab-info-time">
+                      <div className="dashboard-user__history-tab-info__time">
                         <Timer start={tab.startWorkingTime} duration={tab.duration} />
                         <time>{`${publishTime.getHours()}:${getFullMinutes(publishTime.getMinutes())}`}</time></div>
                       <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === activeTab} />
-                      <div className="dashboard-user__history-tab-info-money">{tab.cost}</div>
+                      <div className="dashboard-user__history-tab-info__money">{tab.cost}</div>
                     </div>
                   </Link>
                 )
@@ -272,46 +272,6 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
   } />
 )
 
-const LangLabel = ({ from = 'Rus', to = 'Eng', selected = false, className = '' } = {}) => {
-  return (
-    <div className={`LangLabel  ${selected ? 'selected' : ''} ${className}`}>
-      <span className="LangLabel-from" >{from}</span>
-      <span className="LangLabel-to" >{to}</span>
-    </div>
-  )
-}
-
-const Timer = ({ start, duration, isBig = false } = {}) => {
-
-  const percentage = ((new Date() - new Date(start))) / duration / 1000;
-  console.log(percentage);
-  const START = Math.PI * 0.5;
-  const TAU = Math.PI * 2;
-  const radius = isBig ? 7 : 5;
-  //const percentage = .8;
-  const targetX = radius - Math.cos(START + (percentage * TAU)) * radius;
-  const targetY = radius - Math.sin(START - (percentage * TAU)) * radius;
-  const largeArcFlag = percentage > 0.5 ? 1 : 0;
-  const points = [
-    // Top center.
-    `M ${radius} 0`,
-
-    // Arc are applied to whatever parcentage, swap flag equals 1 and I dont know what is mean. :)
-    `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${targetX} ${targetY}`,
-
-    // Back to the center.
-    `L ${radius} ${radius}`,
-
-    // Close path
-    'Z'
-  ];
-
-  return (
-    <svg className={`Timer ${isBig ? 'Timer-big' : ''}`} xmlns="http://www.w3.org/2000/svg">
-      <path d={points.join(' ')} />
-    </svg>
-  )
-}
 
 class UserFromHistory extends React.Component { // !naming
 
@@ -338,7 +298,7 @@ class UserFromHistory extends React.Component { // !naming
     let publishTime = new Date(currentDate.publishTime);
     return (
       <div className={'f f-col f-align-1-1 dashboard-user__history'}>
-        <div className={'dashboard-user__date-delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
+        <div className={'data__delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
         <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
           <div className={'dashboard-user__history-post__avatar'}>
             <img src={currentDate.avatar} alt={currentDate.nickname} />
@@ -349,8 +309,8 @@ class UserFromHistory extends React.Component { // !naming
             </div>
             <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
               <LangLabel from={currentDate.from} to={currentDate.to} />
-              <Inditator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
-              <Inditator
+              <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
+              <Indicator
                 className={'f f-align-2-2'}
                 icon={
                   <Timer
@@ -360,8 +320,8 @@ class UserFromHistory extends React.Component { // !naming
                 }
                 value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)}
                 hint={'Оставшееся время'} />
-              <Inditator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
-              <Inditator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
+              <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
+              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
 
             </div>
           </div>
@@ -434,7 +394,7 @@ class Search extends React.Component {
     let publishTime = new Date(currentDate.publishTime);
     return (
       <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
-        <div className={'dashboard-user__date-delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
+        <div className={'data__delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
         <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
           <div className={'dashboard-user__searching-post__avatar'}>
             <img src={currentDate.avatar} alt={currentDate.nickname} />
@@ -445,8 +405,8 @@ class Search extends React.Component {
             </div>
             <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
               <LangLabel from={currentDate.from} to={currentDate.to} />
-              <Inditator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
-              <Inditator
+              <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
+              <Indicator
                 className={'f f-align-2-2'}
                 icon={
                   <Timer
@@ -456,8 +416,8 @@ class Search extends React.Component {
                 }
                 value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)}
                 hint={'Оставшееся время'} />
-              <Inditator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
-              <Inditator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
+              <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
+              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
             </div>
           </div>
           <div className={'dashboard-user__searching-post__constols'}>
@@ -653,9 +613,9 @@ class Create extends React.Component {
         </div>
         <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
 
-          <Inditator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * 1)} hint={'Длительность перевода'} />
-          <Inditator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
-          <Inditator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(0.05 * currentNumberOfChar).toFixed(2)}`} hint={'Стоимость перевода'} />
+          <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * 1)} hint={'Длительность перевода'} />
+          <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
+          <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(0.05 * currentNumberOfChar).toFixed(2)}`} hint={'Стоимость перевода'} />
 
           <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
         </div>
@@ -666,71 +626,6 @@ class Create extends React.Component {
   }
 }
 
-const Inditator = ({ icon: Icon = false, value = '', hint = '', className = '' } = {}) => (
-  <div className={`String-indicator ${className} `}>
-    {(Icon === false) ? "" : ((typeof Icon === "string") ? <img src={Icon} alt={hint} /> : Icon)}
-    <span>{value}</span>
-  </div>
-);
-
-const toolbarConfig = {
-  // Optionally specify the groups to display (displayed in the order listed).
-  display: ['INLINE_STYLE_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
-  INLINE_STYLE_BUTTONS: [
-    { label: 'Жырный', style: 'BOLD', className: 'custom-css-class' },
-    { label: 'Курсив', style: 'ITALIC' },
-    { label: 'Подчеркнутый', style: 'UNDERLINE' }
-  ],
-  BLOCK_TYPE_DROPDOWN: [
-    { label: 'Нормальный', style: 'unstyled' },
-    { label: 'Большое заглявье', style: 'header-one' },
-    { label: 'Средние заглявье', style: 'header-two' },
-    { label: 'Маленькое заглявье', style: 'header-three' }
-  ],
-  BLOCK_TYPE_BUTTONS: [
-    { label: '', style: 'unordered-list-item' },
-    { label: 'OL', style: 'ordered-list-item' }
-  ],
-  HISTORY_BUTTONS: [
-    { label: 'Bold', style: 'BOLD', className: 'custom-css-class1' },
-    { label: 'Bold', style: 'BOLD', className: 'custom-css-class2' }
-  ]
-};
-
-class StatefulEditor extends Component {
-
-  state = {
-    value: RichTextEditor.createEmptyValue()
-  }
-
-  letterNumber(value) {
-
-    value = value.toString('html')
-      .replace(/<.?\/?\b[^>]*>/gi, '') // strip html
-      .replace(/\n/gi, '') // do not count new line
-      .replace(/&nbsp;/gi, ' '); // space like one char
-
-    if (this.props.currentNumberOfChar) {
-      this.props.currentNumberOfChar(value.length)
-    }
-  }
-
-  onChange = (value) => {
-    this.setState({ value });
-    debounce(this.letterNumber.bind(this, value), 1000, false)() //actually trottling, because dynamic args
-  }
-
-  render() {
-    return (
-      <RichTextEditor
-        {...this.props}
-        value={this.state.value}
-        onChange={this.onChange.bind(this)}
-        toolbarConfig={toolbarConfig}
-      />
-    );
-  }
-}
 
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
@@ -748,83 +643,3 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 
 
 export default withRouter(DashBoard);
-
-
-
-export function humanReadableTimeDiff(date) {
-  var dateDiff = Date.now() - date;
-  if (dateDiff <= 0 || Math.floor(dateDiff / 1000) == 0) {
-    return 'now';
-  }
-  if (dateDiff < 1000 * 60) {
-    return Math.floor(dateDiff / 1000) + 's';
-  }
-  if (dateDiff < 1000 * 60 * 60) {
-    return Math.floor(dateDiff / (1000 * 60)) + 'm';
-  }
-  if (dateDiff < 1000 * 60 * 60 * 24) {
-    return Math.floor(dateDiff / (1000 * 60 * 60)) + 'h';
-  }
-  return Math.floor(dateDiff / (1000 * 60 * 60 * 24)) + 'd';
-}
-
-export function humanReadableTime(date) {
-  if (date <= 0 || Math.floor(date) == 0) {
-    return '0'; // not sure
-  }
-  if (date < 60) {
-    return Math.floor(date) + 'с ';
-  }
-  if (date < 60 * 60) {
-    return Math.floor(date / 60) + 'м ' + humanReadableTime(date - Math.floor(date / 60) * 60);
-  }
-  if (date < 60 * 60 * 24) {
-    return Math.floor(date / (60 * 60)) + 'ч ' + humanReadableTime(date - Math.floor(date / (60 * 60)) * 60 * 60);
-  }
-  return Math.floor(date / (60 * 60 * 24)) + 'д ' + humanReadableTime(date - Math.floor(date / (60 * 60 * 24)) * 60 * 60 * 24);
-}
-const getMounthName = (numberOfMonth) => {
-  let Mounth = 'Янв';
-  switch (numberOfMonth) {
-    case (0):
-      Mounth = 'Янв'
-      break;
-    case (1):
-      Mounth = 'Фев'
-      break;
-    case (2):
-      Mounth = 'Мрт'
-      break;
-    case (3):
-      Mounth = 'Апр'
-      break;
-    case (4):
-      Mounth = 'Май'
-      break;
-    case (5):
-      Mounth = 'Июн'
-      break;
-    case (6):
-      Mounth = 'Июл'
-      break;
-    case (7):
-      Mounth = 'Авг'
-      break;
-    case (8):
-      Mounth = 'Сен'
-      break;
-    case (9):
-      Mounth = 'Окт'
-      break;
-    case (10):
-      Mounth = 'Нбр'
-      break;
-    case (11):
-      Mounth = 'Дек'
-      break;
-  }
-  return Mounth
-}
-const getFullMinutes = (Minutes) => {
-  return (('' + Minutes).length == 1) ? ('0' + Minutes) : Minutes
-}

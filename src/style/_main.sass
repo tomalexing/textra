@@ -12,7 +12,7 @@
       width: 100%
       z-index: 10
   .outer-right
-    flex: 1 0 auto
+    flex: 1 0
     z-index: 10
     +r(768)
       +coverdiv
@@ -28,7 +28,7 @@
     flex: 0 1 100%
     overflow: hidden
     height: 100%
-    border-right: 1px solid $grey
+    border: 1px solid $grey
   .main
     z-index: 1
     flex: 1 0 auto
@@ -55,6 +55,7 @@
   background-color: #ffffff
   box-shadow: 0 0 8px rgba(33, 143, 216, 0.3)
   padding: 16px
+  z-index: 700
   .header-logo
     max-width: 164px
     flex: 1 1 auto
