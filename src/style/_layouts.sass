@@ -334,8 +334,7 @@
         img
           margin-left: 2px
           margin-right: 4px
-    // Create new
-    user__history-create
+    // Create new from history
     &-create
       width: 100%
       margin-top: 25px
@@ -653,6 +652,11 @@
       border: 1px solid $selected-blue
       path
         fill: #fff
+
+.DisplaySwitcher
+  position: absolute
+  bottom: 0
+  z-index: 200
 //
 // USER Element  END
 //
@@ -667,11 +671,12 @@
 
 .translator
   .outer-left__narrowed,
-  .outer-right__expanded
+  .outer-right__narrowed
     min-width: 180px
     width: 180px
   .outer-right__expanded,
-  .outer-left__narrowed
+  .outer-left__expanded
+    position: relative
     min-width: 300px
     width: 300px
   .outer-main__expanded
@@ -679,7 +684,7 @@
     width: calc(100% -  180px - 300px)
   .sidebar
     position: relative
-
+    background: #fff
 
 .translator
   &-menu
@@ -718,8 +723,8 @@
         +nosel
       &__level-1
         background-color: #353846
-        &.active
-          background-color: darken(#353846,2)
+        li.active &
+          background-color: darken(#353846,7)
         &:hover
           background-color: darken(#353846,1)
         .translator-menu__item__info
@@ -727,8 +732,8 @@
           color: #262b3a
       &__level-2
         background-color: #262b3a
-        &.active
-          background-color: darken(#262b3a,2)
+        li.active &
+          background-color: darken(#262b3a,3)
         &:hover
           background-color: darken(#262b3a,1)
         .translator-menu__item__info
@@ -997,3 +1002,86 @@
       font-weight: 400
       letter-spacing: -0.06px
       line-height: 16px
+
+.translator-history
+  flex: 1 0 100%
+  width: 100%
+  padding: 16px
+  overflow: auto
+  // Post
+  &-post
+    width: 100%
+    margin-bottom: 25px
+    flex: 0 0 auto
+  &-post__avatar
+    flex: 0 0 50px
+    width: 50px
+    height: 50px
+    border-radius: 50%
+    overflow: hidden
+    border: 1px solid $grey
+    +nosel
+  &-post__content
+    border-radius: 4px
+    background-color: $bg-blue
+    padding: 9px 14px
+    flex: 1 1 70%
+    max-width: 70%
+    min-width: 450px
+    &__text
+      color: $text-middle
+      font-weight: 400
+      letter-spacing: -0.06px
+      line-height: 20px
+      font-size: 14px
+    &__bottombar
+      +nosel
+      color: $text-dark
+      margin-top: 10px
+  &-post__constols
+    flex: 1 1 auto
+    +nosel
+  &-post__date
+    flex: 0 1 auto
+    text-align: right
+    color: $grey-light
+    font-size: 10px
+    font-weight: 400
+    line-height: 11px
+    letter-spacing: -0.05px
+    +nosel
+    // Reply
+  &-reply
+    width: 100%
+    margin-bottom: 25px
+    flex: 0 0 auto
+  &-reply__avatar
+    flex: 0 0 50px
+    +nosel
+  &-reply__content
+    border-radius: 4px
+    background-color: $selected-blue
+    padding: 9px 14px
+    flex: 1 1 70%
+    max-width: 70%
+    min-width: 450px
+    &__text
+      color: #fff
+      background: transparent
+      display: block
+      font-size: 14px
+      resize: none
+      width: 100%
+      height: 100%
+      border: 0
+      font-weight: 100
+      letter-spacing: -0.06px
+      line-height: 20px
+  &-reply__constols
+    flex: 1 1 auto
+    align-self: flex-end
+    +nosel
+    button
+      img
+        margin-left: 2px
+        margin-right: 4px

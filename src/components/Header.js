@@ -1,8 +1,11 @@
 import React from 'react';
-import { Link} from 'react-router-dom';
+import { Link, withRouter} from 'react-router-dom';
 import logo from './../assets/logo.png';
 import avatar from './../assets/default-avatar.png';
 
+const isActive = (match, location,to) => {
+  return ['/translator','/dashboard'].some(str => location.pathname.includes(str) )
+}
 
 const Header = () => (
   <header className="f main__header">
@@ -10,7 +13,7 @@ const Header = () => (
       <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
     </div>
     <ul className="f f-align-2-2 header-menu">
-      <NavLink className={'active'} to={'/'} >Рабочий стол</NavLink>
+      <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>
       <NavLink to={'/about'}>О нас</NavLink>
       <NavLink to={'/help'}>Поддержка</NavLink>
     </ul>
@@ -30,10 +33,19 @@ const Header = () => (
   </header>
 );
 
-export const NavLink = (props) => (
-  <li >
-    <Link {...props} />
+export const NavLink  = withRouter(({history, match, location, staticContext,comp, ...props}) => (
+  <li className={
+    (comp ?
+    (comp(match, location, props.to)?
+      'active'
+      :
+      '')
+    :
+    (location.pathname === props.to?
+      'active'
+      :
+      ''))}>
+    <Link {...props} /> 
   </li>
-)
-
+))
 export default Header;

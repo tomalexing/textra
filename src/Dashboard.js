@@ -254,7 +254,7 @@ class DashBoard extends React.Component {
               <Switch>
                 <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate} />
                 <RoutePassProps path="/dashboard/searching/:id" component={Search} currentDate={currentDate} />
-                <RoutePassProps path="/dashboard/user/:id" component={UserFromHistory} currentDate={currentDate} />
+                <RoutePassProps path="/dashboard/user/:id" component={HistoryList} currentDate={currentDate} />
               </Switch>
             </div>
           </div>
@@ -273,7 +273,7 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
 )
 
 
-class UserFromHistory extends React.Component { // !naming
+class HistoryList extends React.Component { // !naming
 
   copy(e) {
     let textAreaSelector = null;
