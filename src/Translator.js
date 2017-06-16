@@ -163,7 +163,127 @@ class Translator extends React.Component {
                 to: 'CHN',
                 cost: '$11.33',
                 isPersonal: true
-            }
+            },
+            'wqtdsq': {
+                uuid: 'wqefeq',
+                nickname: 'alex',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date(new Date - 1000000)).toISOString(),
+                duration: 1341,
+                letterNumber: 213,
+                from: 'RUS',
+                to: 'ENG',
+                cost: '$0.33',
+                isPersonal: false
+            },
+            'wqegsfgs': {
+                uuid: 'wqerq',
+                nickname: 'alex_alexexe',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date).toISOString(),
+                duration: 431241,
+                letterNumber: 123,
+                from: 'ENG',
+                to: 'CHN',
+                cost: '$11.33',
+                isPersonal: true
+            },
+            'wasdffeq': {
+                uuid: 'wqefeq',
+                nickname: 'alex',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date(new Date - 1000000)).toISOString(),
+                duration: 1341,
+                letterNumber: 213,
+                from: 'RUS',
+                to: 'ENG',
+                cost: '$0.33',
+                isPersonal: false
+            },
+            'wasgfasrq': {
+                uuid: 'wqerq',
+                nickname: 'alex_alexexe',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date).toISOString(),
+                duration: 431241,
+                letterNumber: 123,
+                from: 'ENG',
+                to: 'CHN',
+                cost: '$11.33',
+                isPersonal: true
+            },
+            'wagsas': {
+                uuid: 'wqefeq',
+                nickname: 'alex',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date(new Date - 1000000)).toISOString(),
+                duration: 1341,
+                letterNumber: 213,
+                from: 'RUS',
+                to: 'ENG',
+                cost: '$0.33',
+                isPersonal: false
+            },
+            'gasfrq': {
+                uuid: 'wqerq',
+                nickname: 'alex_alexexe',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date).toISOString(),
+                duration: 431241,
+                letterNumber: 123,
+                from: 'ENG',
+                to: 'CHN',
+                cost: '$11.33',
+                isPersonal: false
+            },
+            'iytlk': {
+                uuid: 'wqefeq',
+                nickname: 'alex',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date(new Date - 1000000)).toISOString(),
+                duration: 1341,
+                letterNumber: 213,
+                from: 'RUS',
+                to: 'ENG',
+                cost: '$0.33',
+                isPersonal: false
+            },
+            'wryhrjrrq': {
+                uuid: 'wqerq',
+                nickname: 'alex_alexexe',
+                avatar: avatar,
+                title: 'Создать запрос на перевод',
+                content: 'Создать запрос на перевод',
+                publishTime: (new Date).toISOString(),
+                startWorkingTime: (new Date).toISOString(),
+                duration: 431241,
+                letterNumber: 123,
+                from: 'ENG',
+                to: 'CHN',
+                cost: '$11.33',
+                isPersonal: false
+            } 
         }
         // Feed = {
 
@@ -290,14 +410,14 @@ class Translator extends React.Component {
                             <DisplaySwitcher toggleElem={this.toggleElem}/>
                         </div>
                     )}
-                    />
+                    />  
                     <Route path={Routes['root'].path} render={({ match }) => (
                         <div className={`f outer-main__expanded`} ref={n => this.toggleElem = n}>
                             <div className="main f f-col f-align-1-2">
                                 <Switch>
-                                    <RoutePassProps exact path={Routes['root'].path} component={FeedList} currentDate={currentDate} />
-                                    <RoutePassProps exact path={Routes['feed'].path} component={FeedList} currentDate={currentDate} />
-                                    <RoutePassProps exact path={Routes['common'].path} component={FeedList} currentDate={currentDate} />
+                                    <RoutePassProps exact redirect={Routes['feed'].path} path={Routes['root'].path} component={FeedList} currentDate={currentDate} />
+                                    <RoutePassProps exact path={Routes['feed'].path} component={FeedList} currentDate={currentDate} personal/>
+                                    <RoutePassProps exact path={Routes['common'].path} component={FeedList} currentDate={currentDate} common/>
                                     <RoutePassProps path={Routes['personal'].path} component={FeedList} currentDate={currentDate} />
                                     <RoutePassProps path={`${Routes['history'].path}${Routes['history'].param}`} component={HistoryList} currentDate={currentDate} />
                                     <RoutePassProps path={`${Routes['reply'].path}${Routes['reply'].param}`} component={Reply} currentDate={currentDate} />
@@ -356,7 +476,7 @@ class DisplaySwitcher extends React.Component {
                     (mounted && isTablet) ? (
                         <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this), 500, false)} > переключит</button>
                     ) : (
-                            null
+                        null
                         )
                 )}</p>
             </div>
@@ -408,11 +528,12 @@ const SideList = ({List, uuidOfActiveTab: activeTab, route, title = 'В рабо
 
 
 
-const RoutePassProps = ({ component: Component, ...rest }) => (
-    <Route  {...rest} render={props => (
-        <Component  {...props} {...rest} />
-    )
-    } />
+const RoutePassProps = ({ component: Component, redirect, ...rest }) => (
+    !redirect ? (
+        <Route  {...rest} render={props => (
+            <Component  {...props} {...rest} />
+        )} />):
+     (<Redirect to={`${redirect}`} />)
 )
 
 
@@ -470,21 +591,73 @@ class Reply extends React.Component {
     }
 }
 
+const lcMatch = (q, s) => s && s.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+
+
+class Query {
+    constructor(data, query){
+        this.isNotExeed =  this.isNotExeed.bind(this);
+        this.eqField =  this.eqField.bind(this);
+        this.filter =  this.filter.bind(this);
+        this.displayedCount = 0;
+        this.data = data;
+        this.query = query;
+
+    }
+    eqField = (fieldList, item, rule = "every") => {
+        switch(rule){
+        case('every'):
+                return Object.values(fieldList).every(f => f.diactivate ? true: item[f.name] === f.equals)
+        case('some'):
+                return Object.values(fieldList).some(f => f.diactivate ? true: item[f.name] === f.equals)
+        }
+    }
+    isNotExeed = (q, ind) => {
+        if(q.perPage < 0) return true
+        return (q.perPage * q.page - 1) >= this.displayedCount++;
+    }
+
+    filter = () =>
+        Object.values(this.data).filter((item, idx) =>
+     this.eqField(this.query['fielteredField'], item, this.query['fielteredFieldRule'] ) && this.isNotExeed(this.query, idx))
+
+}
+
 
 
 class FeedList extends React.Component {
 
     render() {
-        let { currentDate } = this.props;
+        let { currentDate, location: { pathname } } = this.props;
+        let personal = /personal/.test(pathname) ;
+        let common = /common/.test(pathname) ;
+        let query = {
+            perPage: (!personal && !common)? -1: 5,
+            page: 1,
+            fielteredField:{
+                field1: {
+                    name: "isPersonal",
+                    equals: personal && !common, // personal and not common at one time 
+                    diactivate: !personal && !common // is active
+                }
+            },
+            fielteredFieldRule: "some" // some || every 
+        }
+        console.time('feedQuery');
+        let FeedQuery = new Query(currentDate, query),
+        filteredFeed =  FeedQuery.filter();
+        console.log(this.props);
+        console.timeEnd('feedQuery');
         const RenderCollection = (renderItem) => {
-            return (<div>{Object.values(currentDate).map((feedData, index) => {
+            return (<div>{filteredFeed.map((feedData, index) => {
                 let publishTime = new Date(feedData.publishTime);
                 return (
                     renderItem(feedData, index, publishTime)
                 )
             })
             }
-            </div>)
+            </div>
+            )
         }
         return (
             (Object.entries(currentDate).length === 0) ?
@@ -542,8 +715,6 @@ class FeedList extends React.Component {
 
 
 class HistoryList extends React.Component {
-
-
 
     render() {
 

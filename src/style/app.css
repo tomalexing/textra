@@ -1459,7 +1459,8 @@ input[type='submit']:focus {
 
 .translator .outer-main__expanded {
   width: calc(100% -  180px - 300px);
-  width: calc(100% -  180px - 300px); }
+  width: calc(100% -  180px - 300px);
+  overflow: auto; }
 
 .translator .sidebar {
   position: relative;
