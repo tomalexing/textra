@@ -41,7 +41,8 @@ a
 	color: $text-dark
 	text-decoration: none
 
-
+button
+	-webkit-tap-highlight-color: rgba(0,0,0,0)
 .btn
 	border-radius: 4px
 	font-family: Roboto
@@ -255,14 +256,6 @@ input[type='submit']
 				> *
 					margin-top: $gap
 					margin-bottom: $gap
-
-	&-v-gap
-		@for $i from 1 through 10
-			&-#{$i}
-			$gap: $base-gap * $i
-			margin-left: - $gap
-			> *
-				margin-left: $gap
 
 
 =flex-alignment($base : '.f-align')

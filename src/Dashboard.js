@@ -52,20 +52,27 @@ class DashBoard extends React.Component {
     super(props);
     this.listeners = [];
     this.doAtDidMount = [];
-
     this.list = this.list.bind(this)
-    this.renders = 0
+    this.renders = 0;
+    this.checkView = this.checkView.bind(this);
   }
 
   state = {
     redirectToReferrer: false,
     isTablet: false,
-    items: []
+    items: [],
+    mainScreen: false
   }
 
   switchPanel = (e) => {
     !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled') : removeClass(this.toggleElem, 'toggled');
   }
+
+  checkView(){
+    if(this.toggleElem){
+      this.state.mainScreen?addClass(this.toggleElem, 'toggled') : removeClass(this.toggleElem, 'toggled');
+    }
+  } 
 
   componentWillMount() {
     this.listeners.push(
@@ -74,6 +81,10 @@ class DashBoard extends React.Component {
         if (this.state.isTablet !== isTablet) this.setState({ isTablet })
       }, 200, false), false)
     );
+    if(window.innerWidth < 768) {
+      console.log('768')
+      this.setState({ isTablet: true })
+    }
     this.doAtDidMount.forEach(func => func());
   }
 
@@ -103,12 +114,29 @@ class DashBoard extends React.Component {
     this.listeners.forEach(removeEventListener => removeEventListener())
   }
 
+  componentWillReceiveProps(props){
+      const { mainScreen } = this.props.location.state || { mainScreen: false }
+      this.setState({mainScreen});
+  }
+  
+  shouldComponentUpdate(props, state){
+    if(props === this.props && state === this.state){
+      console.log('Prevented render')
+      return false
+    }
+     console.log('Allowed render')
+     return true
+  }
+
   render() {
     let { location: { pathname } } = this.props;
     let activeTabA = pathname.split('/');
     let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
 
+    this.checkView();
+
+    console.log( this.props);
     const Searching = {
       'wqefeq': {
         uuid: 'wqefeq',
@@ -154,7 +182,7 @@ class DashBoard extends React.Component {
         from: 'RUS',
         to: 'ENG',
         cost: '$0.33'
-      },
+      }, 
       'wqerq': {
         uuid: 'alex_alex',
         nickname: 'alex_alex',
@@ -184,7 +212,7 @@ class DashBoard extends React.Component {
         <div className="f h100">
           <div className="f f-align-2-2 outer-left">
             <div className="f sidebar">
-              <Link to={'/dashboard/create'} className="f f-align-1-2 dashboard-user__create-tab" >
+              <Link  to={{pathname:'/dashboard/create', state: {mainScreen: true}}} className="f f-align-1-2 dashboard-user__create-tab" >
                 <div className="dashboard-user__create-tab-plus">
                 </div>
                 <div className="dashboard-user__create-tab-content">Создать запрос на перевод
@@ -202,7 +230,7 @@ class DashBoard extends React.Component {
               {Object.values(Searching).map((tab, index) => {
                 let publishTime = new Date(tab.publishTime);
                 return (
-                  <Link to={`/dashboard/searching/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'selected' : ''}`} key={index}>
+                  <Link  to={{pathname:`/dashboard/searching/${tab.uuid}`,state: {mainScreen: true}}} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
                       <div className="dashboard-user__search-tab-title">{tab.title} </div>
@@ -221,7 +249,7 @@ class DashBoard extends React.Component {
               {Object.values(Users).map((tab, index) => {
                 let publishTime = new Date(tab.publishTime);
                 return (
-                  <Link to={`/dashboard/user/${tab.uuid}`} className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab ? 'selected' : ''}`} key={index}>
+                  <Link to={{pathname:`/dashboard/user/${tab.uuid}`, state: {mainScreen: true}}}  className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === activeTab ? 'selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
                       <div className="dashboard-user__history-tab-title"> {tab.title} </div>
@@ -251,6 +279,13 @@ class DashBoard extends React.Component {
           </div>
           <div className="f outer-right" ref={n => this.toggleElem = n}>
             <div className="main f f-col f-align-2-2">
+              {console.log(this.state.isTablet)}
+              {this.state.isTablet?
+                <div className="f f-align-1-2 breadcrumbs">
+                    <button onClick={() => { this.setState({mainScreen: false}) }} className="f f-align-1-2 btn btn-flat breadcrumbs__back" ><svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12"><path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" /></svg>Назад</button> 
+                    <span>{currentDate.nickname}</span>
+                </div>
+              :''}
               <Switch>
                 <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate} />
                 <RoutePassProps path="/dashboard/searching/:id" component={Search} currentDate={currentDate} />
@@ -273,7 +308,12 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
 )
 
 
-class HistoryList extends React.Component { // !naming
+class HistoryList extends React.Component { 
+  
+  constructor(props) {
+    super(props);
+   
+  }
 
   copy(e) {
     let textAreaSelector = null;
@@ -346,7 +386,7 @@ class HistoryList extends React.Component { // !naming
 
             </button>
           </div>
-          <div className={'dashboard-user__history-post__date'}>
+          <div className={'dashboard-user__history-reply__date'}>
             {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
           </div>
         </div>
@@ -364,7 +404,7 @@ class HistoryList extends React.Component { // !naming
               <input type="hidden" value={currentDate.content} />
             </button>
           </div>
-          <div className={'dashboard-user__history-post__date'}>
+          <div className={'dashboard-user__history-reply__date'}>
             {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
           </div>
         </div>
@@ -538,88 +578,88 @@ class Create extends React.Component {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
       valueTranslator, isSearchMenuTranslatorVisible } = this.state;
     return (
-      <form ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
-        <div className={'dashboard-user__create-topbar f f-align-1-2 f-row f-gap-4'}>
-          <Select
-            ref={(n) => this.createLangFrom = n}
-            name="create[from]"
-            autofocus
-            options={optionsLang}
-            disabled={false}
-            simpleValue
-            value={valueLangFrom}
-            onChange={this.updateValueLangFrom}
-            searchable={true}
-            autosize={false}
-            clearable={false}
-            arrowRenderer={this.arrowElementLangs} />
-          <div className={'dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language" /></div>
-          <Select
-            ref={(n) => this.createLangTo = n}
-            name="create[to]"
-            autofocus
-            options={optionsLang}
-            simpleValue
-            disabled={false}
-            value={valueLangTo}
-            onChange={this.updateValueLangTo}
-            searchable={true}
-            autosize={false}
-            clearable={false}
-            arrowRenderer={this.arrowElementLangs}
-          />
-          <div className={'dashboard-user__create-topbar__chooser'}  >
-            <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
-              <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{ width: '30px' }} src={avatar} />
-              <span className={'dashboard-user__create-topbar__chooser-trigger__name'} >{(!!valueTranslator && (valueTranslator.login || valueTranslator.value)) || 'Переводчик'}</span>
-              <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({ isOpen: isSearchMenuTranslatorVisible })}</span>
-            </div>
-            <div className={`dashboard-user__create-topbar__chooser-menu ${isSearchMenuTranslatorVisible ? 'show-chooser-menu' : ''}`}>
-              <Select.Async
-                ref={(n) => this.createTranslatorMenu = n}
-                name="create[translator]"
-                autofocus
-                options={optionsLang}
-                disabled={false}
-                value={valueTranslator}
-                onChange={this.updateValueTranslator}
-                searchable={true}
-                autosize={true}
-                clearable={false}
-                openOnFocus={true}
-                placeholder={'Переводчик'}
-                searchPromptText={'Начните вводить имя'}
-                noResultsText={'Не найдено'}
-                className='dashboard-user__create-topbar__translator'
-                valueRenderer={this.valueTranslatorField}
-                optionRenderer={this.optionTranslatorField}
-                arrowRenderer={this.arrowElementTranslator}
-                loadOptions={this.getUsers}
-                onBlur={this.makeSearchMenuTranslatorUnnisible}
-                onValueClick={this.makeSearchMenuTranslatorUnnisible}
+      <div ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
+          <div className={'dashboard-user__create-topbar f f-align-1-2 f-row f-gap-4'}>
+            <Select
+              ref={(n) => this.createLangFrom = n}
+              name="create[from]"
+              autofocus
+              options={optionsLang}
+              disabled={false}
+              simpleValue
+              value={valueLangFrom}
+              onChange={this.updateValueLangFrom}
+              searchable={true}
+              autosize={false}
+              clearable={false}
+              arrowRenderer={this.arrowElementLangs} />
+            <div className={'dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language" /></div>
+            <Select
+              ref={(n) => this.createLangTo = n}
+              name="create[to]"
+              autofocus
+              options={optionsLang}
+              simpleValue
+              disabled={false}
+              value={valueLangTo}
+              onChange={this.updateValueLangTo}
+              searchable={true}
+              autosize={false}
+              clearable={false}
+              arrowRenderer={this.arrowElementLangs}
+            />
+            <div className={'dashboard-user__create-topbar__chooser'}  >
+              <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
+                <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{ width: '30px' }} src={avatar} />
+                <span className={'dashboard-user__create-topbar__chooser-trigger__name'} >{(!!valueTranslator && (valueTranslator.login || valueTranslator.value)) || 'Переводчик'}</span>
+                <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({ isOpen: isSearchMenuTranslatorVisible })}</span>
+              </div>
+              <div className={`dashboard-user__create-topbar__chooser-menu ${isSearchMenuTranslatorVisible ? 'show-chooser-menu' : ''}`}>
+                <Select.Async
+                  ref={(n) => this.createTranslatorMenu = n}
+                  name="create[translator]"
+                  autofocus
+                  options={optionsLang}
+                  disabled={false}
+                  value={valueTranslator}
+                  onChange={this.updateValueTranslator}
+                  searchable={true}
+                  autosize={true}
+                  clearable={false}
+                  openOnFocus={true}
+                  placeholder={'Переводчик'}
+                  searchPromptText={'Начните вводить имя'}
+                  noResultsText={'Не найдено'}
+                  className='dashboard-user__create-topbar__translator'
+                  valueRenderer={this.valueTranslatorField}
+                  optionRenderer={this.optionTranslatorField}
+                  arrowRenderer={this.arrowElementTranslator}
+                  loadOptions={this.getUsers}
+                  onBlur={this.makeSearchMenuTranslatorUnnisible}
+                  onValueClick={this.makeSearchMenuTranslatorUnnisible}
 
-              />
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <div className={'dashboard-user__create-posteditor'}>
-          <StatefulEditor
-            type="text"
-            tabindex={1}
-            name="create[posteditor]"
-            placeholder={'Ваш запрос на перевод...'}
-            currentNumberOfChar={this.currentNumberOfChar.bind(this)}
-          />
-        </div>
-        <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
+          <div className={'dashboard-user__create-posteditor'}>
+            <StatefulEditor
+              type="text"
+              tabindex={1}
+              name="create[posteditor]"
+              placeholder={'Ваш запрос на перевод...'}
+              currentNumberOfChar={this.currentNumberOfChar.bind(this)}
+            />
+          </div>
+          <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
 
-          <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * 1)} hint={'Длительность перевода'} />
-          <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
-          <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(0.05 * currentNumberOfChar).toFixed(2)}`} hint={'Стоимость перевода'} />
+            <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * 1)} hint={'Длительность перевода'} />
+            <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
+            <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(0.05 * currentNumberOfChar).toFixed(2)}`} hint={'Стоимость перевода'} />
 
-          <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
-        </div>
-      </form>
+            <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
+          </div>
+      </div>
     )
 
 

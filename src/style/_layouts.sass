@@ -65,6 +65,8 @@
     flex: 0 1 344px
   .outer-right
     width: calc(100% -  334px)
+.dashboard-user .outer-right
+  top: 66px
 .data__delimiter
   width: 100%
   text-align: center
@@ -85,11 +87,45 @@
     background-color: #f5f5f5
     height: 1px
     width: calc(50% - 5vw)
+    +r(768)
+      width: calc(50% - 20vw)
   &:after
     right: 0
   &:before
     left: 0 
 
+.breadcrumbs
+  top: 0
+  position: absolute
+  margin-top: 70px
+  width: 100%
+  height: 30px
+  color: #1ea5fc
+  background: #fff
+  font-family: Roboto
+  font-size: 12px
+  font-weight: 500
+  letter-spacing: -0.05px
+  line-height: 14px
+  border-bottom: 1px solid #c8ced3
+  z-index: 100
+  +nosel
+  span
+    color: $grey-light
+    margin: auto
+  &__back
+    position: absolute
+    color: rgb(0, 192, 255)
+    margin-left: 10px
+    margin-right: 4px
+    text-decoration: none
+    svg
+      height: 7px
+    &:hover
+      color: darken(rgb(0, 192, 255),10)
+
+.breadcrumbs ~ *:nth-of-type(2)
+    margin-top: 180px
 
 // USER CREAT Window
 .dashboard-user
@@ -149,6 +185,9 @@
     border-bottom: 1px solid $grey
     padding: 20px
     overflow: auto
+    +r(768)
+      flex: 0 1 auto
+      height: calc(100% - 224px)
     // textarea
     //   display: block
     //   font-size: 16px
@@ -177,6 +216,7 @@
       width: 100%
       margin-bottom: 25px
       flex: 0 0 auto
+      position: relative
     &-post__avatar
       flex: 0 0 50px
       width: 50px
@@ -185,6 +225,16 @@
       overflow: hidden
       border: 1px solid $grey
       +nosel
+      +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
+      img
+        +r(768)
+          flex: 0 0 20px
+          width: 20px
+          height: 20px
+          width: 18px
     &-post__content
       border-radius: 4px
       background-color: $bg-blue
@@ -192,6 +242,10 @@
       flex: 1 1 70%
       max-width: 70%
       min-width: 450px
+      +r(768)
+        flex: 1 0 89%
+        max-width: none
+        min-width: auto
       &__text
         color: $text-middle
         font-weight: 400
@@ -202,6 +256,10 @@
         +nosel
         color: $text-dark
         margin-top: 10px
+        +r(768)
+          flex-flow: row wrap
+          & > *
+            margin-bottom: 10px
     &-post__constols
       flex: 1 1 auto
       +nosel
@@ -214,6 +272,10 @@
       line-height: 11px
       letter-spacing: -0.05px
       +nosel
+      +r(768)
+        position: absolute
+        right: 4%
+        top: 6px
       // Reply
     &-reply
       width: 100%
@@ -229,6 +291,10 @@
       flex: 1 1 70%
       max-width: 70%
       min-width: 450px
+      +r(768)
+        flex: 1 0 89%
+        max-width: none
+        min-width: auto
       &__text
         color: #fff
         background: transparent
@@ -262,6 +328,7 @@
       width: 100%
       margin-bottom: 25px
       flex: 0 0 auto
+      position: relative
     &-post__avatar
       flex: 0 0 50px
       width: 50px
@@ -270,6 +337,16 @@
       overflow: hidden
       border: 1px solid $grey
       +nosel
+      +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
+      img
+        +r(768)
+          flex: 0 0 20px
+          width: 20px
+          height: 20px
+          width: 18px
     &-post__content
       border-radius: 4px
       background-color: $bg-blue
@@ -277,6 +354,10 @@
       flex: 1 1 70%
       max-width: 70%
       min-width: 450px
+      +r(768)
+        flex: 1 0 89%
+        max-width: none
+        min-width: auto
       &__text
         color: $text-middle
         font-weight: 400
@@ -287,6 +368,10 @@
         +nosel
         color: $text-dark
         margin-top: 10px
+        +r(768)
+          flex-flow: row wrap
+          & > *
+            margin-bottom: 10px
     &-post__constols
       flex: 1 1 auto
       +nosel
@@ -299,14 +384,31 @@
       line-height: 11px
       letter-spacing: -0.05px
       +nosel
+      +r(768)
+        position: absolute
+        right: 4%
+        top: 6px
       // Reply
     &-reply
       width: 100%
       margin-bottom: 25px
       flex: 0 0 auto
+      position: relative
+      +r(768)
+        width: 97%
     &-reply__avatar
       flex: 0 0 50px
       +nosel
+      +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
+      img
+        +r(768)
+          flex: 0 0 20px
+          width: 20px
+          height: 20px
+          width: 18px
     &-reply__content
       border-radius: 4px
       background-color: $selected-blue
@@ -314,6 +416,10 @@
       flex: 1 1 70%
       max-width: 70%
       min-width: 450px
+      +r(768)
+        flex: 1 0 auto
+        max-width: none
+        min-width: auto
       &__text
         color: #fff
         background: transparent
@@ -330,10 +436,25 @@
       flex: 1 1 auto
       align-self: flex-end
       +nosel
+      +r(768)
+        flex: 0 1 auto
       button
         img
           margin-left: 2px
           margin-right: 4px
+    &-reply__date
+      flex: 0 1 auto
+      text-align: right
+      color: $grey-light
+      font-size: 10px
+      font-weight: 400
+      line-height: 11px
+      letter-spacing: -0.05px
+      +nosel
+      +r(768)
+        position: absolute
+        right: 7px
+        top: 6px      
     // Create new from history
     &-create
       width: 100%
@@ -349,6 +470,10 @@
         min-width: 450px
         height: 72px
         +tr(background .5s)
+        +r(768)
+          flex: 1 0 89%
+          max-width: none
+          min-width: auto
         &__plus
           position: relative
           background: $selected-blue //$blue
@@ -356,7 +481,10 @@
           height: 50px
           border-radius: 50%
           overflow: hidden
-          border: 1px solid $grey 
+          border: 1px solid $grey
+          +r(768)
+            width: 20px
+            height: 18px
           &:after,
           &:before
             content: ''
@@ -365,16 +493,30 @@
             height: 23px
             border-radius: 1px
             background-color: #ffffff
+            +r(768)
+              width: 1px
+              height: 13px
           &:before
             top: 13px
             left: 24px
             width: 2px
             height: 23px
+            +r(768)
+              top: 3px
+              left: 7px
+              width: 1px
+              height: 10px
           &:after
             top: 23px
             left: 13px
             width: 23px
             height: 2px
+            +r(768)
+              top: 7px
+              left: 1.5px
+              width: 11px
+              height: 1px
+
         &__text
           margin-left: 15px 
           color: $selected-blue
@@ -434,7 +576,7 @@
   &-avatar
     flex: 0 1 65px
   &-details
-    flex: 0 1 198px
+    flex: 1 1 198px
     min-width: 0
     overflow: hidden
     padding-left: 10px
@@ -511,7 +653,7 @@
   &-avatar
     flex: 0 1 65px
   &-details
-    flex: 0 1 198px
+    flex: 1 1 198px
     min-width: 0
     overflow: hidden
     padding-left: 10px

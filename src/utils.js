@@ -80,7 +80,7 @@ export function debounce(func, wait, immediate) {
 	};
 };
 
-export function delegate(target, type, selector, handler, capture) {
+export function delegate(target, type, selector, handler, capture = false, once = false) {
     const dispatchEvent = (event) => {
         // console.time('delegate');
         let targetElement = event.target;
@@ -98,7 +98,7 @@ export function delegate(target, type, selector, handler, capture) {
 
     target.addEventListener(type, dispatchEvent, !!capture);
 
-    return () => target.removeEventListener(type, dispatchEvent, !!capture);
+    return () => target.removeEventListener(type, dispatchEvent, {capture: !!capture, once: !!once});
 
 };
 
