@@ -484,7 +484,8 @@
           border: 1px solid $grey
           +r(768)
             width: 20px
-            height: 18px
+            height: 20px
+            min-width: 20px
           &:after,
           &:before
             content: ''
@@ -502,8 +503,8 @@
             width: 2px
             height: 23px
             +r(768)
-              top: 3px
-              left: 7px
+              top: 4px
+              left: 8.5px
               width: 1px
               height: 10px
           &:after
@@ -512,8 +513,8 @@
             width: 23px
             height: 2px
             +r(768)
-              top: 7px
-              left: 1.5px
+              top: 7.5px
+              left: 3.5px
               width: 11px
               height: 1px
 
@@ -823,8 +824,9 @@
     width: 300px
   .outer-main__expanded
     width: calc(100% -  180px - 300px)
-    width: calc(100% -  180px - 300px)
     overflow: auto
+    +r(768)
+      width: 100%
   .sidebar
     position: relative
     background: #fff
@@ -1063,9 +1065,24 @@
     box-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.3)
     border-radius: 2px
     background-color: #ffffff
-    padding: 16px 0 16px 16px 
+    padding: 16px 0 16px 16px
+    +r(768)
+      width: 90%
+      margin: 10px auto
+      flex-direction: column
+      padding: 8px
     &__avatar
       flex: 0 1 65px
+      +r(768)
+        display: flex
+        align-items: center
+        flex: 0 1 auto
+        width: 100%
+        flex-direction: row
+        img
+          width: 20px
+          height: 20px
+          margin-right: 10px
     &-details
       flex: 0 1 198px
       min-width: 0
@@ -1094,7 +1111,9 @@
           font-size: 14px
           font-weight: 400
           letter-spacing: -0.06px
-          line-height: 13px
+          line-height: 14px
+          +r(768)
+            width: auto
         &__personal
           height: 14px
           padding: 1px 4px
@@ -1114,6 +1133,7 @@
           font-weight: 400
           letter-spacing: -0.06px
           line-height: 14px
+
       &__text
         display: block
         display: -webkit-box
@@ -1128,6 +1148,13 @@
         overflow: hidden
         text-overflow: ellipsis
         letter-spacing: -0.05px
+        +r(768)
+          margin-top: 10px 
+      &__bottombar
+        +r(768)
+          flex-flow: wrap
+          > *
+            margin-top: 10px
     &__constols
       height: 100% 
       width: 97px
@@ -1137,6 +1164,12 @@
       margin-left: 0
       margin-right: 0
       cursor: pointer
+      +r(768)
+        height: 40px
+        margin: 16px 0
+        width: 100%
+        border: none
+        border: 1px solid #d5e0e9
     &__placeholder
       opacity: 0.6
       color: #414141

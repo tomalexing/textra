@@ -93,23 +93,41 @@ class Translator extends React.Component {
 
     state = {
         redirectToReferrer: false,
-        items: []
+        items: [],
+        isTablet: false,
+        mainScreen: true,
+        secondScreen: false,
+        sidebar: false
     }
 
     componentWillMount() {
         this.doAtDidMount.forEach(func => func());
+
+        // Responsive stuff
+        this.listeners.push(
+            listener(window, 'resize', debounce((e) => {
+                let isTablet = e.target.innerWidth < 768 ? true : false;
+                if (this.state.isTablet !== isTablet) this.setState({ isTablet })
+            }, 200, false), false)
+        );
+        if(window.innerWidth < 768) {
+            this.state.isTablet =  true;
+        }
+        // Responsive end
     }
 
     async componentDidMount() {
         console.log('componentDidMount')
+     
         while (1) {
             const prev = this.state.items
             const items = [`Hello World #${prev.length}`, ...prev]
             this.setState({ items })
             await sleep(Math.random() * 3000000)
         }
+        console.log(this)
     }
-
+ 
     list() {
         const { items } = this.state
 
@@ -120,6 +138,15 @@ class Translator extends React.Component {
                 {items.map((v, i) => <li key={i}>{v}</li>)}
             </ul>
         </div>
+    }
+
+    componentWillReceiveProps(props){
+        const { mainScreen, secondScreen } = this.props.location.state || { mainScreen: false, secondScreen: false }
+         console.log('mainScreen');
+        console.log(mainScreen);
+         console.log('secondScreen');
+        console.log(secondScreen);
+        this.setState({mainScreen});
     }
 
     componentWillUnmount() {
@@ -366,30 +393,39 @@ class Translator extends React.Component {
         const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
 
         let currentDate = activeTab ? find(inProgress, activeTab) :  activeHistory ? find(HistoryObject, activeHistory) :  activeFeed ? Feed : {};
+        let {isTablet, sidebar, secondScreen, mainScreen} = this.state;
+    
+        Object.defineProperty(currentDate, 'isTablet', {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: isTablet
+        });
+
 
         return (
             <div className="f f-col outer translator">
                 <Header />
                 <div className="f h100">
-                    <div className="f f-align-2-2 outer-left__narrowed">
+                    <div ref={n => this.sidebar = n } style={{display:`${!isTablet?'flex':sidebar?'flex':'none'}`}} className={`f f-align-2-2 outer-left__narrowed`}>
                         <div className="f sidebar">
                             <ul className="f f-align-1-1 f-col translator-menu">
-                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1'} to={Routes['feed'].path} >
+                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1'} to={{pathname: Routes['feed'].path, state: {mainScreen: true}}} >
                                     <span className={'f f-align-2-2 translator-menu__item__icon'}><img src={icon_posts} /></span>
                                     <span>Запросы</span>
                                     <span className={'f f-align-2-2 translator-menu__item__info'}>3</span>
                                 </NavLink>
-                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-2'} to={Routes['common'].path}>
+                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-2'} to={{pathname:Routes['common'].path, state: {mainScreen: true}}} >
                                     <span className={'f f-align-2-2 translator-menu__item__icon'}></span>
                                     <span>Общие</span>
                                     <span className={'f f-align-2-2 translator-menu__item__info'}>2</span>
                                 </NavLink>
-                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-2'} to={Routes['personal'].path}>
+                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-2'} to={{pathname:Routes['personal'].path, state: {mainScreen: true}}} >
                                     <span className={'f f-align-2-2 translator-menu__item__icon'}></span>
                                     <span>Персональные</span>
                                     <span className={'f f-align-2-2 translator-menu__item__info'}>1</span>
                                 </NavLink>
-                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1'} to={Routes['history'].path}>
+                                <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1'}to={{pathname:Routes['history'].path, state: {mainScreen: true}}} >
                                     <span className={'f f-align-2-2 translator-menu__item__icon'}><img src={icon_history} /></span>
                                     <span>История</span>
                                 </NavLink>
@@ -398,21 +434,21 @@ class Translator extends React.Component {
                         </div>
                     </div>
                     <Route path={Routes['history'].path} render={() => (
-                        <div className="f f-align-2-2 outer-right__expanded">
+                        <div ref={n => this.secondScreen = n }  style={{display:`${!isTablet?'flex':secondScreen?'flex':'none'}`}}  className="f f-align-2-2 outer-right__expanded">
                             <SideList List={HistoryObject} uuidOfActiveTab={activeTab} route={'history'} title="История" />
                             <DisplaySwitcher toggleElem={this.toggleElem}/>
                         </div>
                     )}
                     />
-                    <Route path={Routes['reply'].path} render={() => (
-                        <div className="f f-align-2-2 outer-left__expanded">
+                    <Route ref={n => this.sidebar = n } path={Routes['reply'].path} render={() => (
+                        <div ref={n => this.secondScreen = n }  style={{display:`${!isTablet?'flex':secondScreen?'flex':'none'}`}} className="f f-align-2-2 outer-left__expanded">
                             <SideList List={inProgress} uuidOfActiveTab={activeTab} route={'reply'}/>
                             <DisplaySwitcher toggleElem={this.toggleElem}/>
                         </div>
                     )}
                     />  
                     <Route path={Routes['root'].path} render={({ match }) => (
-                        <div className={`f outer-main__expanded`} ref={n => this.toggleElem = n}>
+                        <div ref={n => this.mainScreen = n }  style={{display:`${!isTablet?'flex':mainScreen?'flex':'none'}`}} className={`f outer-main__expanded`} ref={n => this.toggleElem = n}>
                             <div className="main f f-col f-align-1-2">
                                 <Switch>
                                     <RoutePassProps exact redirect={Routes['feed'].path} path={Routes['root'].path} component={FeedList} currentDate={currentDate} />
@@ -427,7 +463,7 @@ class Translator extends React.Component {
                     )}
                     />
                     <Route path={Routes['feed'].path} render={() => (
-                        <div className="f f-align-2-2 outer-right__expanded">
+                        <div ref={n => this.secondScreen = n }  style={{display:`${!isTablet?'flex':secondScreen?'flex':'none'}`}}  className="f f-align-2-2 outer-right__expanded">
                             <SideList List={inProgress} uuidOfActiveTab={activeTab} route={'reply'} linkBack={false}/>
                             <DisplaySwitcher toggleElem={this.toggleElem}/>
                         </div>
@@ -460,7 +496,6 @@ class DisplaySwitcher extends React.Component {
     }
 
     switchPanel = (e) => {
-        console.log(this.props);
         !hasClass(this.props.toggleElem, 'toggled') ? addClass(this.props.toggleElem, 'toggled') : removeClass(this.props.toggleElem, 'toggled');
     }
 
@@ -646,8 +681,9 @@ class FeedList extends React.Component {
         console.time('feedQuery');
         let FeedQuery = new Query(currentDate, query),
         filteredFeed =  FeedQuery.filter();
-        console.log(this.props);
         console.timeEnd('feedQuery');
+        console.log('isTablet');
+        console.log(currentDate.isTablet);
         const RenderCollection = (renderItem) => {
             return (<div>{filteredFeed.map((feedData, index) => {
                 let publishTime = new Date(feedData.publishTime);
@@ -674,14 +710,21 @@ class FeedList extends React.Component {
                     <div key={index} className={'f f-align-1-33 translator-feed u-my-2'}>
                         <div className={'translator-feed__avatar'}>
                             <img src={feed.avatar} alt={feed.nickname} />
+                            { currentDate.isTablet && <div className={'translator-feed__content__topbar__name'}>{feed.nickname}</div> }
+                            { currentDate.isTablet  && feed.isPersonal && <div className={'translator-feed__content__topbar__personal'}>персональный</div> }
+                            { currentDate.isTablet && <div className={'translator-feed__content__topbar__date'}>
+                                    {publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} - {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                                </div>
+                            }
                         </div>
                         <div className={'f f-1-2 f-col translator-feed__content'}>
                             <div className={'f f-1-2 translator-feed__content__topbar'}>
-                                <div className={'translator-feed__content__topbar__name'}>{feed.nickname}</div>
-                                {feed.isPersonal && <div className={'translator-feed__content__topbar__personal'}>персональный</div>}
-                                <div className={'translator-feed__content__topbar__date'}>
+                                { !currentDate.isTablet && <div className={'translator-feed__content__topbar__name'}>{feed.nickname}</div>}
+                                { !currentDate.isTablet && feed.isPersonal  && <div className={'translator-feed__content__topbar__personal'}>персональный</div>}
+                                { !currentDate.isTablet && <div className={'translator-feed__content__topbar__date'}>
                                     {publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} - {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
                                 </div>
+                                }
                             </div>
                             <div className={'translator-feed__content__text'}>
                                 {feed.content}
