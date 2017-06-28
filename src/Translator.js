@@ -89,6 +89,8 @@ class Translator extends React.Component {
 
         this.list = this.list.bind(this)
         this.renders = 0
+
+        this.boundRef = this.boundRef.bind(this);
     }
 
     state = {
@@ -118,7 +120,7 @@ class Translator extends React.Component {
 
     async componentDidMount() {
         console.log('componentDidMount')
-     
+        console.log(this.test)
         while (1) {
             const prev = this.state.items
             const items = [`Hello World #${prev.length}`, ...prev]
@@ -139,6 +141,8 @@ class Translator extends React.Component {
             </ul>
         </div>
     }
+    
+    boundRef = (n) => this.test = n;
 
     componentWillReceiveProps(props){
         const { mainScreen, secondScreen } = this.props.location.state || { mainScreen: false, secondScreen: false }
@@ -407,7 +411,7 @@ class Translator extends React.Component {
             <div className="f f-col outer translator">
                 <Header />
                 <div className="f h100">
-                    <div ref={n => this.sidebar = n } style={{display:`${!isTablet?'flex':sidebar?'flex':'none'}`}} className={`f f-align-2-2 outer-left__narrowed`}>
+                    <div ref={ this.boundRef } style={{display:`${!isTablet?'flex':sidebar?'flex':'none'}`}} className={`f f-align-2-2 outer-left__narrowed`}>
                         <div className="f sidebar">
                             <ul className="f f-align-1-1 f-col translator-menu">
                                 <NavLink className={'f f-align-1-2 translator-menu__item translator-menu__item__level-1'} to={{pathname: Routes['feed'].path, state: {mainScreen: true}}} >
