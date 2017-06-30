@@ -6,6 +6,7 @@
     "classnames": "^2.2.5",
     "events": "1.1.1",
     "form-serialize": "^0.7.2",
+    "gh-pages": "^1.0.0",
     "moment": "^2.18.1",
     "npm-run-all": "^4.0.2",
     "prop-types": "^15.5.10",
@@ -31,6 +32,9 @@
     "start": "npm-run-all -p watch-css start-js",
     "build": "npm run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "flow": "flow"
-  }
+    "flow": "flow",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "homepage": "https://tomalexing.github.io/textra"
 }
