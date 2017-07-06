@@ -54,7 +54,6 @@ class DashBoard extends React.Component {
     this.doAtDidMount = [];
     this.list = this.list.bind(this)
     this.renders = 0;
-    this.checkView = this.checkView.bind(this);
   }
 
   state = {
@@ -64,15 +63,7 @@ class DashBoard extends React.Component {
     mainScreen: false
   }
 
-  switchPanel = (e) => {
-    !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled') : removeClass(this.toggleElem, 'toggled');
-  }
 
-  checkView(){
-    if(this.toggleElem){
-      this.state.mainScreen?addClass(this.toggleElem, 'toggled') : removeClass(this.toggleElem, 'toggled');
-    }
-  } 
 
   componentWillMount() {
     this.listeners.push(
@@ -134,9 +125,6 @@ class DashBoard extends React.Component {
     let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
 
-    this.checkView();
-
-    console.log( this.props);
     const Searching = {
       'wqefeq': {
         uuid: 'wqefeq',
@@ -205,12 +193,12 @@ class DashBoard extends React.Component {
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
 
     let currentDate = activeTab ? find(Users, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
-
+    let {isTablet,mainScreen} = this.state || {isTablet: false, mainScreen: false}
     return (
       <div className="f f-col outer dashboard-user">
         <Header />
         <div className="f h100">
-          <div className="f f-align-2-2 outer-left">
+          <div className="f f-align-2-2 outer-left"  style={{display:`${!isTablet?'flex':mainScreen?'none':'flex'}`}}>
             <div className="f sidebar">
               <Link  to={{pathname:'/dashboard/create', state: {mainScreen: true}}} className="f f-align-1-2 dashboard-user__create-tab" >
                 <div className="dashboard-user__create-tab-plus">
@@ -265,19 +253,9 @@ class DashBoard extends React.Component {
                   </Link>
                 )
               })}
-
-              <div className="f f-col">
-                <p className="u-mb-4"> переключит? {(
-                  this.state.isTablet ? (
-                    <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this), 500, false)} > переключит</button>
-                  ) : (
-                      null
-                    )
-                )}</p>
-              </div>
             </div>
           </div>
-          <div className="f outer-right" ref={n => this.toggleElem = n}>
+          <div className="f outer-right" ref={n => this.toggleElem = n}  style={{display:`${!isTablet?'flex':mainScreen?'flex':'none'}`}}>
             <div className="main f f-col f-align-2-2">
               {console.log(this.state.isTablet)}
               {this.state.isTablet?
@@ -312,7 +290,6 @@ class HistoryList extends React.Component {
   
   constructor(props) {
     super(props);
-   
   }
 
   copy(e) {
@@ -333,7 +310,7 @@ class HistoryList extends React.Component {
   }
 
   render() {
-
+    console.log(this.props)
     let { currentDate } = this.props
     let publishTime = new Date(currentDate.publishTime);
     return (
@@ -411,7 +388,7 @@ class HistoryList extends React.Component {
 
         <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-create'}>
           <div className={'dashboard-user__history-reply__avatar'}></div>
-          <Link to={'/dashboard/create'} className="f f-align-1-2 dashboard-user__history-create__content" >
+          <Link to={{pathname:'/dashboard/create',state:{mainScreen:true}}} className="f f-align-1-2 dashboard-user__history-create__content" >
             <div className="dashboard-user__history-create__content__plus"></div>
             <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
           </Link>

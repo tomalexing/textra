@@ -1,12 +1,24 @@
 // registr styles
 
-.login-layout
+.login-layout.outer
   .outer-left
     min-width: 334px
     width: 334px
+    +r(768)
+      min-width: 100%
+      width: 100%
+      z-index: 10
   .outer-right
     width: calc(100% -  334px)
-
+    +r(768)
+      +coverdiv
+      transform: translateX(100%)
+      transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
+      z-index: 12
+      &.toggled
+        display: flex
+        transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
+        transform: translateX(0)
 .sidebar-regist__logo
   flex-basis: 27%
   padding: 28px
@@ -97,7 +109,6 @@
 .breadcrumbs
   top: 0
   position: absolute
-  margin-top: 70px
   width: 100%
   height: 30px
   color: #1ea5fc
@@ -123,9 +134,18 @@
       height: 7px
     &:hover
       color: darken(rgb(0, 192, 255),10)
+  &__next
+    position: absolute
+    right: 0
+    margin-right: 4px
+    text-decoration: none
+    svg
+      height: 7px
+    &:hover
+      color: darken(rgb(0, 192, 255),10)
 
 .breadcrumbs ~ *:nth-of-type(2)
-    margin-top: 180px
+    margin-top: 50px
 
 // USER CREAT Window
 .dashboard-user
@@ -187,7 +207,7 @@
     overflow: auto
     +r(768)
       flex: 0 1 auto
-      height: calc(100% - 224px)
+      height: calc(100% - 150px)
     // textarea
     //   display: block
     //   font-size: 16px
@@ -817,12 +837,21 @@
   .outer-right__narrowed
     min-width: 180px
     width: 180px
+    +r(768)
+      position: absolute
+      top: 70px
+      bottom: 0
+      z-index: 150
+
   .outer-right__expanded,
   .outer-left__expanded
     position: relative
     min-width: 300px
     width: 300px
+    +r(768)
+      width: 100%
   .outer-main__expanded
+    position: relative
     width: calc(100% -  180px - 300px)
     overflow: auto
     +r(768)
@@ -938,6 +967,8 @@
     min-width: 0
     overflow: hidden
     padding-left: 10px
+    +r(768)
+      flex: 1 1 198px
   &-info
     flex: 0 1  62px
     min-width: 0

@@ -33,6 +33,10 @@ class Login extends React.Component {
             if(this.state.isTablet !==  isTablet ) this.setState({isTablet})
           }, 200, false), false)
         );
+    if(window.innerWidth < 768) {
+      console.log('768')
+      this.setState({ isTablet: true })
+    }
     this.doAtDidMount.forEach(func => func());
   }
 

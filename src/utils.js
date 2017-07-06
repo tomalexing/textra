@@ -84,9 +84,8 @@ export function delegate(target, type, selector, handler, capture = false, once 
     const dispatchEvent = (event) => {
         // console.time('delegate');
         let targetElement = event.target;
-
         while (targetElement && targetElement !== target ) {
-        if (targetElement.matches(selector)) {
+        if ( typeof targetElement.matches == 'function' && targetElement.matches(selector)) {
             event.delegateTarget = event.delegateTarget || targetElement;
             handler.call(this, event);
             break;
