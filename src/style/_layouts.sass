@@ -19,6 +19,7 @@
         display: flex
         transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
         transform: translateX(0)
+
 .sidebar-regist__logo
   flex-basis: 27%
   padding: 28px
@@ -73,6 +74,7 @@
   .outer-left
     min-width: 334px
     width: 334px
+    background: #fff
   .sidebar
     flex: 0 1 344px
   .outer-right
@@ -127,6 +129,7 @@
   &__back
     position: absolute
     color: rgb(0, 192, 255)
+    font-size: 10px
     margin-left: 10px
     margin-right: 4px
     text-decoration: none
@@ -137,6 +140,8 @@
   &__next
     position: absolute
     right: 0
+    font-size: 10px
+    color: rgb(0, 192, 255)
     margin-right: 4px
     text-decoration: none
     svg
@@ -208,15 +213,15 @@
     +r(768)
       flex: 0 1 auto
       height: calc(100% - 150px)
-    // textarea
-    //   display: block
-    //   font-size: 16px
-    //   resize: none
-    //   width: 100%
-    //   height: 100%
-    //   border: 0
-    //   position: relative
-    //   z-index: 100
+    textarea
+      display: block
+      font-size: 16px
+      resize: none
+      width: 100%
+      height: 100%
+      border: 0
+      position: relative
+      z-index: 100
     button
       background: #fff
       &:hover
@@ -340,7 +345,8 @@
 // USER HISTORY Window
 .dashboard-user__history
     flex: 1 0 100%
-    width: 100%
+    width: auto
+    min-width: 100%
     padding: 16px
     overflow: auto
     // Post
@@ -854,6 +860,8 @@
     position: relative
     width: calc(100% -  180px - 300px)
     overflow: auto
+    .main > div 
+      width: 100%
     +r(768)
       width: 100%
   .sidebar
@@ -948,7 +956,7 @@
       color: darken(rgb(0, 192, 255),10)
 
 .translator-tab__topline ~ *:first-of-type
-    margin-top: 24px
+    margin-top: 30px
 
 .translator-inwork__tab
   height: 66px
@@ -1092,8 +1100,8 @@
 // Feed
 .translator
   &-feed
-    width: 660px
-    box-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.3)
+    width: auto
+    box-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.15)
     border-radius: 2px
     background-color: #ffffff
     padding: 16px 0 16px 16px
@@ -1228,6 +1236,16 @@
     overflow: hidden
     border: 1px solid $grey
     +nosel
+    +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
+    img
+      +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
+        width: 18px
   &-post__content
     border-radius: 4px
     background-color: $bg-blue
@@ -1235,6 +1253,10 @@
     flex: 1 1 70%
     max-width: 70%
     min-width: 450px
+    +r(768)
+      flex: 1 0 89%
+      max-width: none
+      min-width: auto
     &__text
       color: $text-middle
       font-weight: 400
@@ -1245,6 +1267,11 @@
       +nosel
       color: $text-dark
       margin-top: 10px
+      +r(768)
+        flex-flow: row wrap
+        & > *
+          margin-bottom: 10px
+          
   &-post__constols
     flex: 1 1 auto
     +nosel
@@ -1265,6 +1292,16 @@
   &-reply__avatar
     flex: 0 0 50px
     +nosel
+    +r(768)
+      flex: 0 0 20px
+      width: 20px
+      height: 20px
+    img
+      +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
+        width: 18px
   &-reply__content
     border-radius: 4px
     background-color: $selected-blue
@@ -1272,6 +1309,10 @@
     flex: 1 1 70%
     max-width: 70%
     min-width: 450px
+    +r(768)
+      flex: 1 0 89%
+      max-width: none
+      min-width: auto
     &__text
       color: #fff
       background: transparent

@@ -177,7 +177,7 @@ class DashBoard extends React.Component {
         avatar: avatar,
         title: 'Создать запрос на перевод',
         content: 'Создать запрос на перевод',
-        contentFull: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+        contentFull: 'ффффффСоздать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
         publishTime: (new Date(new Date - 100000)).toISOString(),
         startWorkingTime: (new Date(new Date - 100000)).toISOString(),
         duration: 634,
@@ -474,7 +474,8 @@ class Create extends React.Component {
     isSearchMenuTranslatorVisible: false
   }
 
-  currentNumberOfChar(currentNumberOfChar) {
+  currentNumberOfChar({target: {value}}) {
+    let currentNumberOfChar = value.length;
     this.setState({ currentNumberOfChar })
   }
 
@@ -620,12 +621,12 @@ class Create extends React.Component {
             </div>
           </div>
           <div className={'dashboard-user__create-posteditor'}>
-            <StatefulEditor
+            <textarea
               type="text"
-              tabindex={1}
+              tabIndex={1}
               name="create[posteditor]"
               placeholder={'Ваш запрос на перевод...'}
-              currentNumberOfChar={this.currentNumberOfChar.bind(this)}
+              onChange={this.currentNumberOfChar.bind(this)}
             />
           </div>
           <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
