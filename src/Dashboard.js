@@ -6,7 +6,7 @@ import './style/index.css';
 import logo from './assets/logo.png';
 import avatar from './assets/default-avatar.png';
 import icon_arrow from './assets/arrow-down.png';
-import icon_cost from './assets/cost-of-translation.png';
+import icon_cost from './assets/cost-of-translation.svg';
 import icon_dur from './assets/duration-of-translation.svg';
 import icon_letternum from './assets/letter-number.svg';
 import icon_search from './assets/search.svg';

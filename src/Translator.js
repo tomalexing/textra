@@ -6,7 +6,7 @@ import "./style/index.css";
 import logo from "./assets/logo.png";
 import avatar from "./assets/default-avatar.png";
 import icon_arrow from "./assets/arrow-down.png";
-import icon_cost from "./assets/cost-of-translation.png";
+import icon_cost from "./assets/cost-of-translation.svg";
 import icon_dur from "./assets/duration-of-translation.svg";
 import icon_letternum from "./assets/letter-number.svg";
 import icon_search from "./assets/search.svg";
@@ -857,6 +857,11 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
     : <Redirect to={`${redirect}`} />);
 
 class Reply extends React.Component {
+
+  currentNumberOfChar({target: {value}}){
+      console.log(value);
+  }
+
   render() {
     let { currentDate } = this.props;
     let publishTime = new Date(currentDate.publishTime);
@@ -922,15 +927,15 @@ class Reply extends React.Component {
             {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
           </div>
         </div>
-        <div className={"translator-reply"}>
-          <StatefulEditor
-            className={"translator-reply__editor"}
-            type="text"
-            tabindex={1}
-            name="create[posteditor]"
-            placeholder={"Ваш запрос на перевод..."}
-          />
-          <div className={"translator-reply__sent u-mt-3"}>
+        <div className={"f f-align-2-3 translator-reply"}>
+            <textarea
+              type="text"
+              tabIndex={1}
+              name="translator[reply]"
+              placeholder={'Ваш запрос на перевод...'}
+              onChange={this.currentNumberOfChar.bind(this)}
+            />
+          <div className={"translator-reply__sent u-ml-3 u-mt-3"}>
             <button className={"btn btn-mini btn-primiry"}>Отправить</button>
           </div>
         </div>
