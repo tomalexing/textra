@@ -16,7 +16,8 @@ import {
     Redirect,
     withRouter
 } from 'react-router-dom';
-
+import FacebookLogin from './components/FacebookLogin';
+import GoogleLogin from './components/GoogleLogin';
 class Login extends React.Component {
 
  constructor(props){
@@ -24,20 +25,29 @@ class Login extends React.Component {
    this.removeMe = [];
    this.doAtDidMount = [];
    this.login = this.login.bind(this);
+   this.loginGoog = this.loginGoog.bind(this);
+   this.loginFb = this.loginFb.bind(this);
+
+ }
+
+ componentWillMount(){
+
+
  }
 
   componentDidMount(){
     this.removeMe.push(
           listener(window, 'resize', debounce((e) => {
-            let isTablet = e.target.innerWidth < 768 ? true : false;
+            let isTablet = e.target.innerWidth <= 768 ? true : false;
             if(this.state.isTablet !==  isTablet ) this.setState({isTablet})
           }, 200, false), false)
         );
-    if(window.innerWidth < 768) {
+    if(window.innerWidth <= 768) {
       console.log('768')
       this.setState({ isTablet: true })
     }
     this.doAtDidMount.forEach(func => func());
+
   }
 
   setSubmit(input){
@@ -55,7 +65,7 @@ class Login extends React.Component {
 
   login = (e) => {
     console.log(e);
-    e.preventDefault();
+    //e.preventDefault();
     fakeAuth.authenticate(() => {
       this.setState({ redirectToReferrer: true })
     }) 
@@ -66,12 +76,31 @@ class Login extends React.Component {
     !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
   }
 
-  loginVk = () => {
-
+  loginGoog = (info) => {
+    
   }
 
-  loginFb = () => {
-    
+  loginFb = (info) => {
+    window.FB.getLoginStatus( ({status}) => {
+      if(status == 'connected'){
+        try {
+          fetch('/login', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(info)
+          }).then(response => {
+            return response.json();
+          }).then(data => {
+            if (data.err) throw Error(data.err);
+          })
+        }
+        catch (err) {
+          console.trace(err.stack)
+        }
+      }
+    })
+      console.log(info);
   }
 
   render() {
@@ -100,8 +129,28 @@ class Login extends React.Component {
                     )
                 )}</p>
                 <div className="f f-gap-2 registform-regist__social"> 
-                  <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button>
-                  <button onClick={this.loginVk} className="btn btn-primiry btn-normal btn-block google-color"><img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/></button>
+                  {/* <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button> */}
+                  <FacebookLogin
+                    appId="1658887587468539"
+                    autoLoad={true}
+                    fields="name,email,picture"
+                    scope="public_profile,email,user_birthday"
+                    callback={this.loginFb}
+                    textButton={''}
+                    cssClass="btn btn-primiry btn-normal btn-block fb-color"
+                    icon={<img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/>}
+                  />
+
+                  <GoogleLogin
+                    appId="1658887587468539"
+                    autoLoad={true}
+                    onSuccess={this.loginGoog}
+                    textButton={''}
+                    onFailure={this.loginGoog}
+                    cssClass="btn btn-primiry btn-normal btn-block google-color"
+                    icon={<img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/>}
+                  />
+                  {/* <button onClick={this.loginVk} className="btn btn-primiry btn-normal btn-block google-color"><img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/></button> */}
                 </div>
                 <div className="registform-delimiter " ><span>или</span></div>
 
@@ -113,6 +162,7 @@ class Login extends React.Component {
                 </TxForm>
 
                 <p className="f f-align-3-3 u-mt-1">Забыли пароль?</p>
+                <div id="status"></div>
               </div>
           </div>
         </div>

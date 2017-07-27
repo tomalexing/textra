@@ -82,6 +82,9 @@ class Header extends React.Component{
                     <NavLink to={'/help'}>Поддержка</NavLink>
                   </ul>
                 </div>
+                 <div className="f f-align-2-2 header-logo__mobile">
+                  <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
+                </div>
                 <ul className="f f-align-2-2 header-menu">
                   <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>
                   <NavLink to={'/about'}>О нас</NavLink>

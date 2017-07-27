@@ -109,8 +109,8 @@
     left: 0 
 
 .breadcrumbs
-  top: 0
-  position: absolute
+  top: 39px
+  position: fixed
   width: 100%
   height: 24px
   color: #1ea5fc
@@ -121,7 +121,7 @@
   letter-spacing: -0.05px
   line-height: 14px
   border-bottom: 1px solid #c8ced3
-  z-index: 100
+  z-index: 1000
   +nosel
   span
     color: $grey-light
@@ -134,7 +134,7 @@
     margin-right: 4px
     text-decoration: none
     svg
-      height: 7px
+      height: 5px
     &:hover
       color: darken(rgb(0, 192, 255),10)
   &__next
@@ -144,13 +144,19 @@
     color: rgb(0, 192, 255)
     margin-right: 4px
     text-decoration: none
+    line-height: 21px
     svg
-      height: 7px
+      height: 5px
     &:hover
       color: darken(rgb(0, 192, 255),10)
 
-.breadcrumbs ~ *:nth-of-type(2)
-    margin-top: 50px
+.breadcrumbs 
+  +rmin(769)
+    ~ *:nth-of-type(2)
+      padding-top: 25px
+  +r(768)
+    ~ *:nth-of-type(1)
+      margin-top: 23px
 
 // USER CREAT Window
 .dashboard-user
@@ -161,16 +167,29 @@
     z-index: 101
     padding: 0 20px
     +nosel
+    +r(768)
+        padding: 8px
+  &__create-topbar
+    +r(768)
+      height: 113px
+      align-items: flex-end
+  &__create-bottombar
+   +r(768)
+      height: 40px
+
   &__create-topbar
     .Select.is-open,
     .Select.is-open .Select-menu-outer
       box-shadow: 0 2px 6px rgba(29, 122, 184, 0.3)
-    
     img
       vertical-align: middle
     &__chooser
       position: relative
       margin-left: auto
+      +r(768)
+        position: absolute
+        top: 30px
+        right: 2px
       &-trigger
         min-width: 170px
         &__avatar
@@ -211,8 +230,8 @@
     padding: 20px
     overflow: auto
     +r(768)
-      flex: 0 1 auto
-      height: calc(100% - 150px)
+      flex: 1 1 auto
+      padding: 10px
     textarea
       display: block
       font-size: 16px
@@ -268,9 +287,9 @@
       max-width: 70%
       min-width: 450px
       +r(768)
-        flex: 1 0 89%
+        flex: 1 1 89%
         max-width: none
-        min-width: auto
+        min-width: 0
       &__text
         color: $text-middle
         font-weight: 400
@@ -288,6 +307,8 @@
     &-post__constols
       flex: 1 1 auto
       +nosel
+      +r(768)
+        margin-left: -13px
     &-post__date
       flex: 0 1 auto
       text-align: right
@@ -297,10 +318,7 @@
       line-height: 11px
       letter-spacing: -0.05px
       +nosel
-      +r(768)
-        position: absolute
-        right: 4%
-        top: 6px
+
       // Reply
     &-reply
       width: 100%
@@ -332,6 +350,7 @@
         font-weight: 100
         letter-spacing: -0.06px
         line-height: 20px
+        min-height: 100px
     &-reply__constols
       flex: 1 1 auto
       align-self: flex-end
@@ -372,7 +391,7 @@
           flex: 0 0 20px
           width: 20px
           height: 20px
-          width: 18px
+          width: 20px
     &-post__content
       border-radius: 4px
       background-color: $bg-blue
@@ -381,9 +400,9 @@
       max-width: 70%
       min-width: 450px
       +r(768)
-        flex: 1 0 89%
+        flex: 1 1 89%
         max-width: none
-        min-width: auto
+        min-width: 0
       &__text
         color: $text-middle
         font-weight: 400
@@ -401,6 +420,8 @@
     &-post__constols
       flex: 1 1 auto
       +nosel
+      +r(768)
+        margin-left: -13px
     &-post__date
       flex: 0 1 auto
       text-align: right
@@ -411,9 +432,7 @@
       letter-spacing: -0.05px
       +nosel
       +r(768)
-        position: absolute
-        right: 4%
-        top: 6px
+       
       // Reply
     &-reply
       width: 100%
@@ -421,7 +440,7 @@
       flex: 0 0 auto
       position: relative
       +r(768)
-        width: 97%
+        width: 100%
     &-reply__avatar
       flex: 0 0 50px
       +nosel
@@ -434,7 +453,7 @@
           flex: 0 0 20px
           width: 20px
           height: 20px
-          width: 18px
+          width: 20px
     &-reply__content
       border-radius: 4px
       background-color: $selected-blue
@@ -443,9 +462,9 @@
       max-width: 70%
       min-width: 450px
       +r(768)
-        flex: 1 0 auto
+        flex: 1 1 auto
         max-width: none
-        min-width: auto
+        min-width: 0
       &__text
         color: #fff
         background: transparent
@@ -458,13 +477,19 @@
         font-weight: 100
         letter-spacing: -0.06px
         line-height: 20px
+        min-height: 100px
     &-reply__constols
       flex: 1 1 auto
       align-self: flex-end
       +nosel
       +r(768)
         flex: 0 1 auto
+        position: relative
+        margin-left: -39px
+        transform: translateX(38px)
       button
+        +r(768)
+          font: 0/0 a
         img
           margin-left: 2px
           margin-right: 4px
@@ -478,15 +503,15 @@
       letter-spacing: -0.05px
       +nosel
       +r(768)
-        position: absolute
-        right: 7px
-        top: 6px      
+         
     // Create new from history
     &-create
       width: 100%
       margin-top: 25px
       margin-bottom: 25px
       flex: 0 0 auto
+      +r(768)
+        width: 86%
       &__content
         border-radius: 4px
         background-color: $bg-blue
@@ -557,6 +582,7 @@
   width: 100%
   text-decoration: none
   color: $selected-blue
+  border-bottom: 1px $grey solid
   +nosel
   &:hover
     background: darken($bg-blue, 10%)
@@ -595,6 +621,7 @@
   text-decoration: none
   padding: 7px
   background: $bg-blue
+  border-bottom: 1px $grey solid
   +nosel
   &:hover
     background: darken($bg-blue, 10%)
@@ -672,6 +699,7 @@
   text-decoration: none
   color: $selected-blue
   padding: 7px
+  border-bottom: 1px $grey solid
   +nosel
   &:hover
     background: $bg-blue
@@ -685,7 +713,7 @@
     overflow: hidden
     padding-left: 10px
   &-info
-    flex: 0 1  62px
+    flex: 0 1 62px
     min-width: 0
   &-title
     white-space: nowrap
@@ -751,7 +779,7 @@
 
 
 //
-// USER Element 
+// Shared Element 
 //
 // LangLabel Element
 .LangLabel
@@ -827,13 +855,16 @@
   bottom: 0
   z-index: 200
 //
-// USER Element  END
+// Shared Element END
 //
 
-
 //
+//****************************************************************************************************************************************************************
+//****************************************************************************************************************************************************************
 // ALL TRANSLATOR DASHBOARD STYLES START HERE
 //
+
+
 // Common User Dashboard Style
 //
 
@@ -845,7 +876,7 @@
     width: 180px
     +r(768)
       position: absolute
-      top: 70px
+      top: 40px
       bottom: 0
       z-index: 150
 
@@ -862,12 +893,15 @@
     overflow: auto
     .main > div 
       width: 100%
+      height: 100%
     +r(768)
       width: 100%
   .sidebar
     position: relative
     background: #fff
 
+
+// ASide Menu 
 .translator
   &-menu
     height: 100%
@@ -927,7 +961,9 @@
       background-color: #ffffff
       opacity: 0.1
 
-// Tab Translator dashboard 
+// ASide Menu End
+
+// TABs Styles go here  Translator dashboard 
 
 .translator-tab__topline
   position: absolute
@@ -958,11 +994,14 @@
 .translator-tab__topline ~ *:first-of-type
     margin-top: 24px
 
-.translator-inwork__tab
+
+// tab of history and in-word are shared common styles at translator dashboard
+.translator-tab  
   height: 66px
   text-decoration: none
   color: $selected-blue
   padding: 7px
+  border-bottom: 1px $grey solid
   +nosel
   &:hover
     background: $bg-blue
@@ -1037,14 +1076,19 @@
       .selected &
         color: #fff
 
-// Tab Translator dashboard 
+
+// TABs Styles ends here  Translator dashboard 
+
+
+// Main Screen (Reply) Translator dashboard /translator/reply/uuid
 
 .translator-replypost
   flex: 1 0 100%
   width: 100%
+  height: 100%
   padding: 16px
   overflow: auto
-    // Post
+// Post  (Request)
 .translator-post
   width: 100%
   margin-bottom: 25px
@@ -1063,6 +1107,8 @@
     padding: 9px 14px
     flex: 1 1 100%
     max-width: 100%
+    +r(768)
+      min-width: 0
     &__text
       color: $text-middle
       font-weight: 400
@@ -1073,9 +1119,14 @@
       +nosel
       color: $text-dark
       margin-top: 10px
+      +r(768)
+        flex-flow: wrap
+        > *
+          margin-top: 10px
   &__constols
     flex: 1 1 auto
     +nosel
+
   &__date
     flex: 0 1 auto
     text-align: right
@@ -1086,7 +1137,10 @@
     letter-spacing: -0.05px
     margin-left: 40px
     +nosel
-    // Reply
+    +r(768)
+      margin-left: 12px
+
+// Reply  (Answer to User Request)
 .translator-reply
   position: relative
   width: 100%
@@ -1118,7 +1172,42 @@
   &__sent
     float: right
 
-// Feed
+
+// End Main Screen (Reply) Translator dashboard /translator/reply/uuid
+
+
+// Main Screen Feed Translator dashboard translator/feed/*
+
+.translator-feed__topline
+  position: fixed
+  top: 70px
+  left: 0
+  width: 100%
+  height: 25px
+  color: #1ea5fc
+  background: #fff
+  font-family: Roboto
+  font-size: 12px
+  font-weight: 500
+  letter-spacing: -0.05px
+  line-height: 14px
+  border-bottom: 1px solid #c8ced3
+  +nosel
+  span
+    color: $grey-light
+    margin: auto
+  &__back
+    position: absolute
+    color: rgb(0, 192, 255)
+    margin-left: 10px
+    margin-right: 4px
+    &:hover
+      color: darken(rgb(0, 192, 255),10)
+
+.translator-feed__topline ~ *:nth-of-type(2)
+    margin-top: 40px
+
+
 .translator
   &-feed
     width: auto
@@ -1131,6 +1220,8 @@
       margin: 10px auto
       flex-direction: column
       padding: 8px
+      &:nth-of-type(2)
+        margin-top: 40px
     &__avatar
       flex: 0 1 65px
       +r(768)
@@ -1239,6 +1330,9 @@
       letter-spacing: -0.06px
       line-height: 16px
 
+// End Main Screen Feed Translator dashboard translator/feed/* 
+
+// Main Screen History Translator  history/*
 .translator-history
   flex: 1 0 100%
   width: 100%
@@ -1266,7 +1360,7 @@
         flex: 0 0 20px
         width: 20px
         height: 20px
-        width: 18px
+        width: 20px
   &-post__content
     border-radius: 4px
     background-color: $bg-blue
@@ -1275,7 +1369,7 @@
     max-width: 70%
     min-width: 450px
     +r(768)
-      flex: 1 0 89%
+      flex: 1 1 89%
       max-width: none
       min-width: auto
     &__text
@@ -1296,6 +1390,8 @@
   &-post__constols
     flex: 1 1 auto
     +nosel
+    +r(768)
+      margin-left: -13px
   &-post__date
     flex: 0 1 auto
     text-align: right
@@ -1322,7 +1418,7 @@
         flex: 0 0 20px
         width: 20px
         height: 20px
-        width: 18px
+        width: 20px
   &-reply__content
     border-radius: 4px
     background-color: $selected-blue
@@ -1331,7 +1427,7 @@
     max-width: 70%
     min-width: 450px
     +r(768)
-      flex: 1 0 89%
+      flex: 1 1 89%
       max-width: none
       min-width: auto
     &__text
@@ -1346,11 +1442,22 @@
       font-weight: 100
       letter-spacing: -0.06px
       line-height: 20px
+      min-height: 100px
   &-reply__constols
     flex: 1 1 auto
     align-self: flex-end
     +nosel
+    +r(768)
+      margin-left: -38px
+      position: relative
+      transform: translate(38px)
     button
+      +r(768)
+        font: 0/0 a
       img
         margin-left: 2px
         margin-right: 4px
+
+//
+// ALL TRANSLATOR DASHBOARD STYLES ENDED HERE
+//

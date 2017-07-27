@@ -5,6 +5,9 @@
   width: 100%
   min-height: 667px
   overflow: hidden
+  +r(768)
+    min-height: auto
+    height: 100%
   .outer-left
     z-index: 11
     +r(768)
@@ -47,7 +50,8 @@
 .h100
   height: 100%
   height: calc(100% - 70px)
-
+  +r(768)
+    height: 100%
 .main__header
   height: $headerheight
   width: 100%
@@ -55,14 +59,24 @@
   box-shadow: 0 0 8px rgba(33, 143, 216, 0.3)
   padding: 16px
   z-index: 700
+  +r(768)
+    height: 40px
+    align-items: center
   .header-logo
     max-width: 164px
     flex: 1 1 auto
-    +r(767)
+    +r(768)
       display: none
+    &__mobile
+      display: none
+      +r(768)
+        display: block
+        img
+          width: 57px
+          vertical-align: middle
   .header-menu
     flex: 0 1 auto
-    +r(767)
+    +r(768)
       display: none
     li
       position: relative
@@ -106,11 +120,11 @@
         +tr(height .5s)
     &__mobile
       position: relative
-      +rmin(768)
+      +rmin(769)
         display: none
       &__btn
         background: transparent
-        padding: 20px 10px
+        padding: 10px 10px
         +nosel
         &:active
           background: transparent
@@ -145,6 +159,9 @@
       font-weight: 400
       line-height: 16px
       margin-bottom: 7px
+      +r(768)
+        font-size: 10px
+        height: 6px
     .header-details__more
     .header-replenish
       text-decoration: none
@@ -162,6 +179,8 @@
       font-size: 18px
       font-weight: 400
       line-height: 21px
+      +r(768)
+        font-size: 13px
     .header-avatar
       position: relative
       +tr(opacity .5s)
@@ -178,6 +197,11 @@
         border-radius: 50%
         overflow: hidden
         border: 1px solid $grey 
+        img
+          width: 100%
+        +r(768)
+          width: 20px
+          height: 20px
       .header-logout
         cursor: pointer
         position: absolute

@@ -68,11 +68,11 @@ class DashBoard extends React.Component {
   componentWillMount() {
     this.listeners.push(
       listener(window, 'resize', debounce((e) => {
-        let isTablet = e.target.innerWidth < 768 ? true : false;
+        let isTablet = e.target.innerWidth <= 768 ? true : false;
         if (this.state.isTablet !== isTablet) this.setState({ isTablet })
       }, 200, false), false)
     );
-    if(window.innerWidth < 768) {
+    if(window.innerWidth <= 768) {
       console.log('768')
       this.setState({ isTablet: true })
     }
@@ -260,7 +260,7 @@ class DashBoard extends React.Component {
               {console.log(this.state.isTablet)}
               {this.state.isTablet?
                 <div className="f f-align-1-2 breadcrumbs">
-                    <button onClick={() => { this.setState({mainScreen: false}) }} className="f f-align-1-2 btn btn-flat breadcrumbs__back" ><svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12"><path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" /></svg>Назад</button> 
+                    <button onClick={() => { this.setState({mainScreen: false}) }} className="f f-align-2-2 btn btn-flat breadcrumbs__back" ><svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12"><path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" /></svg>Назад</button> 
                     <span>{currentDate.nickname}</span>
                 </div>
               :''}

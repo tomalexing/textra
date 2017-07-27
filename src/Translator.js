@@ -111,7 +111,7 @@ class Translator extends React.Component {
         "resize",
         debounce(
           e => {
-            let isTablet = e.target.innerWidth < 768 ? true : false;
+            let isTablet = e.target.innerWidth <= 768 ? true : false;
             if (this.state.isTablet !== isTablet) this.setState({ isTablet });
           },
           200,
@@ -121,7 +121,7 @@ class Translator extends React.Component {
       )
     );
 
-    if (window.innerWidth < 768) {
+    if (window.innerWidth <= 768) {
       this.state.isTablet = true;
     }
 
@@ -138,7 +138,7 @@ class Translator extends React.Component {
         "touchend",
         `.${Array.from(this.bg.classList).join(".")}`,
         event => {
-          if (!this.state.sidebar || event.target.closest(".sidebar")) return;
+          if (!this.state.sidebar || event.target.closest(".sidebar__menu")) return;
 
           this.setState({ sidebar: false });
         },
@@ -193,7 +193,7 @@ class Translator extends React.Component {
       (/history/.test(pathname) &&
         pathname.split("/")[activeTabA.length - 1]) ||
       false;
-
+      
     let Feed = {
       wqefeq: {
         uuid: "wqefeq",
@@ -451,7 +451,7 @@ class Translator extends React.Component {
             className={`f f-align-2-2 outer-left__narrowed`}
           >
             {/* Starts Left SubMenu */}
-            <div className="f sidebar"> 
+            <div className="f sidebar sidebar__menu"> 
               <ul className="f f-align-1-1 f-col translator-menu">
                 <NavLink
                   className={
@@ -534,19 +534,20 @@ class Translator extends React.Component {
                 style={{
                   display: `${!isTablet ? "flex" : secondScreen ? "flex" : "none"}`
                 }}
-                className="f f-align-2-2 outer-right__expanded"
+                className="f f-align-2-2 outer-left__expanded"
               >
                 <SideList
                   List={HistoryObject}
-                  uuidOfActiveTab={activeTab}
+                  uuidOfActiveTab={activeHistory}
                   route={"history"}
                   title="История"
+                  isTablet={isTablet}
+                  this={this}
+                  
                 />
               </div>
             )}
           />
-
-         
           <Route
             ref={n => (this.sidebar = n)}
             path={Routes["reply"].path}
@@ -578,7 +579,8 @@ class Translator extends React.Component {
               <div
                 ref={n => (this.mainScreen = n)}
                 style={{
-                  display: `${!isTablet ? "flex" : mainScreen ? "flex" : "none"}`
+                  display: `${!isTablet ? "flex" : mainScreen ? "flex" : "none"}`,
+                  background: `${activeFeed ? "#f5f5f5": "#fff"}`
                 }}
                 className={`f outer-main__expanded`}
                 ref={n => (this.toggleElem = n)}
@@ -658,6 +660,11 @@ class Translator extends React.Component {
                   title="В работе"
                   isTablet={isTablet}
                   this={this}
+                   Left={{
+                        leftBtn: true,
+                        leftBtnName: "Меню",
+                        newLeftBtnState: { mainScreen: false, sidebar: true, secondScreen: true }
+                  }}
                 />
               </div>
             )}
@@ -717,7 +724,7 @@ const BreadCrumbs = ({
             </button>
           : ""}
       </div>
-    : shownOnDesktop ? <span>{title}</span>: <div/>;
+    : shownOnDesktop &&  <div className="f f-align-1-2 translator-tab__topline"> <span>{title}</span> </div>;
 };
 
 class DisplaySwitcher extends React.Component {
@@ -735,7 +742,7 @@ class DisplaySwitcher extends React.Component {
         "resize",
         debounce(
           e => {
-            let isTablet = e.target.innerWidth < 768 ? true : false;
+            let isTablet = e.target.innerWidth <= 768 ? true : false;
             if (this.state.isTablet !== isTablet) this.setState({ isTablet });
           },
           200,
@@ -782,11 +789,19 @@ const SideList = ({
   route,
   title = "В работе",
   isTablet,
-  this: _rootSelf
+  this: _rootSelf,
+  Left = {
+        leftBtn: true,
+        leftBtnName: "Меню",
+        newLeftBtnState: { mainScreen: false, sidebar: true, secondScreen: true }
+  },
+  Right = {
+    rightBtn: false
+  }
 }) => {
+
   return (
     <div className="f sidebar">
-      <div className="f f-align-1-2 translator-tab__topline">
         <BreadCrumbs
           this={_rootSelf}
           isTablet={isTablet}
@@ -794,17 +809,9 @@ const SideList = ({
               title: title,
               shownOnDesktop: true
           }}
-          Left={{
-            leftBtn: true,
-            leftBtnName: "Запросы",
-            newLeftBtnState: { mainScreen: true, sidebar: false, secondScreen: false }
-          }}
-          Right={{
-            rightBtn: false
-          }}
+          Left={Left}
+          Right={Right}
         />
-      </div>
-
       {/*<Batch
                 flushCount={10}
                 flushInterval={150}
@@ -818,20 +825,20 @@ const SideList = ({
         return (
           <Link
             to={`${Routes[route].path}/${tab.uuid}`}
-            className={`f f-align-1-2 translator-inwork__tab ${tab.uuid === activeTab ? "selected" : ""}`}
+            className={`f f-align-1-2 translator-tab ${tab.uuid === activeTab ? "selected" : ""}`}
             key={index}
           >
-            <figure className="f f-align-2-2 translator-inwork__tab-avatar">
+            <figure className="f f-align-2-2 translator-tab-avatar">
               {" "}<img src={tab.avatar} alt="Textra" />{" "}
             </figure>
-            <div className="f f-col f-align-1-1 translator-inwork__tab-details">
-              <div className="translator-inwork__tab-title">{tab.title} </div>
-              <div className="translator-inwork__tab-content">
+            <div className="f f-col f-align-1-1 translator-tab-details">
+              <div className="translator-tab-title">{tab.title} </div>
+              <div className="translator-tab-content">
                 {" "}{tab.content}
               </div>
             </div>
-            <div className="f f-col f-align-2-3 translator-inwork__tab-info">
-              <div className="translator-inwork__tab-info__time">
+            <div className="f f-col f-align-2-3 translator-tab-info">
+              <div className="translator-tab-info__time">
                 <time
                 >{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time>
               </div>
@@ -840,7 +847,7 @@ const SideList = ({
                 to={tab.to}
                 selected={tab.uuid === activeTab}
               />
-              <div className="translator-inwork__tab-info__duration">
+              <div className="translator-tab-info__duration">
                 {humanReadableTime(tab.duration)}
               </div>
             </div>
@@ -856,93 +863,7 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
     ? <Route {...rest} render={props => <Component {...props} {...rest} />} />
     : <Redirect to={`${redirect}`} />);
 
-class Reply extends React.Component {
 
-  currentNumberOfChar({target: {value}}){
-      console.log(value);
-  }
-
-  render() {
-    let { currentDate } = this.props;
-    let publishTime = new Date(currentDate.publishTime);
-    return (
-      <div className={"f f-col f-align-1-1 translator-replypost"}>
-        <div className={"data__delimiter"}>
-          {publishTime.getDate()}
-          {" "}
-          {getMounthName(publishTime.getMonth())}
-          ,
-          {" "}
-          {publishTime.getFullYear()}
-          {" "}
-        </div>
-        <div className={"f f-align-1-1 translator-post "}>
-          <div className={"translator-post__content"}>
-            <div className={"translator-post__content__text"}>
-              {currentDate.content}
-            </div>
-            <div
-              className={
-                "f f-align-1-2 f-gap-4 translator-post__content__bottombar"
-              }
-            >
-              <LangLabel from={currentDate.from} to={currentDate.to} />
-              <Indicator
-                className={"f f-align-2-2"}
-                icon={icon_dur}
-                value={humanReadableTime(currentDate.duration)}
-                hint={"Длительность перевода"}
-              />
-              <Indicator
-                className={"f f-align-2-2"}
-                icon={
-                  <Timer
-                    start={currentDate.startWorkingTime}
-                    duration={currentDate.duration}
-                    isBig={true}
-                  />
-                }
-                value={humanReadableTime(
-                  currentDate.duration -
-                    (new Date() - new Date(currentDate.startWorkingTime)) / 1000
-                )}
-                hint={"Оставшееся время"}
-              />
-              <Indicator
-                className={"f f-align-2-2"}
-                icon={icon_letternum}
-                value={currentDate.letterNumber}
-                hint={"Количество символов"}
-              />
-              <Indicator
-                className={"f f-align-2-2"}
-                icon={icon_cost}
-                value={currentDate.cost}
-                hint={"Стоимость"}
-              />
-
-            </div>
-          </div>
-          <div className={"translator-post__date"}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-          </div>
-        </div>
-        <div className={"f f-align-2-3 translator-reply"}>
-            <textarea
-              type="text"
-              tabIndex={1}
-              name="translator[reply]"
-              placeholder={'Ваш запрос на перевод...'}
-              onChange={this.currentNumberOfChar.bind(this)}
-            />
-          <div className={"translator-reply__sent u-ml-3 u-mt-3"}>
-            <button className={"btn btn-mini btn-primiry"}>Отправить</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
 
 const lcMatch = (q, s) => s && s.toLowerCase().indexOf(q.toLowerCase()) >= 0;
 
@@ -1000,12 +921,9 @@ class FeedList extends React.Component {
       },
       fielteredFieldRule: "some" // some || every
     };
-    console.time("feedQuery");
     let FeedQuery = new Query(currentDate, query),
       filteredFeed = FeedQuery.filter();
-    console.timeEnd("feedQuery");
-    console.log("isTablet");
-    console.log(currentDate.isTablet);
+
     const RenderCollection = renderItem => {
       return (
         <div>
@@ -1013,8 +931,8 @@ class FeedList extends React.Component {
                 this={_self}
                 isTablet={isTablet}
                 Title={{
-                title: "Запросы",
-                shownOnDesktop: false
+                    title: "Запросы",
+                    shownOnDesktop: false
                 }}
                 Left={{
                     leftBtn: true,
@@ -1031,6 +949,7 @@ class FeedList extends React.Component {
                 }
                 }}
             />
+            {!isTablet && <div className="f f-align-1-2 translator-feed__topline"><span>Запросы</span></div>}
           {filteredFeed.map((feedData, index) => {
             let publishTime = new Date(feedData.publishTime);
             return renderItem(feedData, index, publishTime);
@@ -1157,12 +1076,170 @@ class FeedList extends React.Component {
   }
 }
 
-class HistoryList extends React.Component {
+
+class Reply extends React.Component {
+
+  currentNumberOfChar({target: {value}}){
+      console.log(value);
+  }
+
   render() {
-    let { currentDate } = this.props;
+    let { currentDate, isTablet, _self } = this.props;
+    let publishTime = new Date(currentDate.publishTime);
+
     const RenderCollection = renderItem => {
       return (
         <div>
+            <BreadCrumbs
+                this={_self}
+                isTablet={isTablet}
+                Title={{
+                    title:  currentDate.uuid,  // we get [0] because the very first item in thread can be only from user
+                    shownOnDesktop: false
+                }}
+                Left={{
+                    leftBtn: true,
+                    leftBtnName: "Меню",
+                    newLeftBtnState: { 
+                        mainScreen: true, 
+                        sidebar: true 
+                    }
+                    }}
+                Right={{
+                rightBtn: true,
+                rightBtnName: "Назад",
+                newRightBtnState: {
+                    mainScreen: false,
+                    secondScreen: true,
+                    sidebar: false
+                }
+                }}
+            />
+          {
+            renderItem(Object.assign({},currentDate), 1, new Date(currentDate.publishTime))
+          }
+          
+        </div>
+      );
+    };
+    return (Object.entries(currentDate).length === 0
+            ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
+                <div className={"translator-feed__avatar"}>
+                    <img src={avatar} />
+                </div>
+                <div className={"f f-align-2-2 translator-feed__placeholder"}>
+                    <span>История отсутствуют</span>
+                </div>
+              </div>
+            : RenderCollection((currentDate, index, publishTime) => (
+            <div className={"f f-col f-align-1-1 translator-replypost"}>
+                
+                <div className={"data__delimiter"}>
+                {publishTime.getDate()}
+                {" "}
+                {getMounthName(publishTime.getMonth())}
+                ,
+                {" "}
+                {publishTime.getFullYear()}
+                {" "}
+                </div>
+                <div className={"f f-align-1-1 translator-post "}>
+                <div className={"translator-post__content"}>
+                    <div className={"translator-post__content__text"}>
+                    {currentDate.content}
+                    </div>
+                    <div
+                    className={
+                        "f f-align-1-2 f-gap-4 translator-post__content__bottombar"
+                    }
+                    >
+                    <LangLabel from={currentDate.from} to={currentDate.to} />
+                    <Indicator
+                        className={"f f-align-2-2"}
+                        icon={icon_dur}
+                        value={humanReadableTime(currentDate.duration)}
+                        hint={"Длительность перевода"}
+                    />
+                    <Indicator
+                        className={"f f-align-2-2"}
+                        icon={
+                        <Timer
+                            start={currentDate.startWorkingTime}
+                            duration={currentDate.duration}
+                            isBig={true}
+                        />
+                        }
+                        value={humanReadableTime(
+                        currentDate.duration -
+                            (new Date() - new Date(currentDate.startWorkingTime)) / 1000
+                        )}
+                        hint={"Оставшееся время"}
+                    />
+                    <Indicator
+                        className={"f f-align-2-2"}
+                        icon={icon_letternum}
+                        value={currentDate.letterNumber}
+                        hint={"Количество символов"}
+                    />
+                    <Indicator
+                        className={"f f-align-2-2"}
+                        icon={icon_cost}
+                        value={currentDate.cost}
+                        hint={"Стоимость"}
+                    />
+
+                    </div>
+                </div>
+                <div className={"translator-post__date"}>
+                    {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                </div>
+                </div>
+                <div className={"f f-align-2-3 translator-reply"}>
+                    <textarea
+                    type="text"
+                    tabIndex={1}
+                    name="translator[reply]"
+                    placeholder={'Ваш запрос на перевод...'}
+                    onChange={this.currentNumberOfChar.bind(this)}
+                    />
+                <div className={"translator-reply__sent u-ml-3 u-mt-3"}>
+                    <button className={"btn btn-mini btn-primiry"}>Отправить</button>
+                </div>
+                </div>
+            </div>)
+    ));
+  }
+}
+
+
+class HistoryList extends React.Component {
+  render() {
+    let { currentDate, isTablet, _self,  } = this.props;
+    const RenderCollection = renderItem => {
+      return (
+        <div>
+            <BreadCrumbs
+                this={_self}
+                isTablet={isTablet}
+                Title={{
+                    title:  currentDate[Object.keys(currentDate)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
+                    shownOnDesktop: false
+                }}
+                Left={{
+                    leftBtn: true,
+                    leftBtnName: "Меню",
+                    newLeftBtnState: { mainScreen: true, sidebar: true }
+                    }}
+                Right={{
+                rightBtn: true,
+                rightBtnName: "История",
+                newRightBtnState: {
+                    mainScreen: false,
+                    secondScreen: true,
+                    sidebar: false
+                }
+                }}
+            />
           {Object.values(currentDate).map((data, index) => {
             let publishTime = new Date(data.publishTime);
             return renderItem(data, index, publishTime);
