@@ -15,6 +15,16 @@ import {
 import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump } from './utils';
 
+if (process.env.NODE_ENV !== 'production') {
+  const {whyDidYouUpdate} = require('why-did-you-update')
+    let createClass = React.createClass;
+    Object.defineProperty(React, 'createClass', {
+      set: (nextCreateClass) => {
+        createClass = nextCreateClass;
+      }
+    });
+  whyDidYouUpdate(React)
+}
 
 injectTapEventPlugin();
 // ====================================

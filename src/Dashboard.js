@@ -20,7 +20,8 @@ import {
   Link,
   Redirect,
   withRouter,
-  Switch
+  Switch,
+  Prompt
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { 
@@ -471,12 +472,21 @@ class Create extends React.Component {
     valueLangTo: 'Eng',
     valueTranslator: undefined,
     currentNumberOfChar: 0,
-    isSearchMenuTranslatorVisible: false
+    isSearchMenuTranslatorVisible: false,
+    isBlocking: false
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+    if( this.state == nextState && this.props == nextProps){
+      return false
+    }
+    console.log('rerender')
+    return true
   }
 
   currentNumberOfChar({target: {value}}) {
     let currentNumberOfChar = value.length;
-    this.setState({ currentNumberOfChar })
+    this.setState({ currentNumberOfChar, isBlocking: value.length >  0 })
   }
 
   updateValueLangFrom(valueLangFrom) {
@@ -554,9 +564,17 @@ class Create extends React.Component {
 
   render() {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
-      valueTranslator, isSearchMenuTranslatorVisible } = this.state;
+      valueTranslator, isSearchMenuTranslatorVisible, isBlocking } = this.state;
+
     return (
       <div ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
+      <form className={'f f-col dashboard-user__create-forms'}>
+         <Prompt
+                when={this.state.isBlocking}
+                message={location => (
+                  `Вы уверены, что хотите уйти`
+                )}
+          />
           <div className={'dashboard-user__create-topbar f f-align-1-2 f-row f-gap-4'}>
             <Select
               ref={(n) => this.createLangFrom = n}
@@ -571,7 +589,7 @@ class Create extends React.Component {
               autosize={false}
               clearable={false}
               arrowRenderer={this.arrowElementLangs} />
-            <div className={'dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language" /></div>
+            <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language" /></div>
             <Select
               ref={(n) => this.createLangTo = n}
               name="create[to]"
@@ -626,7 +644,7 @@ class Create extends React.Component {
               tabIndex={1}
               name="create[posteditor]"
               placeholder={'Ваш запрос на перевод...'}
-              onChange={this.currentNumberOfChar.bind(this)}
+              onChange={this.currentNumberOfChar}
             />
           </div>
           <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
@@ -635,8 +653,10 @@ class Create extends React.Component {
             <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
             <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(0.05 * currentNumberOfChar).toFixed(2)}`} hint={'Стоимость перевода'} />
 
-            <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
+          <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
+             
           </div>
+      </form>
       </div>
     )
 

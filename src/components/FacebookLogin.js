@@ -204,9 +204,6 @@ class FacebookLogin extends React.Component {
     }
   };
 
-
-
-  // [AdGo] 20.11.2016 - coult not get container class to work
   containerStyle() {
     const style = { transition: 'opacity 0.5s' };
     if (this.state.isProcessing || !this.state.isSdkLoaded || this.props.isDisabled) {

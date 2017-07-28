@@ -16,13 +16,15 @@
     "react-router-dom": "^4.1.1",
     "react-rte": "^0.11.0",
     "react-select": "^1.0.0-rc.5",
-    "react-select-plus": "^1.0.0-rc.5"
+    "react-select-plus": "^1.0.0-rc.5",
+    "recompose": "^0.24.0"
   },
   "devDependencies": {
     "flow-bin": "^0.45.0",
     "node-sass-chokidar": "0.0.1",
     "react-scripts": "1.0.4",
-    "react-tap-event-plugin": "^2.0.1"
+    "react-tap-event-plugin": "^2.0.1",
+    "why-did-you-update": "^0.0.8"
   },
   "scripts": {
     "build-css": "node-sass-chokidar src/style/ -o public/ --output-style=compressed && node-sass-chokidar src/style/ -o src/style/ --output-style=compressed && node-sass-chokidar src/style/ -o build/  --output-style=compressed",

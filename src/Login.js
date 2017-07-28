@@ -31,7 +31,7 @@ class Login extends React.Component {
  }
 
  componentWillMount(){
-
+  console.log( process.env.NODE_ENV )
 
  }
 
@@ -63,12 +63,28 @@ class Login extends React.Component {
     isTablet: false
   }
 
-  login = (e) => {
-    console.log(e);
-    //e.preventDefault();
-    fakeAuth.authenticate(() => {
-      this.setState({ redirectToReferrer: true })
-    }) 
+  login = (e, _ , info) => {
+
+    try {
+      fetch('/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(info)
+      }).then(response => {
+        return response.json();
+      }).then(data => {
+        if (data.err) throw Error(data.err);
+        
+        fakeAuth.authenticate(() => {
+          this.setState({ redirectToReferrer: true })
+        })
+      })
+    }
+    catch (err) {
+      console.trace(err.stack)
+    }
+
 
   }
 
@@ -77,29 +93,46 @@ class Login extends React.Component {
   }
 
   loginGoog = (info) => {
-    
+
+    // try {
+    //   fetch('/login', {
+    //     method: 'POST',
+    //     credentials: 'include',
+    //     headers: {'Content-Type': 'application/json'},
+    //     body: JSON.stringify(info)
+    //   }).then(response => {
+    //     return response.json();
+    //   }).then(data => {
+    //     if (data.err) throw Error(data.err);
+    //   })
+    // }
+    // catch (err) {
+    //   console.trace(err.stack)
+    // }
+
+    console.log(info);
+
   }
 
   loginFb = (info) => {
-    window.FB.getLoginStatus( ({status}) => {
-      if(status == 'connected'){
-        try {
-          fetch('/login', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(info)
-          }).then(response => {
-            return response.json();
-          }).then(data => {
-            if (data.err) throw Error(data.err);
-          })
-        }
-        catch (err) {
-          console.trace(err.stack)
-        }
-      }
-    })
+
+        // try {
+        //   fetch('/login', {
+        //     method: 'POST',
+        //     credentials: 'include',
+        //     headers: {'Content-Type': 'application/json'},
+        //     body: JSON.stringify(info)
+        //   }).then(response => {
+        //     return response.json();
+        //   }).then(data => {
+        //     if (data.err) throw Error(data.err);
+        //   })
+        // }
+        // catch (err) {
+        //   console.trace(err.stack)
+        // }
+  
+
       console.log(info);
   }
 
@@ -131,8 +164,8 @@ class Login extends React.Component {
                 <div className="f f-gap-2 registform-regist__social"> 
                   {/* <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button> */}
                   <FacebookLogin
-                    appId="1658887587468539"
-                    autoLoad={true}
+                    appId={ process.env.NODE_ENV == 'development' ? "761774717317607" : "1658887587468539" }  // for localhost and textra.iondigi.com
+                    autoLoad={false}
                     fields="name,email,picture"
                     scope="public_profile,email,user_birthday"
                     callback={this.loginFb}
@@ -142,10 +175,14 @@ class Login extends React.Component {
                   />
 
                   <GoogleLogin
-                    appId="1658887587468539"
-                    autoLoad={true}
+                    clientId={ process.env.NODE_ENV == 'development'
+                      ? "960245280639-apkq5ilofburuimjtte66313b9r41a44.apps.googleusercontent.com" 
+                      : "592190753761-7h6mnscbc9vjlegb899ikgm07agdh8lv.apps.googleusercontent.com"} // for localhost and textra.iondigi.com
+                    autoLoad={false}
+                    cookiePolicy={'none'}
                     onSuccess={this.loginGoog}
                     textButton={''}
+                    hostedDomain={''}
                     onFailure={this.loginGoog}
                     cssClass="btn btn-primiry btn-normal btn-block google-color"
                     icon={<img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/>}
