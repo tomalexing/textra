@@ -13,7 +13,7 @@ import icon_search from './assets/search.svg';
 import sl from './assets/swap-lang.svg';
 import copy from './assets/icon-copy.svg';
 import './polyfill';
-import { fakeAuth } from './index';
+import { Auth } from './index';
 import {
   BrowserRouter as Router,
   Route,
@@ -46,7 +46,7 @@ import Indicator from './components/Indicator';
 import Timer from './components/Timer';
 import LangLabel from './components/LangLabel';
 import StatefulEditor from './components/StatefulEditor';
-
+import deepEqual from 'deep-equal';
 class DashBoard extends React.Component {
 
   constructor(props) {
@@ -111,13 +111,13 @@ class DashBoard extends React.Component {
       this.setState({mainScreen});
   }
   
-  shouldComponentUpdate(props, state){
-    if(props === this.props && state === this.state){
-      console.log('Prevented render')
-      return false
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
     }
-     console.log('Allowed render')
-     return true
+    console.log('not rerender')
+    return false
   }
 
   render() {
@@ -293,6 +293,15 @@ class HistoryList extends React.Component {
     super(props);
   }
 
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   copy(e) {
     let textAreaSelector = null;
     try {
@@ -406,6 +415,14 @@ class HistoryList extends React.Component {
 
 class Search extends React.Component {
 
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
   render() {
 
     let { currentDate } = this.props
@@ -477,11 +494,12 @@ class Create extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState){
-    if( this.state == nextState && this.props == nextProps){
-      return false
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
     }
-    console.log('rerender')
-    return true
+    console.log('not rerender')
+    return false
   }
 
   currentNumberOfChar({target: {value}}) {
@@ -665,19 +683,6 @@ class Create extends React.Component {
 }
 
 
-
-const PrivateRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={props => (
-    fakeAuth.isAuthenticated ? (
-      <Component {...props} />
-    ) : (
-        <Redirect to={{
-          pathname: '/login',
-          state: { from: props.location }
-        }} />
-      )
-  )} />
-)
 
 
 export default withRouter(DashBoard);

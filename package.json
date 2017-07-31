@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "classnames": "^2.2.5",
+    "deep-equal": "^1.0.1",
     "events": "1.1.1",
     "form-serialize": "^0.7.2",
     "moment": "^2.18.1",
@@ -17,7 +18,10 @@
     "react-rte": "^0.11.0",
     "react-select": "^1.0.0-rc.5",
     "react-select-plus": "^1.0.0-rc.5",
-    "recompose": "^0.24.0"
+    "recompose": "^0.24.0",
+    "save": "^2.3.1",
+    "semantic-ui-react": "^0.71.3",
+    "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
     "flow-bin": "^0.45.0",

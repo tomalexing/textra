@@ -14,18 +14,6 @@ import {
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump } from './utils';
-
-if (process.env.NODE_ENV !== 'production') {
-  const {whyDidYouUpdate} = require('why-did-you-update')
-    let createClass = React.createClass;
-    Object.defineProperty(React, 'createClass', {
-      set: (nextCreateClass) => {
-        createClass = nextCreateClass;
-      }
-    });
-  whyDidYouUpdate(React)
-}
-
 injectTapEventPlugin();
 // ====================================
 // ========= Lazy loadin ==============
@@ -38,33 +26,50 @@ injectTapEventPlugin();
 const Registration = () => <Lazy load={() => import('./Registration')}/>
 
   // eslint-disable-next-line
-const Login = () => <Lazy load={() => import('./Login')}/>
+const Login = () => <Lazy  load={() => import('./Login')}/>
 
   // eslint-disable-next-line
-const DashBoard = () => <Lazy load={() => import('./Dashboard')}/>
+const DashBoard = () => <Lazy  load={() => import('./Dashboard')}/>
 
   // eslint-disable-next-line
-const Test = () => <Lazy load={() => import('./Test')}/>
+const Test = (props) => <Lazy {...props} load={() => import('./Test')}/>
 
   // eslint-disable-next-line
-const Translator = () => <Lazy load={() => import('./Translator')}/>
+const Translator = () => <Lazy {...props} load={() => import('./Translator')}/>
+
+  // eslint-disable-next-line
+const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>
 // ====================================
 // ========= Lazy loadin end ==========
 // ====================================
 
 
-export const fakeAuth = {
-  isAuthenticated: false,
-  authenticate(cb) {
-    this.isAuthenticated = true
-    setTimeout(cb, 100) // fake async
+export const Auth = {
+  isAuthenticated: true,
+  role: 'dev',
+  authenticate(cb, role) {
+    this.isAuthenticated = true;
+    this.role = role;
+    if(this.isAuthenticated!= null && this.role!= null){
+        window.localStorage.setItem('isLoggedIn', this.isAuthenticated);
+        window.localStorage.setItem('userId', this.isAuthenticated)
+    }
+    cb();
   },
   signout(cb) {
-    this.isAuthenticated = false
-    setTimeout(cb, 100)
+    this.isAuthenticated = false;
+    this.role = undefined;
+    window.localStorage.removeItem('isLoggedIn');
+    window.localStorage.removeItem('userId');
+    cb();
   }
 }
+if(Auth.role == undefined){
+  
+  // TODO: Make Ajax request to server for obtain role of the user 
+  // I Should keep role only in App because it can be malfunction
 
+}
 
 
 const Public = () => <h3>Public</h3>
@@ -80,15 +85,14 @@ const App = () => (
               transitionEnterTimeout={300}
               transitionLeaveTimeout={300}
             >
-            <ToDashBoard exact path="/" key={getUniqueKey()}/>
-            <Route path="/dashboard" component={DashBoard} location={location}  key={getUniqueKey()}/>
-            <Route path="/translator" component={Translator} location={location}  key={getUniqueKey()}/>
-            <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
-            <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
-            <Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} />
-            <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
-            
-
+              <ToDashBoard exact path="/" key={getUniqueKey()}/>
+              <Route path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
+              <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
+              <PrivateRoute path="/admin" component={Admin} location={location} role={['admin','dev']} key={getUniqueKey()}/>
+              <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
+              <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
+              <PrivateRoute exact path="/test" component={Test} location={location} role={['dev']}key={getUniqueKey()} />
+              <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
             </ReactCSSTransitionGroup>
 
      )}/>
@@ -98,23 +102,30 @@ const App = () => (
 
 
 const AuthButton = withRouter(({ history }) => (
-  fakeAuth.isAuthenticated ? (
+  
+  Auth.isAuthenticated ? (
     <p>
       Welcome! <button onClick={() => {
-        fakeAuth.signout(() => history.push('/'))
+        Auth.signout(() => history.push('/'))
       }}>Sign out</button>
     </p>
   ) : (
       <p>You are not logged in.</p>
     )
 ))
- 
-const PrivateRoute = ({ component: Component, ...rest }) => (
+
+const PrivateRoute =  ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
-    fakeAuth.isAuthenticated ? (
-        <Component {...props} />
+    Auth.isAuthenticated && rest.role.includes(Auth.role) ? (
+       <Component {...rest}/>
     ) : (
+        Auth.isAuthenticated ?
         <Redirect to={{
+          pathname: '/',
+          state: { from: props.location }
+        }} />
+        :
+         <Redirect to={{
           pathname: '/login',
           state: { from: props.location }
         }} />

@@ -1,5 +1,5 @@
 import React from 'react';
-import {fakeAuth} from './index';
+import {Auth} from './index';
 import mainbg from './assets/main.png';
 import logo from './logo.svg';
 import fb from './assets/fb.svg';
@@ -24,7 +24,7 @@ class Login extends React.Component {
 
   login = () => {
     console.log('registretion')
-    fakeAuth.authenticate(() => {
+    Auth.authenticate(() => {
       this.setState({ redirectToReferrer: true })
     })
   }
@@ -33,7 +33,6 @@ class Login extends React.Component {
     !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
   }
   
-
   render() {
     const { from } = this.props.location.state || { from: { pathname: '/' } }
     const bgPic = {

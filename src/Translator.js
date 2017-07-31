@@ -16,7 +16,7 @@ import icon_posts from "./assets/icon-posts.svg";
 import icon_history from "./assets/icon-history.svg";
 
 import "./polyfill";
-import { fakeAuth } from "./index";
+import { Auth } from "./index";
 import {
   BrowserRouter as Router,
   Route,
@@ -49,6 +49,7 @@ import Timer from "./components/Timer";
 import LangLabel from "./components/LangLabel";
 import StatefulEditor from "./components/StatefulEditor";
 import Indicator from "./components/Indicator";
+import deepEqual from 'deep-equal';
 
 const Routes = {
   root: {
@@ -83,6 +84,7 @@ const Routes = {
 class Translator extends React.Component {
   constructor(props) {
     super(props);
+    debugger;
     this.listeners = [];
     this.doAtDidMount = [];
 
@@ -170,6 +172,15 @@ class Translator extends React.Component {
 
   boundRef = place => (n => (this[place] = n)).bind(this);
 
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   componentWillReceiveProps(props) {
     const { mainScreen, secondScreen } = this.props.location.state || {
       mainScreen: true,
@@ -193,7 +204,7 @@ class Translator extends React.Component {
       (/history/.test(pathname) &&
         pathname.split("/")[activeTabA.length - 1]) ||
       false;
-      
+
     let Feed = {
       wqefeq: {
         uuid: "wqefeq",
@@ -734,6 +745,15 @@ class DisplaySwitcher extends React.Component {
     mounted: false
   };
 
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   componentWillMount() {
     this.setState({ mounted: true });
     this.listeners.push(
@@ -905,6 +925,16 @@ class Query {
 }
 
 class FeedList extends React.Component {
+
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   render() {
     let { currentDate, location: { pathname }, isTablet, _self } = this.props;
     let personal = /personal/.test(pathname);
@@ -1083,6 +1113,15 @@ class Reply extends React.Component {
       console.log(value);
   }
 
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   render() {
     let { currentDate, isTablet, _self } = this.props;
     let publishTime = new Date(currentDate.publishTime);
@@ -1213,6 +1252,16 @@ class Reply extends React.Component {
 
 
 class HistoryList extends React.Component {
+
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   render() {
     let { currentDate, isTablet, _self,  } = this.props;
     const RenderCollection = renderItem => {
@@ -1375,20 +1424,5 @@ class HistoryList extends React.Component {
     );
   }
 }
-
-const PrivateRoute = ({ component: Component, ...rest }) => (
-  <Route
-    {...rest}
-    render={props =>
-      (fakeAuth.isAuthenticated
-        ? <Component {...props} />
-        : <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: props.location }
-            }}
-          />)}
-  />
-);
 
 export default withRouter(Translator);

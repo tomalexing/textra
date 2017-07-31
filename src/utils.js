@@ -8,7 +8,7 @@ export class Lazy extends React.Component {
     // short for "module" but that's a keyword in js, so "mod"
     mod: null
   }
-  
+
   componentWillMount() {
     this.load(this.props)
   }
@@ -29,7 +29,8 @@ export class Lazy extends React.Component {
   }
 
   render() {
-    return  React.createElement('div', null, this.state.mod && React.createElement(this.state.mod, null, null))
+    let {load , ...rest} = this.props;
+    return  React.createElement('div', null, this.state.mod && React.createElement(this.state.mod, rest, null))
   }
 }
 

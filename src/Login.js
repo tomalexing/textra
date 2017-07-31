@@ -1,5 +1,5 @@
 import React from 'react';
-import {fakeAuth} from './index';
+import {Auth} from './index';
 
 import mainbg from './assets/main.png';
 import logo from './assets/logo.png';
@@ -69,16 +69,18 @@ class Login extends React.Component {
       fetch('/login', {
         method: 'POST',
         credentials: 'include',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept'      : 'application/json'},
         body: JSON.stringify(info)
       }).then(response => {
         return response.json();
       }).then(data => {
         if (data.err) throw Error(data.err);
         
-        fakeAuth.authenticate(() => {
+        Auth.authenticate(() => {
           this.setState({ redirectToReferrer: true })
-        })
+        }, data.role)
       })
     }
     catch (err) {

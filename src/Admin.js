@@ -12,11 +12,11 @@ import icon_letternum from "./assets/letter-number.svg";
 import icon_search from "./assets/search.svg";
 import sl from "./assets/swap-lang.svg";
 import copy from "./assets/icon-copy.svg";
-import icon_posts from "./assets/icon-posts.svg";
-import icon_history from "./assets/icon-history.svg";
+import users from "./assets/users.svg";
+import appeals from "./assets/appeals.svg";
 
 import "./polyfill";
-import { fakeAuth } from "./index";
+import { Auth } from "./index";
 import {
   BrowserRouter as Router,
   Route,
@@ -50,37 +50,36 @@ import LangLabel from "./components/LangLabel";
 import StatefulEditor from "./components/StatefulEditor";
 import Indicator from "./components/Indicator";
 
+
+import { Button, Checkbox, Icon, Table } from 'semantic-ui-react'
+
+
 const Routes = {
   root: {
-    path: "/translator",
+    path: "/admin",
     exact: true
   },
-  feed: {
-    path: "/translator/feed",
+  users: {
+    path: "/admin/users",
     exact: false
   },
-  common: {
-    path: "/translator/feed/common",
-    exact: false
-  },
-  personal: {
-    path: "/translator/feed/personal",
-    exact: false
-  },
-  history: {
-    path: "/translator/history",
+  user: {
+    path: "/admin/user",
     exact: false,
     param: "/:id"
   },
-
-  reply: {
-    path: "/translator/reply",
+  appeals: {
+    path: "/admin/appeals",
+    exact: false
+  },
+  appeal: {
+    path: "/admin/appeals",
     exact: false,
     param: "/:id"
   }
 };
 
-class Translator extends React.Component {
+class Admin extends React.Component {
   constructor(props) {
     super(props);
     this.listeners = [];
@@ -101,9 +100,17 @@ class Translator extends React.Component {
     sidebar: false
   };
 
+  addStyleSeheet(){
+    let style = document.createElement('link');
+    style.rel = "stylesheet";
+    style.href = "//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.11/semantic.min.css";
+    let element = document.getElementsByTagName('style')[0];
+    element.insertAdjacentElement('afterend',style);
+  }
+
   componentWillMount() {
     this.doAtDidMount.forEach(func => func());
-
+    this.addStyleSeheet();
     // Responsive stuff
     this.listeners.push(
       listener(
@@ -186,11 +193,11 @@ class Translator extends React.Component {
     let { location: { pathname } } = this.props;
     let activeTabA = pathname.split("/");
     let activeTab =
-      (/reply/.test(pathname) && pathname.split("/")[activeTabA.length - 1]) ||
+      (/user(\/.+)?$/.test(pathname) && pathname.split("/")[activeTabA.length - 1]) ||
       false;
-    let activeFeed = /feed/.test(pathname);
+    let allUsers = /users/.test(pathname);
     let activeHistory =
-      (/history/.test(pathname) &&
+      (/appeals/.test(pathname) &&
         pathname.split("/")[activeTabA.length - 1]) ||
       false;
       
@@ -430,7 +437,9 @@ class Translator extends React.Component {
       ? find(inProgress, activeTab)
       : activeHistory
           ? HistoryObject
-          : activeFeed ? Feed : {};
+          : allUsers ? Feed : {};
+      
+
     let { isTablet, sidebar, secondScreen, mainScreen } = this.state;
 
     Object.defineProperty(currentDate, "isTablet", {
@@ -441,7 +450,7 @@ class Translator extends React.Component {
     });
 
     return (
-      <div className="f f-col outer translator">
+      <div className="f f-col outer admin">
         <Header />
         <div className="f h100" ref={n => this.boundRef("bg")(n)}>
           <div
@@ -458,66 +467,31 @@ class Translator extends React.Component {
                     "f f-align-1-2 translator-menu__item translator-menu__item__level-1"
                   }
                   to={{
-                    pathname: Routes["feed"].path,
+                    pathname: Routes["users"].path,
                     state: { mainScreen: true }
                   }}
                 >
                   <span className={"f f-align-2-2 translator-menu__item__icon"}>
-                    <img src={icon_posts} />
+                    <img src={users} />
                   </span>
-                  <span>Запросы</span>
-                  <span className={"f f-align-2-2 translator-menu__item__info"}>
-                    3
-                  </span>
+                  <span>Пользователи</span>
+                 
                 </NavLink>
-                <NavLink
-                  className={
-                    "f f-align-1-2 translator-menu__item translator-menu__item__level-2"
-                  }
-                  to={{
-                    pathname: Routes["common"].path,
-                    state: { mainScreen: true }
-                  }}
-                >
-                  <span
-                    className={"f f-align-2-2 translator-menu__item__icon"}
-                  />
-                  <span>Общие</span>
-                  <span className={"f f-align-2-2 translator-menu__item__info"}>
-                    2
-                  </span>
-                </NavLink>
-                <NavLink
-                  className={
-                    "f f-align-1-2 translator-menu__item translator-menu__item__level-2"
-                  }
-                  to={{
-                    pathname: Routes["personal"].path,
-                    state: { mainScreen: true }
-                  }}
-                >
-                  <span
-                    className={"f f-align-2-2 translator-menu__item__icon"}
-                  />
-                  <span>Персональные</span>
-                  <span className={"f f-align-2-2 translator-menu__item__info"}>
-                    1
-                  </span>
-                </NavLink>
+                <div className="translator-menu__delimiter" />
                 <NavLink
                   className={
                     "f f-align-1-2 translator-menu__item translator-menu__item__level-1"
                   }
                   to={{
-                    pathname: Routes["history"].path,
+                    pathname: Routes["appeals"].path,
                     state: { mainScreen: false,
-                            secondScreen:true }
+                            secondScreen: true }
                   }}
                 >
                   <span className={"f f-align-2-2 translator-menu__item__icon"}>
-                    <img src={icon_history} />
+                    <img src={appeals} />
                   </span>
-                  <span>История</span>
+                  <span>Запросы</span>
                 </NavLink>
                 <div className="translator-menu__delimiter" />
               </ul>
@@ -527,7 +501,7 @@ class Translator extends React.Component {
 
           {/*  Left Expanded Area  */}
           <Route
-            path={Routes["history"].path}
+            path={Routes["user"].path}
             render={() => (
               <div
                 ref={n => (this.secondScreen = n)}
@@ -548,28 +522,6 @@ class Translator extends React.Component {
               </div>
             )}
           />
-          <Route
-            ref={n => (this.sidebar = n)}
-            path={Routes["reply"].path}
-            render={() => (
-              <div
-                ref={n => (this.secondScreen = n)}
-                style={{
-                  display: `${!isTablet ? "flex" : secondScreen ? "flex" : "none"}`
-                }}
-                className="f f-align-2-2 outer-left__expanded"
-              >
-                <SideList
-                  List={inProgress}
-                  uuidOfActiveTab={activeTab}
-                  route={"reply"}
-                  title="В работе"
-                  isTablet={isTablet}
-                  this={this}
-                />
-              </div>
-            )}
-          />
            {/*  Ends Left Expanded Area  */}
 
            {/*  Main Area  */}
@@ -580,26 +532,26 @@ class Translator extends React.Component {
                 ref={n => (this.mainScreen = n)}
                 style={{
                   display: `${!isTablet ? "flex" : mainScreen ? "flex" : "none"}`,
-                  background: `${activeFeed ? "#f5f5f5": "#fff"}`
+                  background: `${allUsers ? "#f5f5f5": "#fff"}`
                 }}
-                className={`f outer-main__expanded`}
+                className={`f outer-main__full`}
                 ref={n => (this.toggleElem = n)}
               >
                 <div className="main f f-col f-align-1-2">
                   <Switch>
                     <RoutePassProps
                       exact
-                      redirect={Routes["feed"].path}
+                      redirect={Routes["users"].path}
                       path={Routes["root"].path}
-                      component={FeedList}
+                      component={Users}
                       isTablet={this.state.isTablet}
                       currentDate={currentDate}
                       _self={this}
                     />
                     <RoutePassProps
                       exact
-                      path={Routes["feed"].path}
-                      component={FeedList}
+                      path={Routes["users"].path}
+                      component={Users}
                       currentDate={currentDate}
                       isTablet={this.state.isTablet}
                       _self={this}
@@ -607,30 +559,23 @@ class Translator extends React.Component {
                     />
                     <RoutePassProps
                       exact
-                      path={Routes["common"].path}
-                      component={FeedList}
+                      path={Routes["appeals"].path}
+                      component={Users}
                       currentDate={currentDate}
                       isTablet={this.state.isTablet}
                       _self={this}
                       common
                     />
                     <RoutePassProps
-                      path={Routes["personal"].path}
-                      component={FeedList}
+                      path={`${Routes["user"].path}${Routes["user"].param}`}
+                      component={Users}
                       currentDate={currentDate}
                       _self={this}
                       isTablet={this.state.isTablet}
                     />
                     <RoutePassProps
-                      path={`${Routes["history"].path}${Routes["history"].param}`}
-                      component={HistoryList}
-                      currentDate={currentDate}
-                      _self={this}
-                      isTablet={this.state.isTablet}
-                    />
-                    <RoutePassProps
-                      path={`${Routes["reply"].path}${Routes["reply"].param}`}
-                      component={Reply}
+                      path={`${Routes["appeals"].path}${Routes["appeals"].param}`}
+                      component={Users}
                       currentDate={currentDate}
                       _self={this}
                       isTablet={this.state.isTablet}
@@ -641,35 +586,6 @@ class Translator extends React.Component {
             )}
           />
          {/* Ends Main Area  */}
-
-         {/*  Right Expended Area  */}
-          <Route
-            path={Routes["feed"].path}
-            render={() => (
-              <div
-                ref={n => (this.secondScreen = n)}
-                style={{
-                  display: `${!isTablet ? "flex" : secondScreen ? "flex" : "none"}`
-                }}
-                className="f f-align-2-2 outer-right__expanded"
-              >
-                <SideList
-                  List={inProgress}
-                  uuidOfActiveTab={activeTab}
-                  route={"reply"}
-                  title="В работе"
-                  isTablet={isTablet}
-                  this={this}
-                   Left={{
-                        leftBtn: true,
-                        leftBtnName: "Меню",
-                        newLeftBtnState: { mainScreen: false, sidebar: true, secondScreen: true }
-                  }}
-                />
-              </div>
-            )}
-          />
-        {/*  Ends Right Expended Area  */}
         </div>
       </div>
     );
@@ -727,61 +643,6 @@ const BreadCrumbs = ({
     : shownOnDesktop &&  <div className="f f-align-1-2 translator-tab__topline"> <span>{title}</span> </div>;
 };
 
-class DisplaySwitcher extends React.Component {
-  listeners = [];
-  state = {
-    isTablet: false,
-    mounted: false
-  };
-
-  componentWillMount() {
-    this.setState({ mounted: true });
-    this.listeners.push(
-      listener(
-        window,
-        "resize",
-        debounce(
-          e => {
-            let isTablet = e.target.innerWidth <= 768 ? true : false;
-            if (this.state.isTablet !== isTablet) this.setState({ isTablet });
-          },
-          200,
-          false
-        ),
-        false
-      )
-    );
-  }
-
-  switchPanel = e => {
-    !hasClass(this.props.toggleElem, "toggled")
-      ? addClass(this.props.toggleElem, "toggled")
-      : removeClass(this.props.toggleElem, "toggled");
-  };
-
-  componentWillUnmount() {
-    this.listeners.forEach(f => f());
-  }
-
-  render() {
-    let { mounted, isTablet } = this.state;
-    return (
-      <div className="DisplaySwitcher f f-col">
-        <p className="u-mb-4">
-          {" "}
-          {mounted && isTablet
-            ? <button
-                className="btn btn-flat"
-                onClick={debounce(this.switchPanel.bind(this), 500, false)}
-              >
-                {" "}переключит
-              </button>
-            : null}
-        </p>
-      </div>
-    );
-  }
-}
 
 const SideList = ({
   List,
@@ -904,175 +765,72 @@ class Query {
     );
 }
 
-class FeedList extends React.Component {
+class Users extends React.Component {
   render() {
     let { currentDate, location: { pathname }, isTablet, _self } = this.props;
-    let personal = /personal/.test(pathname);
-    let common = /common/.test(pathname);
-    let query = {
-      perPage: !personal && !common ? -1 : 5,
-      page: 1,
-      fielteredField: {
-        field1: {
-          name: "isPersonal",
-          equals: personal && !common, // personal and not common at one time
-          diactivate: !personal && !common // is active
-        }
-      },
-      fielteredFieldRule: "some" // some || every
-    };
-    let FeedQuery = new Query(currentDate, query),
-      filteredFeed = FeedQuery.filter();
 
-    const RenderCollection = renderItem => {
-      return (
-        <div>
-            <BreadCrumbs
-                this={_self}
-                isTablet={isTablet}
-                Title={{
-                    title: "Запросы",
-                    shownOnDesktop: false
-                }}
-                Left={{
-                    leftBtn: true,
-                    leftBtnName: "Меню",
-                    newLeftBtnState: { mainScreen: true, sidebar: true }
-                    }}
-                Right={{
-                rightBtn: true,
-                rightBtnName: "Текущие",
-                newRightBtnState: {
-                    mainScreen: false,
-                    secondScreen: true,
-                    sidebar: false
-                }
-                }}
-            />
-            {!isTablet && <div className="f f-align-1-2 translator-feed__topline"><span>Запросы</span></div>}
-          {filteredFeed.map((feedData, index) => {
-            let publishTime = new Date(feedData.publishTime);
-            return renderItem(feedData, index, publishTime);
-          })}
-        </div>
-      );
-    };
+
     return Object.entries(currentDate).length === 0
-      ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
-          <div className={"translator-feed__avatar"}>
-            <img src={avatar} />
-          </div>
-          <div className={"f f-align-2-2 translator-feed__placeholder"}>
-            <span>Запросы на перевод отсутствуют</span>
-          </div>
+      ? <div className={"f f-align-2-33 admin-list "}>
+            <span>Пользователи отсутствуют</span>
         </div>
-      : RenderCollection((feed, index, publishTime) => (
-          <div key={index} className={"f f-align-1-33 translator-feed u-mx-3 u-my-2"}>
-            <div className={"translator-feed__avatar"}>
-              <img src={feed.avatar} alt={feed.nickname} />
-              {currentDate.isTablet &&
-                <div className={"translator-feed__content__topbar__name"}>
-                  {feed.nickname}
-                </div>}
-              {currentDate.isTablet &&
-                feed.isPersonal &&
-                <div className={"translator-feed__content__topbar__personal"}>
-                  персональный
-                </div>}
-              {currentDate.isTablet &&
-                <div className={"translator-feed__content__topbar__date"}>
-                  {publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())}
-                  ,
-                  {" "}{publishTime.getFullYear()}{" "}
-                  -
-                  {" "}{publishTime.getHours()}
-                  :
-                  {getFullMinutes(publishTime.getMinutes())}
-                </div>}
-            </div>
-            <div className={"f f-1-2 f-col translator-feed__content"}>
-              <div className={"f f-1-2 translator-feed__content__topbar"}>
-                {!currentDate.isTablet &&
-                  <div className={"translator-feed__content__topbar__name"}>
-                    {feed.nickname}
-                  </div>}
-                {!currentDate.isTablet &&
-                  feed.isPersonal &&
-                  <div className={"translator-feed__content__topbar__personal"}>
-                    персональный
-                  </div>}
-                {!currentDate.isTablet &&
-                  <div className={"translator-feed__content__topbar__date"}>
-                    {publishTime.getDate()}
-                    {" "}
-                    {getMounthName(publishTime.getMonth())}
-                    ,
-                    {" "}
-                    {publishTime.getFullYear()}
-                    {" "}
-                    -
-                    {" "}
-                    {publishTime.getHours()}
-                    :
-                    {getFullMinutes(publishTime.getMinutes())}
-                  </div>}
-              </div>
-              <div className={"translator-feed__content__text"}>
-                {feed.content}
-              </div>
-              <div
-                className={
-                  "f f-align-1-2 f-gap-4 translator-feed__content__bottombar"
-                }
-              >
-                <LangLabel from={feed.from} to={feed.to} />
-                <Indicator
-                  className={"f f-align-2-2"}
-                  icon={icon_dur}
-                  value={humanReadableTime(feed.duration)}
-                  hint={"Длительность перевода"}
-                />
-                <Indicator
-                  className={"f f-align-2-2"}
-                  icon={
-                    <Timer
-                      start={feed.startWorkingTime}
-                      duration={feed.duration}
-                      isBig={true}
-                    />
-                  }
-                  value={humanReadableTime(feed.duration - (new Date() - new Date(feed.startWorkingTime)) / 1000)}
-                  hint={"Оставшееся время"}
-                />
-                <Indicator
-                  className={"f f-align-2-2"}
-                  icon={icon_letternum}
-                  value={feed.letterNumber}
-                  hint={"Количество символов"}
-                />
-                <Indicator
-                  className={"f f-align-2-2"}
-                  icon={icon_cost}
-                  value={feed.cost}
-                  hint={"Стоимость"}
-                />
-              </div>
-            </div>
-            <div className={"f f-align-2-2 translator-feed__constols"}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="28"
-                height="24"
-                viewBox="0 0 28 24"
-              >
-                <path
-                  fill="#9ca9b2"
-                  d="M26.22 0L8.64 20.74l-7.39-6.9L0 15.17l8.1 7.53.71.65.59-.71L27.59 1.16z"
-                />
-              </svg>
-            </div>
-          </div>
-        ));
+      :  <div>
+           <div className="f f-align-1-2 admin-list__topline"><span>Пользователи</span></div>
+              <Table compact celled definition>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell />
+                  <Table.HeaderCell>Name</Table.HeaderCell>
+                  <Table.HeaderCell>Registration Date</Table.HeaderCell>
+                  <Table.HeaderCell>E-mail address</Table.HeaderCell>
+                  <Table.HeaderCell>Premium Plan</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+
+              <Table.Body>
+                <Table.Row>
+                  <Table.Cell collapsing>
+                    <Checkbox slider />
+                  </Table.Cell>
+                  <Table.Cell>John Lilki</Table.Cell>
+                  <Table.Cell>September 14, 2013</Table.Cell>
+                  <Table.Cell>jhlilk22@yahoo.com</Table.Cell>
+                  <Table.Cell>No</Table.Cell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.Cell collapsing>
+                    <Checkbox slider />
+                  </Table.Cell>
+                  <Table.Cell>Jamie Harington</Table.Cell>
+                  <Table.Cell>January 11, 2014</Table.Cell>
+                  <Table.Cell>jamieharingonton@yahoo.com</Table.Cell>
+                  <Table.Cell>Yes</Table.Cell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.Cell collapsing>
+                    <Checkbox slider />
+                  </Table.Cell>
+                  <Table.Cell>Jill Lewis</Table.Cell>
+                  <Table.Cell>May 11, 2014</Table.Cell>
+                  <Table.Cell>jilsewris22@yahoo.com</Table.Cell>
+                  <Table.Cell>Yes</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+
+              <Table.Footer fullWidth>
+                <Table.Row>
+                  <Table.HeaderCell />
+                  <Table.HeaderCell colSpan='4'>
+                    <Button floated='right' icon labelPosition='left' primary size='small'>
+                      <Icon name='user' /> Add User
+                    </Button>
+                    <Button size='small'>Approve</Button>
+                    <Button disabled size='small'>Approve All</Button>
+                  </Table.HeaderCell>
+                </Table.Row>
+              </Table.Footer>
+            </Table>
+        </div>
   }
 }
 
@@ -1376,19 +1134,4 @@ class HistoryList extends React.Component {
   }
 }
 
-const PrivateRoute = ({ component: Component, ...rest }) => (
-  <Route
-    {...rest}
-    render={props =>
-      (fakeAuth.isAuthenticated
-        ? <Component {...props} />
-        : <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: props.location }
-            }}
-          />)}
-  />
-);
-
-export default withRouter(Translator);
+export default withRouter(Admin);
