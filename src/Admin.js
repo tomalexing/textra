@@ -37,7 +37,8 @@ import {
   sleep,
   humanReadableTime,
   getMounthName,
-  getFullMinutes
+  getFullMinutes,
+  dump
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -51,7 +52,7 @@ import StatefulEditor from "./components/StatefulEditor";
 import Indicator from "./components/Indicator";
 
 
-import { Button, Checkbox, Icon, Table } from 'semantic-ui-react'
+import { Button, Checkbox, Icon, Table, Dropdown } from 'semantic-ui-react'
 
 
 const Routes = {
@@ -79,6 +80,179 @@ const Routes = {
   }
 };
 
+
+function swap(items, firstIndex, secondIndex){
+    var temp = items[firstIndex];
+    items[firstIndex] = items[secondIndex];
+    items[secondIndex] = temp;
+}
+
+function partition(items, left, right, item, comporator) {
+
+    var pivot   = items[Math.floor((right + left) / 2)],
+        i       = left,
+        j       = right;
+
+
+    while (i <= j) {
+
+        while (comporator(items[i], pivot, false, item)) {
+            i++;
+        }
+
+        while (comporator(items[j], pivot, true, item)) {
+            j--;
+        }
+
+        if (i <= j) {
+            swap(items, i, j);
+            i++;
+            j--;
+        }
+    }
+
+    return i;
+}
+function quickSort(items, left, right, item, comporator) {
+
+    var index;
+
+    if (items.length > 1) {
+
+        left = typeof left != "number" ? 0 : left;
+        right = typeof right != "number" ? items.length - 1 : right;
+
+        index = partition(items, left, right, item, comporator);
+
+        if (left < index - 1) {
+            quickSort(items, left, index - 1, item, comporator)
+        }
+
+        if (index < right) {
+            quickSort(items, index, right, item, comporator)
+        }
+
+    }
+
+    return items;
+};
+    // Types of user :
+    // u - user
+    // c - controller
+    // t - translater
+   
+const UsersList = [
+      {
+        uuid: "qwerqwerqwer",
+        nickname: "aaaa",
+        type: 'u',
+        email: 'nickmy@yandex.ru',
+        avatar: avatar,
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 10000),
+        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
+        duration: 1341,
+        letterNumber: 213,
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        isPersonal: false
+      },
+       {
+        uuid: "lkhgghk",
+        nickname: "zfdfsddf",
+        email: 'helpme@yandex.ru',
+        avatar: avatar,
+        type: 'c',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 10065500),
+        duration: 431241,
+        letterNumber: 123,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        isPersonal: true
+      },
+      {
+        uuid: "vnbmnbmhg",
+        nickname: "alex",
+        email: 'yiyiyiyi@mail.ru',
+        avatar: avatar,
+        type: 't',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
+        registrationTime: new Date(new Date() - 10000000),
+        duration: 1341,
+        letterNumber: 213,
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        isPersonal: false
+      },
+      {
+        uuid: "bertu",
+        nickname: "rgsgfgsa",
+        email: 'yiyiyiyi@mail.ru',
+        avatar: avatar,
+        type: 'u',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 10),
+        duration: 431241,
+        letterNumber: 123,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        isPersonal: true
+      },
+      {
+        uuid: "wasdffeq",
+        nickname: "bfsbs",
+        email: 'dsgsgsgdg@mail.ru',
+        avatar: avatar,
+        type: 'c',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
+        registrationTime: new Date(new Date() - 1000),
+        duration: 1341,
+        letterNumber: 213,
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        isPersonal: false
+      },
+      {
+        uuid: "wasgfasrq",
+        nickname: "asdasdas",
+        email: 'mtnbvcx@mail.ru',
+        avatar: avatar,
+        type: 'c',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 1000000),
+        duration: 431241,
+        letterNumber: 123,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        isPersonal: true
+      }
+];
+
+
 class Admin extends React.Component {
   constructor(props) {
     super(props);
@@ -89,6 +263,9 @@ class Admin extends React.Component {
     this.renders = 0;
 
     this.boundRef = this.boundRef.bind(this);
+    this.changeUsersList = this.changeUsersList.bind(this);
+    this.deleteUserFromList = this.deleteUserFromList.bind(this);
+    this.sortCollection = this.sortCollection.bind(this);
   }
 
   state = {
@@ -97,7 +274,8 @@ class Admin extends React.Component {
     isTablet: false,
     mainScreen: true,
     secondScreen: false,
-    sidebar: false
+    sidebar: false,
+    UsersList: null
   };
 
   addStyleSeheet(){
@@ -133,6 +311,9 @@ class Admin extends React.Component {
     }
 
     // Responsive end
+    sleep(1000);
+    this.setState({UsersList});
+
   }
 
   async componentDidMount() {
@@ -159,6 +340,90 @@ class Admin extends React.Component {
       await sleep(Math.random() * 3000000);
     }
     console.log(this);
+  }
+
+  changeUsersList(uuid, value){
+    let self = this;
+    let inx
+    self.state.UsersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+     return new Promise(r => {
+       this.setState(Object.assign(self.state.UsersList[inx], {type: value}),r)
+     })
+  }
+
+  deleteUserFromList(uuid){
+    let self = this;
+    let inx
+    self.state.UsersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+    return new Promise(r => {
+        let list = Object.assign([], this.state.UsersList);
+        list.splice(inx,1);
+        this.setState(Object.assign(self.state.UsersList, {UsersList:list}),r);
+      })
+  }
+
+  sortCollection({columnNameToSort, columnSortDirection}){
+
+    console.time('sort');
+    let sortedList = quickSort(Object.assign([], this.state.UsersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
+      if (item){ // if its object
+        if(!(item in val1))
+          throw new Error('Item not in the Object, check Object for Comporator');
+
+        val1 = val1[item];
+        val2 = val2[item];
+      }
+
+      if(typeof val1 === 'number' &&  typeof val2 === 'number'){
+       if(pos)
+          return val1 > val2
+       else 
+          return val1 < val2
+      }
+
+      if(typeof val1 === 'string' &&  typeof val2 === 'string'){
+        let l1 = val1.length, l2 = val2.length, i = 0;
+
+        while(i < Math.min(l1, l2)){
+          if(val1.charCodeAt(i) === val2.charCodeAt(i)){
+            i++;
+            if( i === Math.min(l1, l2) ){
+               if (pos)
+                return l1 > l2
+              else 
+                return l1 < l2
+              }
+            continue;
+          }
+          if (pos)
+            return val1.charCodeAt(i) > val2.charCodeAt(i)
+          else 
+            return val1.charCodeAt(i) < val2.charCodeAt(i)
+        }
+      }
+
+      if(val1 instanceof Date &&  val2 instanceof Date){
+
+        val1 = val1.getTime();
+        val2 = val2.getTime();
+
+        if(pos)
+          return val1 > val2
+        else 
+          return val1 < val2
+      }
+    }); // null for omit
+    console.timeEnd('sort');
+    // sortedList = sortedList.reduce((acum, val, idx) => {
+    //   acum[val['uuid']] = val;
+    //   return acum;
+    // }, {})
+    if (columnSortDirection == 'ascending'){
+      sortedList = sortedList.reverse();
+    }
+
+    this.setState(Object.assign(this.state, {UsersList:sortedList}));
+
   }
 
   list() {
@@ -201,161 +466,6 @@ class Admin extends React.Component {
         pathname.split("/")[activeTabA.length - 1]) ||
       false;
       
-    let Feed = {
-      wqefeq: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wqerq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      wqtdsq: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wqegsfgs: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      wasdffeq: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wasgfasrq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      wagsas: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      gasfrq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: false
-      },
-      iytlk: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wryhrjrrq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: false
-      }
-    };
-    // Feed = {
-
-    // }
 
     const inProgress = {
       wqefeq: {
@@ -432,22 +542,15 @@ class Admin extends React.Component {
     };
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
-
+    let {UsersList} = this.state;
     let currentDate = activeTab
       ? find(inProgress, activeTab)
       : activeHistory
           ? HistoryObject
-          : allUsers ? Feed : {};
+          : allUsers ? UsersList : {};
       
 
     let { isTablet, sidebar, secondScreen, mainScreen } = this.state;
-
-    Object.defineProperty(currentDate, "isTablet", {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value: isTablet
-    });
 
     return (
       <div className="f f-col outer admin">
@@ -555,7 +658,9 @@ class Admin extends React.Component {
                       currentDate={currentDate}
                       isTablet={this.state.isTablet}
                       _self={this}
-                      personal
+                      changeUsersList = {this.changeUsersList}
+                      deleteUserFromList = {this.deleteUserFromList} 
+                      sortCollection = {this.sortCollection}
                     />
                     <RoutePassProps
                       exact
@@ -766,69 +871,163 @@ class Query {
 }
 
 class Users extends React.Component {
+
+  constructor(p){
+    super(p);
+
+    this.changeTypeOfUser = this.changeTypeOfUser.bind(this)
+    this.deleteUser = this.deleteUser.bind(this)
+    this.sortMe = this.sortMe.bind(this)
+
+  }
+
+  state = {
+    loading: {
+      is: false,
+      uuid: undefined
+    },
+    deleting:{
+      is: false,
+      uuid: undefined
+    },
+    sorting:{
+      columnNameToSort: undefined,
+      columnSortDirection: 'descending'
+    }
+  }
+
+  changeTypeOfUser(uuid, _ , {value, defaultValue}){
+    let argsAr  = Array.prototype.slice.call(arguments);
+    console.log(argsAr);
+
+    if(defaultValue == value) // do nothing if nothing has changed
+      return 
+
+    this.setState(Object.assign(this.state,{
+      loading:{
+        is: true,
+        uuid
+      }
+    }))
+
+    return new Promise(resolve => setTimeout(resolve ,1000))
+                  .then(_ => {
+                    return this.props.changeUsersList(uuid, value)
+                  }).then(_ => {
+                    this.setState(Object.assign(this.state,{
+                      loading:{
+                        is: false,
+                        uuid: undefined
+                      }
+                    }))
+                  })
+  }
+
+  deleteUser (uuid){
+
+    this.setState(Object.assign(this.state,{
+      deleting:{
+        is: true,
+        uuid
+      }
+    }))
+
+    return new Promise(resolve => setTimeout(resolve ,1000))
+              .then(_ => {
+                return this.props.deleteUserFromList(uuid)
+              }).then(_ => {
+                this.setState(Object.assign(this.state,{
+                  deleting:{
+                    is: false,
+                    uuid: undefined
+                  }
+                }))
+              })
+  }
+
+  sortMe  = (columnNameToSort) => () => {
+    let self = this;
+
+    if(columnNameToSort == self.state.sorting.columnNameToSort){
+
+      self.setState(Object.assign(self.state.sorting, {
+        columnSortDirection: self.state.sorting.columnSortDirection === 'ascending' ? 'descending' : 'ascending'
+      }), self.props.sortCollection({
+        columnNameToSort,
+        columnSortDirection: self.state.sorting.columnSortDirection === 'ascending' ? 'descending' : 'ascending'
+      }))
+      return
+    }
+
+    self.setState(Object.assign(self.state,{
+      sorting:{
+        columnNameToSort,
+        columnSortDirection: 'descending'
+      }
+    }), self.props.sortCollection({
+        columnNameToSort,
+        columnSortDirection: 'descending'
+      }))
+  }
+
   render() {
     let { currentDate, location: { pathname }, isTablet, _self } = this.props;
+    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}} = this.state;
+    let self = this;
+    const Roles = [
+      {
+        text: 'Пользователь',
+        value: 'u',
+        icon: { name: 'circle', color: 'grey', size: 'small' },
+     },
+    {
+        text: 'Контроллер',
+        value: 'c',
+        icon: { name: 'circle', color: 'red', size: 'small' },
+     },
+    {
+        text: 'Переводчик',
+        value: 't',
+        icon: { name: 'circle', color: 'blue', size: 'small' },
+     }, 
+    ];
 
-
-    return Object.entries(currentDate).length === 0
+    const findIcon = (objs, id) => Object.values(objs).find(o => o.value == id)['icon'];
+    return currentDate.length === 0
       ? <div className={"f f-align-2-33 admin-list "}>
             <span>Пользователи отсутствуют</span>
         </div>
       :  <div>
            <div className="f f-align-1-2 admin-list__topline"><span>Пользователи</span></div>
-              <Table compact celled definition>
+              <Table compact fixed celled  sortable={true} style={{maxWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>
               <Table.Header>
                 <Table.Row>
-                  <Table.HeaderCell />
-                  <Table.HeaderCell>Name</Table.HeaderCell>
-                  <Table.HeaderCell>Registration Date</Table.HeaderCell>
-                  <Table.HeaderCell>E-mail address</Table.HeaderCell>
-                  <Table.HeaderCell>Premium Plan</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort == 'nickname' ? columnSortDirection : null} onClick={this.sortMe('nickname')}>Name</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort == 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort == 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort == 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
+                  <Table.HeaderCell textAlign='center' >Delete</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
-
               <Table.Body>
-                <Table.Row>
-                  <Table.Cell collapsing>
-                    <Checkbox slider />
-                  </Table.Cell>
-                  <Table.Cell>John Lilki</Table.Cell>
-                  <Table.Cell>September 14, 2013</Table.Cell>
-                  <Table.Cell>jhlilk22@yahoo.com</Table.Cell>
-                  <Table.Cell>No</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell collapsing>
-                    <Checkbox slider />
-                  </Table.Cell>
-                  <Table.Cell>Jamie Harington</Table.Cell>
-                  <Table.Cell>January 11, 2014</Table.Cell>
-                  <Table.Cell>jamieharingonton@yahoo.com</Table.Cell>
-                  <Table.Cell>Yes</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell collapsing>
-                    <Checkbox slider />
-                  </Table.Cell>
-                  <Table.Cell>Jill Lewis</Table.Cell>
-                  <Table.Cell>May 11, 2014</Table.Cell>
-                  <Table.Cell>jilsewris22@yahoo.com</Table.Cell>
-                  <Table.Cell>Yes</Table.Cell>
-                </Table.Row>
+                {currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
+                  <Table.Row key={index}>
+                    <Table.Cell><Link to={`/admin/user/${uuid}`}>{nickname}</Link></Table.Cell>
+                    <Table.Cell>{email}</Table.Cell>
+                    {/* {dump(find(Roles, type))} */}
+                    <Table.Cell style={{overflow: 'visible'}}><Icon {...findIcon(Roles, type)} />
+                      <Dropdown inline 
+                      {...(loading.is && loading.uuid === uuid && {loading:true})} 
+                      {...(loading.is && {disabled:true})} options={Roles} defaultValue={type} 
+                      onChange={this.changeTypeOfUser.bind(self, uuid)}/>
+                    </Table.Cell>
+                    <Table.Cell>{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
+                    <Table.Cell  textAlign='center'>
+                      <Button  {...(deleting.is && {disabled:true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} icon color='blue' size='small'><Icon name='delete' /></Button>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
               </Table.Body>
-
-              <Table.Footer fullWidth>
-                <Table.Row>
-                  <Table.HeaderCell />
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' icon labelPosition='left' primary size='small'>
-                      <Icon name='user' /> Add User
-                    </Button>
-                    <Button size='small'>Approve</Button>
-                    <Button disabled size='small'>Approve All</Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
             </Table>
         </div>
   }
