@@ -52,7 +52,7 @@ import StatefulEditor from "./components/StatefulEditor";
 import Indicator from "./components/Indicator";
 
 
-import { Button, Checkbox, Icon, Table, Dropdown } from 'semantic-ui-react'
+import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
 
 
 const Routes = {
@@ -69,6 +69,11 @@ const Routes = {
     exact: false,
     param: "/:id"
   },
+  history: {
+    path: "/admin/user/:id/history",
+    exact: false,
+    param: "/:history"
+  },
   appeals: {
     path: "/admin/appeals",
     exact: false
@@ -79,6 +84,42 @@ const Routes = {
     param: "/:id"
   }
 };
+
+//  'a' resorved for ALL
+const Roles = [
+  {
+    text: 'Пользователь',
+    value: 'u', //  user
+    icon: { name: 'circle', color: 'grey', size: 'small' },
+  },
+  {
+    text: 'Контроллер',
+    value: 'c', // consroller
+    icon: { name: 'circle', color: 'red', size: 'small' },
+  },
+  {
+    text: 'Переводчик',
+    value: 't', // translator
+    icon: { name: 'circle', color: 'blue', size: 'small' },
+  },
+   {
+    text: 'Стать переводчиком',
+    value: 'p', // possibility
+    icon: { name: 'circle', color: 'blue', size: 'small' },
+  }, 
+   {
+    text: 'Жалоба',
+    value: 'g', // grumble
+    icon: { name: 'circle', color: 'red', size: 'small' },
+  }, 
+   {
+    text: 'Другое',
+    value: 'o', // other
+    icon: { name: 'circle', color: 'grey', size: 'small' },
+  }, 
+];
+
+const findIcon = (objs, id, prop = 'icon') => Object.values(objs).find(o => o.value == id)[prop];
 
 
 function swap(items, firstIndex, secondIndex){
@@ -140,7 +181,10 @@ function quickSort(items, left, right, item, comporator) {
     // u - user
     // c - controller
     // t - translater
-   
+    // p - possibility
+    // a - appeal
+    // o - other
+
 const UsersList = [
       {
         uuid: "qwerqwerqwer",
@@ -148,7 +192,7 @@ const UsersList = [
         type: 'u',
         email: 'nickmy@yandex.ru',
         avatar: avatar,
-        title: "Создать запрос на перевод",
+        title: "Инна Константинопольская",
         content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
         publishTime: new Date().toISOString(),
         registrationTime: new Date(new Date() - 10000),
@@ -266,6 +310,8 @@ class Admin extends React.Component {
     this.changeUsersList = this.changeUsersList.bind(this);
     this.deleteUserFromList = this.deleteUserFromList.bind(this);
     this.sortCollection = this.sortCollection.bind(this);
+    this.changeListByFilter = this.changeListByFilter.bind(this);
+    this.changeListBySearch = this.changeListBySearch.bind(this);
   }
 
   state = {
@@ -275,7 +321,13 @@ class Admin extends React.Component {
     mainScreen: true,
     secondScreen: false,
     sidebar: false,
-    UsersList: null
+    page:{
+      pageType: 'users',
+      id: undefined,
+      historyId: undefined
+    },
+    UsersList: null,
+    
   };
 
   addStyleSeheet(){
@@ -311,9 +363,44 @@ class Admin extends React.Component {
     }
 
     // Responsive end
+
+    let { location: { pathname } } = this.props;
+    let activeTabA = pathname.split("/");
+    this.setState({
+      page:{
+        pageType: ((/user(\/.+)?$/.test(pathname))
+                  ? 'User'
+                  : /users/.test(pathname)
+                  ? 'Users'
+                  : (/appeals/.test(pathname))
+                  ? 'Appeals'
+                  : (/appeal(\/.+)?$/.test(pathname))) ,
+        id: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 3] : pathname.split("/")[activeTabA.length - 1],
+        historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
+      }
+    })
+
     sleep(1000);
     this.setState({UsersList});
 
+  }
+
+  componentWillReceiveProps(nextProps){
+    let { location: { pathname } } = nextProps;
+    let activeTabA = pathname.split("/");
+    this.setState({
+      page:{
+        pageType: ((/user(\/.+)?$/.test(pathname))
+                  ? 'User'
+                  : /users/.test(pathname)
+                  ? 'Users'
+                  : (/appeals/.test(pathname))
+                  ? 'Appeals'
+                  : (/appeal(\/.+)?$/.test(pathname))) ,
+        id: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 3] : pathname.split("/")[activeTabA.length - 1],
+        historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
+      }
+    })
   }
 
   async componentDidMount() {
@@ -353,77 +440,107 @@ class Admin extends React.Component {
 
   deleteUserFromList(uuid){
     let self = this;
-    let inx
+    let inx, inx2;
     self.state.UsersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+    UsersList.find((o,i) => {if(o.uuid == uuid) inx2 = i});
+
     return new Promise(r => {
         let list = Object.assign([], this.state.UsersList);
         list.splice(inx,1);
+        UsersList.splice(inx2,1);
         this.setState(Object.assign(self.state.UsersList, {UsersList:list}),r);
       })
   }
 
   sortCollection({columnNameToSort, columnSortDirection}){
+    return new Promise(r => {
+      console.time('sort');
+      let sortedList = quickSort(Object.assign([], this.state.UsersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
+        if (item){ // if its object
+          if(!(item in val1))
+            throw new Error('Item not in the Object, check Object for Comporator');
 
-    console.time('sort');
-    let sortedList = quickSort(Object.assign([], this.state.UsersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
-      if (item){ // if its object
-        if(!(item in val1))
-          throw new Error('Item not in the Object, check Object for Comporator');
-
-        val1 = val1[item];
-        val2 = val2[item];
-      }
-
-      if(typeof val1 === 'number' &&  typeof val2 === 'number'){
-       if(pos)
-          return val1 > val2
-       else 
-          return val1 < val2
-      }
-
-      if(typeof val1 === 'string' &&  typeof val2 === 'string'){
-        let l1 = val1.length, l2 = val2.length, i = 0;
-
-        while(i < Math.min(l1, l2)){
-          if(val1.charCodeAt(i) === val2.charCodeAt(i)){
-            i++;
-            if( i === Math.min(l1, l2) ){
-               if (pos)
-                return l1 > l2
-              else 
-                return l1 < l2
-              }
-            continue;
-          }
-          if (pos)
-            return val1.charCodeAt(i) > val2.charCodeAt(i)
-          else 
-            return val1.charCodeAt(i) < val2.charCodeAt(i)
+          val1 = val1[item];
+          val2 = val2[item];
         }
-      }
 
-      if(val1 instanceof Date &&  val2 instanceof Date){
-
-        val1 = val1.getTime();
-        val2 = val2.getTime();
-
+        if(typeof val1 === 'number' &&  typeof val2 === 'number'){
         if(pos)
-          return val1 > val2
+            return val1 > val2
         else 
-          return val1 < val2
+            return val1 < val2
+        }
+
+        if(typeof val1 === 'string' &&  typeof val2 === 'string'){
+          let l1 = val1.length, l2 = val2.length, i = 0;
+
+          while(i < Math.min(l1, l2)){
+            if(val1.charCodeAt(i) === val2.charCodeAt(i)){
+              i++;
+              if( i === Math.min(l1, l2) ){
+                if (pos)
+                  return l1 > l2
+                else 
+                  return l1 < l2
+                }
+              continue;
+            }
+            if (pos)
+              return val1.charCodeAt(i) > val2.charCodeAt(i)
+            else 
+              return val1.charCodeAt(i) < val2.charCodeAt(i)
+          }
+        }
+
+        if(val1 instanceof Date &&  val2 instanceof Date){
+
+          val1 = val1.getTime();
+          val2 = val2.getTime();
+
+          if(pos)
+            return val1 > val2
+          else 
+            return val1 < val2
+        }
+      }); // null for omit
+      console.timeEnd('sort');
+      // sortedList = sortedList.reduce((acum, val, idx) => {
+      //   acum[val['uuid']] = val;
+      //   return acum;
+      // }, {})
+      if (columnSortDirection == 'ascending'){
+        sortedList = sortedList.reverse();
       }
-    }); // null for omit
-    console.timeEnd('sort');
-    // sortedList = sortedList.reduce((acum, val, idx) => {
-    //   acum[val['uuid']] = val;
-    //   return acum;
-    // }, {})
-    if (columnSortDirection == 'ascending'){
-      sortedList = sortedList.reverse();
-    }
 
-    this.setState(Object.assign(this.state, {UsersList:sortedList}));
+      this.setState(Object.assign(this.state, {UsersList:sortedList}),r);
+    });
 
+  }
+
+  changeListByFilter({field, value}){
+    return new Promise(r => {
+      if(value === 'a'){
+        this.setState({UsersList},r);
+        return
+      }
+      this.setState({
+        UsersList: this.state.UsersList.filter(o => o[field] === value)
+      },r)
+    });
+  }
+
+  changeListBySearch({value, field, filter}){
+    return new Promise(r => {
+      if(filter === 'a'){
+        this.setState({
+        UsersList: UsersList.filter(o => o['nickname'].includes(value))
+        },r)
+        return
+      }
+      this.setState({
+        UsersList: UsersList.filter(o => o['nickname'].includes(value) &&  o[field] === filter)
+      },r)
+    });
   }
 
   list() {
@@ -465,10 +582,9 @@ class Admin extends React.Component {
       (/appeals/.test(pathname) &&
         pathname.split("/")[activeTabA.length - 1]) ||
       false;
-      
 
-    const inProgress = {
-      wqefeq: {
+    const HistoryList = {
+      alex: {
         uuid: "alex",
         nickname: "alex",
         avatar: avatar,
@@ -483,7 +599,8 @@ class Admin extends React.Component {
         startTime: "12:32",
         from: "RUS",
         to: "ENG",
-        cost: "$0.33"
+        cost: "$0.33",
+        postType: 'post'
       },
       wqerq: {
         uuid: "alex_alex",
@@ -500,55 +617,24 @@ class Admin extends React.Component {
         opened: false,
         from: "ENG",
         to: "CHN",
-        cost: "$11.33"
-      }
-    };
-
-    const HistoryObject = {
-      wqefeq: {
-        uuid: "alex",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        contentFull: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        opened: false,
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 24441,
-        letterNumber: 213,
-        startTime: "12:32",
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33"
-      },
-      wqerq: {
-        uuid: "alex_alex",
-        nickname: "alex_alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        contentFull: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date(new Date() - 100000).toISOString(),
-        duration: 634,
-        startTime: "12:32",
-        letterNumber: 213,
-        opened: false,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33"
+        cost: "$11.33",
+        postType: 'reply'
       }
     };
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
-    let {UsersList} = this.state;
-    let currentDate = activeTab
-      ? find(inProgress, activeTab)
-      : activeHistory
-          ? HistoryObject
-          : allUsers ? UsersList : {};
-      
+    let {UsersList, page:{pageType, id, historyId}} = this.state;
+    let currentDate, user;
+
+    switch(pageType){
+    case('Users'): 
+      currentDate = UsersList;
+      break;
+    case('User'):
+      currentDate = HistoryList;
+      user = UsersList.find(v => v.uuid === id);
+      break;
+    }
 
     let { isTablet, sidebar, secondScreen, mainScreen } = this.state;
 
@@ -611,16 +697,16 @@ class Admin extends React.Component {
                 style={{
                   display: `${!isTablet ? "flex" : secondScreen ? "flex" : "none"}`
                 }}
-                className="f f-align-2-2 outer-left__expanded"
+                className="f f-align-2-2 f-col outer-left__expanded"
               >
                 <SideList
-                  List={HistoryObject}
-                  uuidOfActiveTab={activeHistory}
-                  route={"history"}
-                  title="История"
+                  List={currentDate}
+                  user={user}
+                  uuidOfActiveTab={historyId}
+                  route={`${Routes["user"].path}/${id}`}
+                  title="Пользователь"
                   isTablet={isTablet}
                   this={this}
-                  
                 />
               </div>
             )}
@@ -661,6 +747,8 @@ class Admin extends React.Component {
                       changeUsersList = {this.changeUsersList}
                       deleteUserFromList = {this.deleteUserFromList} 
                       sortCollection = {this.sortCollection}
+                      changeListByFilter = {this.changeListByFilter}
+                      changeListBySearch = {this.changeListBySearch}
                     />
                     <RoutePassProps
                       exact
@@ -672,9 +760,10 @@ class Admin extends React.Component {
                       common
                     />
                     <RoutePassProps
-                      path={`${Routes["user"].path}${Routes["user"].param}`}
-                      component={Users}
+                      path={`${Routes["user"].path}${Routes["user"].param}/history${Routes["history"].param}`}
+                      component={UserAccount}
                       currentDate={currentDate}
+                      user = {user}
                       _self={this}
                       isTablet={this.state.isTablet}
                     />
@@ -751,6 +840,7 @@ const BreadCrumbs = ({
 
 const SideList = ({
   List,
+  user,
   uuidOfActiveTab: activeTab,
   route,
   title = "В работе",
@@ -765,7 +855,7 @@ const SideList = ({
     rightBtn: false
   }
 }) => {
-
+  let registrationTime = new Date(user.registrationTime);
   return (
     <div className="f sidebar">
         <BreadCrumbs
@@ -773,38 +863,52 @@ const SideList = ({
           isTablet={isTablet}
           Title={{
               title: title,
-              shownOnDesktop: true
+              shownOnDesktop: false
           }}
           Left={Left}
           Right={Right}
         />
-      {/*<Batch
-                flushCount={10}
-                flushInterval={150}
-                count={this.state.items.length}
-                render={this.list}
-                debug
-            />*/}
-
+        <div className="admin-user-details">
+            <div className="admin-user-details__topArea">
+              <figure className="f f-align-2-2 admin-user-details__avatar">
+                <img src={user.avatar} alt="Textra" />
+              </figure>
+              <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
+                <div className="admin-user-details__personalInfo__title">{user.title} </div>
+                <div className="admin-user-details__personalInfo__email">{user.email}</div>
+                <div className={`admin-user-details__personalInfo__type admin-user-details__personalInfo__type${String.prototype.toUpperCase.call(user.type)}`}>
+                  {findIcon(Roles, user.type, 'text')}
+                </div>
+              </div>
+            </div>
+            <div className="admin-user-details__delimiter"></div>
+            <div className="admin-user-details__serviceInfo">
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__regData"><span>Дата регистрации:</span>
+                  <data>{registrationTime.getDay()}.{registrationTime.getMonth()}.{registrationTime.getFullYear()}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.duration)}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.letterNumber}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
+            </div>  
+        </div>
       {Object.values(List).map((tab, index) => {
         let publishTime = new Date(tab.publishTime);
         return (
           <Link
-            to={`${Routes[route].path}/${tab.uuid}`}
-            className={`f f-align-1-2 translator-tab ${tab.uuid === activeTab ? "selected" : ""}`}
+            to={`${route}/history/${tab.uuid}`}
+            className={`f f-align-1-2 admin-tab ${tab.uuid === activeTab ? "selected" : ""}`}
             key={index}
           >
-            <figure className="f f-align-2-2 translator-tab-avatar">
+            <figure className="f f-align-2-2 admin-tab-avatar">
               {" "}<img src={tab.avatar} alt="Textra" />{" "}
             </figure>
-            <div className="f f-col f-align-1-1 translator-tab-details">
-              <div className="translator-tab-title">{tab.title} </div>
-              <div className="translator-tab-content">
+            <div className="f f-col f-align-1-1 admin-tab-details">
+              <div className="admin-tab-title">{tab.title} </div>
+              <div className="admin-tab-content">
                 {" "}{tab.content}
               </div>
             </div>
-            <div className="f f-col f-align-2-3 translator-tab-info">
-              <div className="translator-tab-info__time">
+            <div className="f f-col f-align-2-3 admin-tab-info">
+              <div className="admin-tab-info__time">
                 <time
                 >{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time>
               </div>
@@ -813,7 +917,7 @@ const SideList = ({
                 to={tab.to}
                 selected={tab.uuid === activeTab}
               />
-              <div className="translator-tab-info__duration">
+              <div className="admin-tab-info__duration">
                 {humanReadableTime(tab.duration)}
               </div>
             </div>
@@ -878,10 +982,14 @@ class Users extends React.Component {
     this.changeTypeOfUser = this.changeTypeOfUser.bind(this)
     this.deleteUser = this.deleteUser.bind(this)
     this.sortMe = this.sortMe.bind(this)
-
+    this.changeFilter = this.changeFilter.bind(this)
+    this.changeSearch = this.changeSearch.bind(this)
+    this.rememberLastValue = this.rememberLastValue.bind(this)
+    this.lastDropDownOpenedValue = undefined;
   }
 
   state = {
+    roles: [],
     loading: {
       is: false,
       uuid: undefined
@@ -893,14 +1001,33 @@ class Users extends React.Component {
     sorting:{
       columnNameToSort: undefined,
       columnSortDirection: 'descending'
+    },
+    filter:{
+      text: 'Все',
+      value: 'a'
+    },
+    search: {
+      value: undefined
     }
   }
 
-  changeTypeOfUser(uuid, _ , {value, defaultValue}){
+  componentWillMount(){
+    let {currentDate} = this.props,
+        usedRoles = {},
+        roles = [];
+    currentDate.map(o => usedRoles[o.type] = true)
+    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
+    this.setState({
+      roles
+    })
+  }
+  rememberLastValue(_, {value}) { this.lastDropDownOpenedValue = value }
+
+  changeTypeOfUser(uuid, _ , {value}){
     let argsAr  = Array.prototype.slice.call(arguments);
     console.log(argsAr);
 
-    if(defaultValue == value) // do nothing if nothing has changed
+    if( this.lastDropDownOpenedValue == value) // do nothing if nothing has changed
       return 
 
     this.setState(Object.assign(this.state,{
@@ -913,6 +1040,8 @@ class Users extends React.Component {
     return new Promise(resolve => setTimeout(resolve ,1000))
                   .then(_ => {
                     return this.props.changeUsersList(uuid, value)
+                  }).then(_ => {  
+                    return this.props.changeListByFilter({field: 'type', value: this.state.filter.value || 'c'});
                   }).then(_ => {
                     this.setState(Object.assign(this.state,{
                       loading:{
@@ -949,13 +1078,14 @@ class Users extends React.Component {
     let self = this;
 
     if(columnNameToSort == self.state.sorting.columnNameToSort){
-
       self.setState(Object.assign(self.state.sorting, {
         columnSortDirection: self.state.sorting.columnSortDirection === 'ascending' ? 'descending' : 'ascending'
-      }), self.props.sortCollection({
-        columnNameToSort,
-        columnSortDirection: self.state.sorting.columnSortDirection === 'ascending' ? 'descending' : 'ascending'
-      }))
+      }), () => {
+         self.props.sortCollection({
+          columnNameToSort,
+          columnSortDirection: self.state.sorting.columnSortDirection
+        })
+      })
       return
     }
 
@@ -964,62 +1094,92 @@ class Users extends React.Component {
         columnNameToSort,
         columnSortDirection: 'descending'
       }
-    }), self.props.sortCollection({
+    }), () => {
+      self.props.sortCollection({
         columnNameToSort,
         columnSortDirection: 'descending'
-      }))
+      })
+    })
+  }
+
+  changeFilter(_ , {options, value}){
+    let self = this,
+        text = options.find(o => o.value === value)['text'];
+        
+    self.setState(Object.assign(self.state,{
+      filter:{
+        text,
+        value
+      }
+    }), () => {
+      this.props.changeListByFilter({field: 'type', value});
+    })
+  }
+
+  changeSearch(_ , {value}){
+    let self = this;
+
+    self.setState(Object.assign(self.state,{
+      search:{
+        value
+      }
+    }), () => {
+      Promise.resolve().then( _ => {
+        return self.props.changeListBySearch({value, field: 'type', filter: self.state.filter.value})})
+      .then(_ => {  
+        //return self.props.changeListByFilter({field: 'type', value: self.state.filter.value || 'c'});
+    })
+    })
   }
 
   render() {
+  
     let { currentDate, location: { pathname }, isTablet, _self } = this.props;
-    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}} = this.state;
+    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search, roles} = this.state;
     let self = this;
-    const Roles = [
-      {
-        text: 'Пользователь',
-        value: 'u',
-        icon: { name: 'circle', color: 'grey', size: 'small' },
-     },
-    {
-        text: 'Контроллер',
-        value: 'c',
-        icon: { name: 'circle', color: 'red', size: 'small' },
-     },
-    {
-        text: 'Переводчик',
-        value: 't',
-        icon: { name: 'circle', color: 'blue', size: 'small' },
-     }, 
-    ];
 
-    const findIcon = (objs, id) => Object.values(objs).find(o => o.value == id)['icon'];
-    return currentDate.length === 0
-      ? <div className={"f f-align-2-33 admin-list "}>
-            <span>Пользователи отсутствуют</span>
-        </div>
-      :  <div>
-           <div className="f f-align-1-2 admin-list__topline"><span>Пользователи</span></div>
+    return  (<div>
+              <div className="f f-align-1-2 admin-list__topline"><span>Пользователи</span></div>
+              <div className="f f-align-1-2 admin-list__topbar">
+                <Dropdown text={`${text}`} options={Object.assign([],roles,[{ 
+                  text: 'Все',
+                  value: 'a', 
+                  icon: { name: 'circle', color: 'teal', size: 'small' },
+                  },...roles])} 
+                  icon='filter'   
+                  floating
+                  labeled 
+                  button 
+                  className='icon admin-list__filter'
+                  onChange={self.changeFilter}/>
+                <Input icon='search' iconPosition='left' className='admin-list__search' value={!!search.value ? search.value : '' } onChange={self.changeSearch} />
+              </div>
               <Table compact fixed celled  sortable={true} style={{maxWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>
               <Table.Header>
                 <Table.Row>
-                  <Table.HeaderCell sorted={ columnNameToSort == 'nickname' ? columnSortDirection : null} onClick={this.sortMe('nickname')}>Name</Table.HeaderCell>
-                  <Table.HeaderCell sorted={ columnNameToSort == 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
-                  <Table.HeaderCell sorted={ columnNameToSort == 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
-                  <Table.HeaderCell sorted={ columnNameToSort == 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'nickname' ? columnSortDirection : null} onClick={this.sortMe('nickname')}>Name</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
                   <Table.HeaderCell textAlign='center' >Delete</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
+                { currentDate.length === 0 ?
+                <Table.Row className={"f f-align-2-33 admin-list "} textAlign='center'>
+                    <Table.Cell >Пользователи отсутствуют</Table.Cell>
+                </Table.Row>
+                :
+                currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
                   <Table.Row key={index}>
                     <Table.Cell><Link to={`/admin/user/${uuid}`}>{nickname}</Link></Table.Cell>
                     <Table.Cell>{email}</Table.Cell>
-                    {/* {dump(find(Roles, type))} */}
-                    <Table.Cell style={{overflow: 'visible'}}><Icon {...findIcon(Roles, type)} />
+                    <Table.Cell style={{overflow: 'visible'}}><Icon {...findIcon(roles, type)} />
                       <Dropdown inline 
                       {...(loading.is && loading.uuid === uuid && {loading:true})} 
-                      {...(loading.is && {disabled:true})} options={Roles} defaultValue={type} 
-                      onChange={this.changeTypeOfUser.bind(self, uuid)}/>
+                      {...(loading.is && {disabled:true})} options={roles} value={type}
+                      onChange={this.changeTypeOfUser.bind(self, uuid)}
+                      onOpen={this.rememberLastValue}/>
                     </Table.Cell>
                     <Table.Cell>{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
                     <Table.Cell  textAlign='center'>
@@ -1029,20 +1189,17 @@ class Users extends React.Component {
                 ))}
               </Table.Body>
             </Table>
-        </div>
+        </div>)
   }
 }
 
 
-class Reply extends React.Component {
+class UserAccount extends React.Component {
 
-  currentNumberOfChar({target: {value}}){
-      console.log(value);
-  }
 
   render() {
-    let { currentDate, isTablet, _self } = this.props;
-    let publishTime = new Date(currentDate.publishTime);
+
+    let { currentDate, user, isTablet, _self } = this.props;
 
     const RenderCollection = renderItem => {
       return (
@@ -1051,7 +1208,7 @@ class Reply extends React.Component {
                 this={_self}
                 isTablet={isTablet}
                 Title={{
-                    title:  currentDate.uuid,  // we get [0] because the very first item in thread can be only from user
+                    title:  user.nickname, 
                     shownOnDesktop: false
                 }}
                 Left={{
@@ -1073,94 +1230,73 @@ class Reply extends React.Component {
                 }}
             />
           {
-            renderItem(Object.assign({},currentDate), 1, new Date(currentDate.publishTime))
+            Object.values(currentDate).map( (item ,index) => {
+                return renderItem(item, index, new Date(item.publishTime))
+            })
           }
           
         </div>
       );
     };
     return (Object.entries(currentDate).length === 0
-            ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
-                <div className={"translator-feed__avatar"}>
+            ? <div className={"f f-align-2-33 admin-feed u-mx-3 u-my-2"}>
+                <div className={"admin-feed__avatar"}>
                     <img src={avatar} />
                 </div>
-                <div className={"f f-align-2-2 translator-feed__placeholder"}>
+                <div className={"f f-align-2-2 admin-feed__placeholder"}>
                     <span>История отсутствуют</span>
                 </div>
               </div>
             : RenderCollection((currentDate, index, publishTime) => (
-            <div className={"f f-col f-align-1-1 translator-replypost"}>
-                
-                <div className={"data__delimiter"}>
-                {publishTime.getDate()}
-                {" "}
-                {getMounthName(publishTime.getMonth())}
-                ,
-                {" "}
-                {publishTime.getFullYear()}
-                {" "}
-                </div>
-                <div className={"f f-align-1-1 translator-post "}>
-                <div className={"translator-post__content"}>
-                    <div className={"translator-post__content__text"}>
+            <div key={index} className={"f f-col f-align-1-1 admin-historypost"}>
+                {currentDate.postType === 'post' &&<div className={"data__delimiter"}>
+                  {publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}
+                </div>}
+                <div className={`f f-align-1-1 admin-historypost-${currentDate.postType}`}>
+                <div className={`admin-historypost-${currentDate.postType}__content`}>
+                    <div className={`admin-historypost-${currentDate.postType}__content__text`}>
                     {currentDate.content}
                     </div>
-                    <div
-                    className={
-                        "f f-align-1-2 f-gap-4 translator-post__content__bottombar"
-                    }
-                    >
-                    <LangLabel from={currentDate.from} to={currentDate.to} />
-                    <Indicator
-                        className={"f f-align-2-2"}
-                        icon={icon_dur}
-                        value={humanReadableTime(currentDate.duration)}
-                        hint={"Длительность перевода"}
-                    />
-                    <Indicator
-                        className={"f f-align-2-2"}
-                        icon={
-                        <Timer
-                            start={currentDate.startWorkingTime}
-                            duration={currentDate.duration}
-                            isBig={true}
-                        />
-                        }
-                        value={humanReadableTime(
-                        currentDate.duration -
-                            (new Date() - new Date(currentDate.startWorkingTime)) / 1000
-                        )}
-                        hint={"Оставшееся время"}
-                    />
-                    <Indicator
-                        className={"f f-align-2-2"}
-                        icon={icon_letternum}
-                        value={currentDate.letterNumber}
-                        hint={"Количество символов"}
-                    />
-                    <Indicator
-                        className={"f f-align-2-2"}
-                        icon={icon_cost}
-                        value={currentDate.cost}
-                        hint={"Стоимость"}
-                    />
+                    {currentDate.postType === 'post' && <div className={`f f-align-1-2 f-gap-4 admin-historypost-${currentDate.postType}__content__bottombar`}>
+                      <LangLabel from={currentDate.from} to={currentDate.to} />
+                      <Indicator
+                          className={"f f-align-2-2"}
+                          icon={icon_dur}
+                          value={humanReadableTime(currentDate.duration)}
+                          hint={"Длительность перевода"}
+                      />
+                      <Indicator
+                          className={"f f-align-2-2"}
+                          icon={
+                          <Timer
+                              start={currentDate.startWorkingTime}
+                              duration={currentDate.duration}
+                              isBig={true}
+                          />
+                          }
+                          value={humanReadableTime(
+                          currentDate.duration -
+                              (new Date() - new Date(currentDate.startWorkingTime)) / 1000
+                          )}
+                          hint={"Оставшееся время"}
+                      />
+                      <Indicator
+                          className={"f f-align-2-2"}
+                          icon={icon_letternum}
+                          value={currentDate.letterNumber}
+                          hint={"Количество символов"}
+                      />
+                      <Indicator
+                          className={"f f-align-2-2"}
+                          icon={icon_cost}
+                          value={currentDate.cost}
+                          hint={"Стоимость"}
+                      />
 
-                    </div>
+                    </div>}
                 </div>
-                <div className={"translator-post__date"}>
+                <div className={`admin-historypost-${currentDate.postType}__date`}>
                     {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-                </div>
-                </div>
-                <div className={"f f-align-2-3 translator-reply"}>
-                    <textarea
-                    type="text"
-                    tabIndex={1}
-                    name="translator[reply]"
-                    placeholder={'Ваш запрос на перевод...'}
-                    onChange={this.currentNumberOfChar.bind(this)}
-                    />
-                <div className={"translator-reply__sent u-ml-3 u-mt-3"}>
-                    <button className={"btn btn-mini btn-primiry"}>Отправить</button>
                 </div>
                 </div>
             </div>)

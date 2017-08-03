@@ -1509,6 +1509,7 @@
   .sidebar
     position: relative
     background: #fff
+    width: 100%
 
 
 // ASide Menu 
@@ -1599,8 +1600,291 @@
     &:hover
       color: darken(rgb(0, 192, 255),10)
 
-.translator-feed__topline ~ *:nth-of-type(2)
+.admin-list__topline ~ *:nth-of-type(2)
     margin-top: 40px
+
+.admin-list
+  &__topbar
+    max-width: 959px
+    margin-left: auto
+    margin-right: auto
+  &__filter
+    margin-left: auto !important
+
+.admin-user-details
+  background: $bg-blue
+  &__topArea
+    display: flex
+    flex-direction: row
+    text-decoration: none
+    color: #228fd8
+    padding: 7px
+    +nosel
+  &__avatar
+    flex: 0 1 65px
+    img
+      width: 50px
+      height: 50px
+  &__personalInfo
+    flex: 0 1 198px
+    min-width: 0
+    overflow: hidden
+    padding-left: 10px
+    &__title
+      font-size: 14px
+      letter-spacing: -0.06px
+      color: $text-middle
+    &__email
+      font-size: 12px
+      letter-spacing: -0.05px
+      color: $grey-light
+      margin-top: 1px
+    &__type
+      margin-top: 6px
+      font-weight: 500
+      font-size: 8px
+      color: #fff
+      height: 14px
+      line-height: 14px
+      padding: 1px 4px
+      border-radius: 4px
+      text-align: center
+      font-weight: 500
+      letter-spacing: -0.05px
+    &__typeU
+      background-color: $grey-light
+    &__typeC
+      background-color: #f00
+    &__typeT
+      background-color: #0099ff
+  &__delimiter
+    margin: 0 14px
+    height: 1px
+    width: auto
+    background: $grey 
+  &__serviceInfo
+    margin: 11px 16px
+    &__regData,
+    &__spendTime,
+    &__amountSymble,
+    &__balance
+      font-size: 12px
+      line-height: 14px
+      letter-spacing: -0.05px
+      margin: 7px 0px
+      & span
+        color: $grey-light
+      & data
+        color: $text-light
+
+
+.translator-tab__topline ~ *:first-of-type
+    margin-top: 24px
+
+
+// tab of history and in-word are shared common styles at translator dashboard
+.admin-tab  
+  height: 66px
+  text-decoration: none
+  color: $selected-blue
+  padding: 7px
+  border-bottom: 1px $grey solid
+  +nosel
+  &:hover
+    background: $bg-blue
+  &.selected
+    background: $selected-blue
+  &-avatar
+    flex: 0 1 65px
+  &-details
+    flex: 0 1 198px
+    min-width: 0
+    overflow: hidden
+    padding-left: 10px
+    +r(768)
+      flex: 1 1 198px
+  &-info
+    flex: 0 1  62px
+    min-width: 0
+  &-title
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+    width: 100%
+    color: #333333
+    font-size: 14px
+    font-weight: 400
+    letter-spacing: -0.06px
+    line-height: 16px
+    padding-bottom: 5px 
+    .selected &
+      color: #fff
+  &-content
+    display: block
+    display: -webkit-box
+    max-width: 204px
+    height: 12px*$line-height*$lines-to-show
+    color: $grey-light
+    font-size: 12px
+    font-weight: 400
+    line-height: $line-height
+    -webkit-line-clamp: $lines-to-show
+    -webkit-box-orient: vertical
+    overflow: hidden
+    text-overflow: ellipsis
+    letter-spacing: -0.05px
+    .selected &
+      color: #fff
+  &-info
+    &__time
+      align-self: flex-end
+      time
+        width: 30px
+        height: 11px
+        color: $grey-light
+        font-size: 10px
+        font-weight: 400
+        line-height: 11px
+        letter-spacing: -0.05px
+        margin-left: 2px
+        .selected &
+          color: #fff
+    &__duration
+      align-self: flex-end
+      margin-top: 3px
+      width: 84px
+      height: 14px
+      color: $text-dark
+      font-size: 12px
+      font-weight: 500
+      letter-spacing: -0.05px
+      line-height: 14px
+      text-align: right
+      .selected &
+        color: #fff
+
+// Admin History 
+
+.admin-historypost
+  flex: 1 0 100%
+  width: 100%
+  padding: 16px
+  overflow: auto
+// History User Post  (Request)
+.admin-historypost-post
+  width: 100%
+  flex: 0 0 auto
+  &__avatar
+    flex: 0 0 50px
+    width: 50px
+    height: 50px
+    border-radius: 50%
+    overflow: hidden
+    border: 1px solid $grey
+    +nosel
+  &__content
+    border-radius: 4px
+    background-color: $bg-blue
+    padding: 9px 14px
+    flex: 1 1 100%
+    max-width: 100%
+    +r(768)
+      min-width: 0
+    &__text
+      color: $text-middle
+      font-weight: 400
+      letter-spacing: -0.06px
+      line-height: 20px
+      font-size: 14px
+    &__bottombar
+      +nosel
+      color: $text-dark
+      margin-top: 10px
+      +r(768)
+        flex-flow: wrap
+        > *
+          margin-top: 10px
+  &__constols
+    flex: 1 1 auto
+    +nosel
+
+  &__date
+    flex: 0 1 auto
+    text-align: right
+    color: $grey-light
+    font-size: 10px
+    font-weight: 400
+    line-height: 11px
+    letter-spacing: -0.05px
+    margin-left: 40px
+    +nosel
+    +r(768)
+      margin-left: 12px
+
+// History User Reply  (Answer to User Request)
+.admin-historypost-reply
+  position: relative
+  width: 100%
+  margin-bottom: 25px
+  flex: 0 0 auto
+  margin-top: auto
+  &__avatar
+    flex: 0 0 50px
+    width: 50px
+    height: 50px
+    border-radius: 50%
+    overflow: hidden
+    border: 1px solid $grey
+    +nosel
+  &__content
+    border-radius: 4px
+    background-color: $selected-blue
+    padding: 9px 14px
+    flex: 1 1 100%
+    max-width: 100%
+    min-width: 450px
+    +r(768)
+      flex: 1 1 89%
+      max-width: none
+      min-width: auto
+    &__text
+      color: #fff
+      background: transparent
+      display: block
+      font-size: 14px
+      resize: none
+      width: 100%
+      height: 100%
+      border: 0
+      font-weight: 100
+      letter-spacing: -0.06px
+      line-height: 20px
+    &__bottombar
+      +nosel
+      color: $text-dark
+      margin-top: 10px
+      +r(768)
+        flex-flow: wrap
+        > *
+          margin-top: 10px
+  &__constols
+    flex: 1 1 auto
+    +nosel
+
+  &__date
+    flex: 0 1 auto
+    text-align: right
+    color: $grey-light
+    font-size: 10px
+    font-weight: 400
+    line-height: 11px
+    letter-spacing: -0.05px
+    margin-left: 40px
+    +nosel
+    +r(768)
+      margin-left: 12px
+
+
 
 //
 //****************************************************************************************************************************************************************

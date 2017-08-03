@@ -35,7 +35,7 @@ const DashBoard = () => <Lazy  load={() => import('./Dashboard')}/>
 const Test = (props) => <Lazy {...props} load={() => import('./Test')}/>
 
   // eslint-disable-next-line
-const Translator = () => <Lazy {...props} load={() => import('./Translator')}/>
+const Translator = () => <Lazy load={() => import('./Translator')}/>
 
   // eslint-disable-next-line
 const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>

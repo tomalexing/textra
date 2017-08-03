@@ -84,7 +84,6 @@ const Routes = {
 class Translator extends React.Component {
   constructor(props) {
     super(props);
-    debugger;
     this.listeners = [];
     this.doAtDidMount = [];
 
