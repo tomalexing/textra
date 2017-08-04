@@ -38,5 +38,6 @@
     "build": "npm run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "flow": "flow"
-  }
+  },
+  "proxy": "http://localhost:9000"
 }

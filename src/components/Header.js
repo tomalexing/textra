@@ -3,8 +3,10 @@ import { Link, withRouter} from 'react-router-dom';
 import logo from './../assets/logo.png';
 import avatar from './../assets/default-avatar.png';
 import {hasClass, addClass, removeClass, delegate} from './../utils';
+import PropTypes from 'prop-types';
+
 const isActive = (match, location,to) => {
-  return ['/translator','/dashboard'].some(str => location.pathname.includes(str) )
+  return ['/translator','/dashboard','/admin'].some(str => location.pathname.includes(str) )
 }
 
 const requestAnimationFramePromise = _ => new Promise(requestAnimationFrame);
@@ -91,13 +93,13 @@ class Header extends React.Component{
                   <NavLink to={'/help'}>Поддержка</NavLink>
                 </ul>
                 <div className="f f-align-2-2 header-account">
-                  <div className="f f-col f-align-1-3 header-details">
+                  {this.props.currentRole !== 'admin' &&  <div className="f f-col f-align-1-3 header-details">
                     <div className="header-email">mikehanser@gmail.com</div>
                     <div className="header-details__more">
                       <Link to={'/'} className="header-replenish">пополнить</Link>
                       <span className="header-balance">$0.91</span>
                     </div>
-                  </div>
+                  </div>}
                   <div className="f f-align-2-2 header-avatar">
                     <figure className="f f-align-2-2 header-avatar__in"> <img src={avatar} alt="Textra" /> </figure>
                     <div className="header-logout">Выйти</div>
@@ -108,9 +110,7 @@ class Header extends React.Component{
   }
 }
 
-
-
-export const NavLink  = withRouter(({history, match, location, staticContext,comp, ...props}) => (
+export const NavLink  = withRouter(({history, match, location, staticContext, comp, ...props}) => (
   <li className={
     (comp ?
     (comp(match, location, props.to)?
@@ -118,11 +118,20 @@ export const NavLink  = withRouter(({history, match, location, staticContext,com
       :
       '')
     :
-    (location.pathname === props.to?
+    (location.pathname === ((typeof props.to === 'string')?props.to : props.to.pathname) ?
       'active'
       :
       ''))}>
     <Link {...props} /> 
   </li>
 ))
+
+Header.propTypes = {
+  currentRole: PropTypes.string
+}
+
+Header.defaultProps = {
+  currentRole: ''
+}
+
 export default Header;

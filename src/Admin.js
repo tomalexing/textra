@@ -14,6 +14,7 @@ import sl from "./assets/swap-lang.svg";
 import copy from "./assets/icon-copy.svg";
 import users from "./assets/users.svg";
 import appeals from "./assets/appeals.svg";
+import deleteIcon from './assets/delete.svg';
 
 import "./polyfill";
 import { Auth } from "./index";
@@ -50,7 +51,7 @@ import Timer from "./components/Timer";
 import LangLabel from "./components/LangLabel";
 import StatefulEditor from "./components/StatefulEditor";
 import Indicator from "./components/Indicator";
-
+import deepEqual from 'deep-equal';
 
 import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
 
@@ -79,7 +80,7 @@ const Routes = {
     exact: false
   },
   appeal: {
-    path: "/admin/appeals",
+    path: "/admin/appeal",
     exact: false,
     param: "/:id"
   }
@@ -184,8 +185,8 @@ function quickSort(items, left, right, item, comporator) {
     // p - possibility
     // a - appeal
     // o - other
-
-const UsersList = [
+let UsersList = [];
+const UsersList1 = [
       {
         uuid: "qwerqwerqwer",
         nickname: "aaaa",
@@ -296,6 +297,156 @@ const UsersList = [
       }
 ];
 
+const UsersList2 = [
+      {
+        uuid: "qwerqwerqwer",
+        nickname: "aaaa",
+        type: 'g',
+        email: 'nickmy@yandex.ru',
+        avatar: avatar,
+        title: "Инна Константинопольская",
+        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 10000),
+        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
+        duration: 1341,
+        letterNumber: 213,
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        isPersonal: false
+      },
+       {
+        uuid: "lkhgghk",
+        nickname: "zfdfsddf",
+        email: 'helpme@yandex.ru',
+        avatar: avatar,
+        type: 'o',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 10065500),
+        duration: 431241,
+        letterNumber: 123,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        isPersonal: true
+      },
+      {
+        uuid: "vnbmnbmhg",
+        nickname: "alex",
+        email: 'yiyiyiyi@mail.ru',
+        avatar: avatar,
+        type: 'p',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
+        registrationTime: new Date(new Date() - 10000000),
+        duration: 1341,
+        letterNumber: 213,
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        isPersonal: false
+      },
+      {
+        uuid: "bertu",
+        nickname: "rgsgfgsa",
+        email: 'yiyiyiyi@mail.ru',
+        avatar: avatar,
+        type: 'p',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 10),
+        duration: 431241,
+        letterNumber: 123,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        isPersonal: true
+      },
+      {
+        uuid: "wasdffeq",
+        nickname: "bfsbs",
+        email: 'dsgsgsgdg@mail.ru',
+        avatar: avatar,
+        type: 'g',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
+        registrationTime: new Date(new Date() - 1000),
+        duration: 1341,
+        letterNumber: 213,
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        isPersonal: false
+      },
+      {
+        uuid: "wasgfasrq",
+        nickname: "asdasdas",
+        email: 'mtnbvcx@mail.ru',
+        avatar: avatar,
+        type: 'g',
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        publishTime: new Date().toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        registrationTime: new Date(new Date() - 1000000),
+        duration: 431241,
+        letterNumber: 123,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        isPersonal: true
+      }
+];
+
+
+const HistoryList = {
+      alex: {
+        uuid: "alex",
+        nickname: "alex",
+        avatar: avatar,
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
+        contentFull: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
+        opened: false,
+        publishTime: new Date(new Date() - 100000).toISOString(),
+        startWorkingTime: new Date().toISOString(),
+        duration: 24441,
+        letterNumber: 213,
+        startTime: "12:32",
+        from: "RUS",
+        to: "ENG",
+        cost: "$0.33",
+        postType: 'post'
+      },
+      wqerq: {
+        uuid: "alex_alex",
+        nickname: "alex_alex",
+        avatar: avatar,
+        title: "Создать запрос на перевод",
+        content: "Создать запрос на перевод",
+        contentFull: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
+        publishTime: new Date(new Date() - 100000).toISOString(),
+        startWorkingTime: new Date(new Date() - 100000).toISOString(),
+        duration: 634,
+        startTime: "12:32",
+        letterNumber: 213,
+        opened: false,
+        from: "ENG",
+        to: "CHN",
+        cost: "$11.33",
+        postType: 'reply'
+      }
+    };
 
 class Admin extends React.Component {
   constructor(props) {
@@ -317,7 +468,6 @@ class Admin extends React.Component {
   state = {
     redirectToReferrer: false,
     items: [],
-    isTablet: false,
     mainScreen: true,
     secondScreen: false,
     sidebar: false,
@@ -341,28 +491,7 @@ class Admin extends React.Component {
   componentWillMount() {
     this.doAtDidMount.forEach(func => func());
     this.addStyleSeheet();
-    // Responsive stuff
-    this.listeners.push(
-      listener(
-        window,
-        "resize",
-        debounce(
-          e => {
-            let isTablet = e.target.innerWidth <= 768 ? true : false;
-            if (this.state.isTablet !== isTablet) this.setState({ isTablet });
-          },
-          200,
-          false
-        ),
-        false
-      )
-    );
 
-    if (window.innerWidth <= 768) {
-      this.state.isTablet = true;
-    }
-
-    // Responsive end
 
     let { location: { pathname } } = this.props;
     let activeTabA = pathname.split("/");
@@ -374,12 +503,19 @@ class Admin extends React.Component {
                   ? 'Users'
                   : (/appeals/.test(pathname))
                   ? 'Appeals'
-                  : (/appeal(\/.+)?$/.test(pathname))) ,
+                  : /appeal(\/.+)?$/.test(pathname)
+                  ? 'Appeal'
+                  : ''),
         id: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 3] : pathname.split("/")[activeTabA.length - 1],
         historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
       }
     })
-
+    if(/users/.test(pathname)){
+      
+    }
+    if(/appeals/.test(pathname) || /appeal/.test(pathname) ){
+      UsersList = UsersList2;
+    }
     sleep(1000);
     this.setState({UsersList});
 
@@ -396,11 +532,29 @@ class Admin extends React.Component {
                   ? 'Users'
                   : (/appeals/.test(pathname))
                   ? 'Appeals'
-                  : (/appeal(\/.+)?$/.test(pathname))) ,
+                  : (/appeal(\/.+)?$/.test(pathname)))
+                  ? 'Appeal'
+                  : '',
         id: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 3] : pathname.split("/")[activeTabA.length - 1],
         historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
       }
     })
+    if(/users/.test(pathname)){
+      UsersList = UsersList1;
+    }
+    if(/appeals/.test(pathname)){
+      UsersList = UsersList2;
+    }
+
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
   }
 
   async componentDidMount() {
@@ -524,7 +678,7 @@ class Admin extends React.Component {
         return
       }
       this.setState({
-        UsersList: this.state.UsersList.filter(o => o[field] === value)
+        UsersList: UsersList.filter(o => o[field] === value)
       },r)
     });
   }
@@ -572,104 +726,60 @@ class Admin extends React.Component {
   }
 
   render() {
-    let { location: { pathname } } = this.props;
-    let activeTabA = pathname.split("/");
-    let activeTab =
-      (/user(\/.+)?$/.test(pathname) && pathname.split("/")[activeTabA.length - 1]) ||
-      false;
-    let allUsers = /users/.test(pathname);
-    let activeHistory =
-      (/appeals/.test(pathname) &&
-        pathname.split("/")[activeTabA.length - 1]) ||
-      false;
 
-    const HistoryList = {
-      alex: {
-        uuid: "alex",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        contentFull: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        opened: false,
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 24441,
-        letterNumber: 213,
-        startTime: "12:32",
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        postType: 'post'
-      },
-      wqerq: {
-        uuid: "alex_alex",
-        nickname: "alex_alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        contentFull: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date(new Date() - 100000).toISOString(),
-        duration: 634,
-        startTime: "12:32",
-        letterNumber: 213,
-        opened: false,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        postType: 'reply'
-      }
-    };
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
     let {UsersList, page:{pageType, id, historyId}} = this.state;
-    let currentDate, user;
+    let currentDate, user, allUsers = false;
 
     switch(pageType){
     case('Users'): 
       currentDate = UsersList;
+      allUsers = true
+      break;
+    case('Appeals'): 
+      currentDate = UsersList;
+      allUsers = true
       break;
     case('User'):
       currentDate = HistoryList;
       user = UsersList.find(v => v.uuid === id);
       break;
+    case('Appeal'):
+      currentDate = UsersList;
+      user = UsersList.find(v => v.uuid === id);
+      break;
     }
 
-    let { isTablet, sidebar, secondScreen, mainScreen } = this.state;
+    let { sidebar, secondScreen, mainScreen } = this.state;
 
     return (
       <div className="f f-col outer admin">
-        <Header />
+        <Header currentRole={this.props.currentRole}/>
         <div className="f h100" ref={n => this.boundRef("bg")(n)}>
-          <div
-            style={{
-              display: `${!isTablet ? "flex" : sidebar ? "flex" : "none"}`
-            }}
-            className={`f f-align-2-2 outer-left__narrowed`}
-          >
+          <div className={`f f-align-2-2 outer-left__narrowed`}>
             {/* Starts Left SubMenu */}
             <div className="f sidebar sidebar__menu"> 
-              <ul className="f f-align-1-1 f-col translator-menu">
+              <ul className="f f-align-1-1 f-col admin-menu">
                 <NavLink
                   className={
-                    "f f-align-1-2 translator-menu__item translator-menu__item__level-1"
+                    "f f-align-1-2 admin-menu__item admin-menu__item__level-1"
                   }
                   to={{
                     pathname: Routes["users"].path,
                     state: { mainScreen: true }
                   }}
                 >
-                  <span className={"f f-align-2-2 translator-menu__item__icon"}>
+                  <span className={"f f-align-2-2 admin-menu__item__icon"}>
                     <img src={users} />
                   </span>
                   <span>Пользователи</span>
                  
                 </NavLink>
-                <div className="translator-menu__delimiter" />
+                <div className="admin-menu__delimiter" />
                 <NavLink
                   className={
-                    "f f-align-1-2 translator-menu__item translator-menu__item__level-1"
+                    "f f-align-1-2 admin-menu__item admin-menu__item__level-1"
                   }
                   to={{
                     pathname: Routes["appeals"].path,
@@ -677,12 +787,12 @@ class Admin extends React.Component {
                             secondScreen: true }
                   }}
                 >
-                  <span className={"f f-align-2-2 translator-menu__item__icon"}>
+                  <span className={"f f-align-2-2 admin-menu__item__icon"}>
                     <img src={appeals} />
                   </span>
                   <span>Запросы</span>
                 </NavLink>
-                <div className="translator-menu__delimiter" />
+                <div className="admin-menu__delimiter" />
               </ul>
                {/* Ends Left SubMenu */}
             </div>
@@ -692,20 +802,13 @@ class Admin extends React.Component {
           <Route
             path={Routes["user"].path}
             render={() => (
-              <div
-                ref={n => (this.secondScreen = n)}
-                style={{
-                  display: `${!isTablet ? "flex" : secondScreen ? "flex" : "none"}`
-                }}
-                className="f f-align-2-2 f-col outer-left__expanded"
-              >
+              <div ref={n => (this.secondScreen = n)} className="f f-align-2-2 f-col outer-left__expanded">
                 <SideList
                   List={currentDate}
                   user={user}
                   uuidOfActiveTab={historyId}
                   route={`${Routes["user"].path}/${id}`}
                   title="Пользователь"
-                  isTablet={isTablet}
                   this={this}
                 />
               </div>
@@ -719,10 +822,7 @@ class Admin extends React.Component {
             render={({ match }) => (
               <div
                 ref={n => (this.mainScreen = n)}
-                style={{
-                  display: `${!isTablet ? "flex" : mainScreen ? "flex" : "none"}`,
-                  background: `${allUsers ? "#f5f5f5": "#fff"}`
-                }}
+                style={{background: `${allUsers ? "#f5f5f5": "#fff"}`}}
                 className={`f outer-main__full`}
                 ref={n => (this.toggleElem = n)}
               >
@@ -733,7 +833,6 @@ class Admin extends React.Component {
                       redirect={Routes["users"].path}
                       path={Routes["root"].path}
                       component={Users}
-                      isTablet={this.state.isTablet}
                       currentDate={currentDate}
                       _self={this}
                     />
@@ -742,22 +841,26 @@ class Admin extends React.Component {
                       path={Routes["users"].path}
                       component={Users}
                       currentDate={currentDate}
-                      isTablet={this.state.isTablet}
                       _self={this}
                       changeUsersList = {this.changeUsersList}
                       deleteUserFromList = {this.deleteUserFromList} 
                       sortCollection = {this.sortCollection}
                       changeListByFilter = {this.changeListByFilter}
                       changeListBySearch = {this.changeListBySearch}
+                      pageType={pageType}
                     />
                     <RoutePassProps
                       exact
                       path={Routes["appeals"].path}
                       component={Users}
                       currentDate={currentDate}
-                      isTablet={this.state.isTablet}
                       _self={this}
-                      common
+                      changeUsersList = {this.changeUsersList}
+                      deleteUserFromList = {this.deleteUserFromList} 
+                      sortCollection = {this.sortCollection}
+                      changeListByFilter = {this.changeListByFilter}
+                      changeListBySearch = {this.changeListBySearch}
+                      pageType={pageType}
                     />
                     <RoutePassProps
                       path={`${Routes["user"].path}${Routes["user"].param}/history${Routes["history"].param}`}
@@ -765,14 +868,13 @@ class Admin extends React.Component {
                       currentDate={currentDate}
                       user = {user}
                       _self={this}
-                      isTablet={this.state.isTablet}
                     />
                     <RoutePassProps
-                      path={`${Routes["appeals"].path}${Routes["appeals"].param}`}
-                      component={Users}
+                      path={`${Routes["appeal"].path}${Routes["appeal"].param}`}
+                      component = {Appeal}
+                      user = {user}
                       currentDate={currentDate}
                       _self={this}
-                      isTablet={this.state.isTablet}
                     />
                   </Switch>
                 </div>
@@ -786,88 +888,16 @@ class Admin extends React.Component {
   }
 }
 
-const BreadCrumbs = ({
-  this: _self,
-  Title: {title, shownOnDesktop},
-  Left: { leftBtn, leftBtnName, newLeftBtnState },
-  Right: { rightBtn, rightBtnName, newRightBtnState },
-  isTablet
-}) => {
-  return isTablet
-    ? <div className="f f-align-1-2 breadcrumbs">
-        {leftBtn
-          ? <button
-              onClick={() => {
-                _self.setState(newLeftBtnState);
-              }}
-              className="f f-align-1-2 btn btn-flat breadcrumbs__back"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="7"
-                height="12"
-                viewBox="0 0 7 12"
-              >
-                <path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" />
-              </svg>
-              {leftBtnName}
-            </button>
-          : ""}
-        <span>{title}</span>
-        {rightBtn
-          ? <button
-              onClick={() => {
-                _self.setState(newRightBtnState);
-              }}
-              className="f f-align-1-2 btn btn-flat breadcrumbs__next"
-            >
-              {rightBtnName}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="7"
-                height="12"
-                viewBox="0 0 7 12"
-                style={{ transform: "rotate(180deg)" }}
-              >
-                <path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" />
-              </svg>
-            </button>
-          : ""}
-      </div>
-    : shownOnDesktop &&  <div className="f f-align-1-2 translator-tab__topline"> <span>{title}</span> </div>;
-};
-
 
 const SideList = ({
   List,
   user,
   uuidOfActiveTab: activeTab,
-  route,
-  title = "В работе",
-  isTablet,
-  this: _rootSelf,
-  Left = {
-        leftBtn: true,
-        leftBtnName: "Меню",
-        newLeftBtnState: { mainScreen: false, sidebar: true, secondScreen: true }
-  },
-  Right = {
-    rightBtn: false
-  }
+  route
 }) => {
   let registrationTime = new Date(user.registrationTime);
   return (
     <div className="f sidebar">
-        <BreadCrumbs
-          this={_rootSelf}
-          isTablet={isTablet}
-          Title={{
-              title: title,
-              shownOnDesktop: false
-          }}
-          Left={Left}
-          Right={Right}
-        />
         <div className="admin-user-details">
             <div className="admin-user-details__topArea">
               <figure className="f f-align-2-2 admin-user-details__avatar">
@@ -1020,7 +1050,8 @@ class Users extends React.Component {
     this.setState({
       roles
     })
-  }
+  } 
+
   rememberLastValue(_, {value}) { this.lastDropDownOpenedValue = value }
 
   changeTypeOfUser(uuid, _ , {value}){
@@ -1134,27 +1165,26 @@ class Users extends React.Component {
 
   render() {
   
-    let { currentDate, location: { pathname }, isTablet, _self } = this.props;
+    let { currentDate, location: { pathname },  _self, pageType} = this.props;
     let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search, roles} = this.state;
     let self = this;
 
     return  (<div>
-              <div className="f f-align-1-2 admin-list__topline"><span>Пользователи</span></div>
               <div className="f f-align-1-2 admin-list__topbar">
                 <Dropdown text={`${text}`} options={Object.assign([],roles,[{ 
                   text: 'Все',
-                  value: 'a', 
-                  icon: { name: 'circle', color: 'teal', size: 'small' },
-                  },...roles])} 
+                  value: 'a'
+                  },...roles.map(o => {return { text: o.text, value: o.value }})])} 
                   icon='filter'   
                   floating
                   labeled 
                   button 
+                  header={{icon:'tags', content:'Фильтр по nickname'}}
                   className='icon admin-list__filter'
                   onChange={self.changeFilter}/>
                 <Input icon='search' iconPosition='left' className='admin-list__search' value={!!search.value ? search.value : '' } onChange={self.changeSearch} />
               </div>
-              <Table compact fixed celled  sortable={true} style={{maxWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>
+              <Table color={'blue'} compact fixed celled sortable={true} style={{ width: '90%', minWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell sorted={ columnNameToSort === 'nickname' ? columnSortDirection : null} onClick={this.sortMe('nickname')}>Name</Table.HeaderCell>
@@ -1172,18 +1202,21 @@ class Users extends React.Component {
                 :
                 currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
                   <Table.Row key={index}>
-                    <Table.Cell><Link to={`/admin/user/${uuid}`}>{nickname}</Link></Table.Cell>
+                    <Table.Cell><Link to={`/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`}>{nickname}</Link></Table.Cell>
                     <Table.Cell>{email}</Table.Cell>
                     <Table.Cell style={{overflow: 'visible'}}><Icon {...findIcon(roles, type)} />
-                      <Dropdown inline 
+                     { pageType ===  'Users' ?
+                       <Dropdown inline 
                       {...(loading.is && loading.uuid === uuid && {loading:true})} 
-                      {...(loading.is && {disabled:true})} options={roles} value={type}
+                      {...(loading.is && {disabled:true})} options={roles.map(o => {return { text: o.text, value: o.value }})} value={type}
                       onChange={this.changeTypeOfUser.bind(self, uuid)}
                       onOpen={this.rememberLastValue}/>
+                      : findIcon(roles, type, 'text')
+                     }
                     </Table.Cell>
                     <Table.Cell>{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
-                    <Table.Cell  textAlign='center'>
-                      <Button  {...(deleting.is && {disabled:true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} icon color='blue' size='small'><Icon name='delete' /></Button>
+                    <Table.Cell className="f f-align-2-2">
+                      <button {...(deleting.is && {disabled:true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} className="btn btn-block btn-flat btn-normal f f-align-2-2"><img src={deleteIcon} alt="icon"/></button>
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -1196,39 +1229,22 @@ class Users extends React.Component {
 
 class UserAccount extends React.Component {
 
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
 
   render() {
 
-    let { currentDate, user, isTablet, _self } = this.props;
+    let { currentDate, user,  _self } = this.props;
 
     const RenderCollection = renderItem => {
       return (
         <div>
-            <BreadCrumbs
-                this={_self}
-                isTablet={isTablet}
-                Title={{
-                    title:  user.nickname, 
-                    shownOnDesktop: false
-                }}
-                Left={{
-                    leftBtn: true,
-                    leftBtnName: "Меню",
-                    newLeftBtnState: { 
-                        mainScreen: true, 
-                        sidebar: true 
-                    }
-                    }}
-                Right={{
-                rightBtn: true,
-                rightBtnName: "Назад",
-                newRightBtnState: {
-                    mainScreen: false,
-                    secondScreen: true,
-                    sidebar: false
-                }
-                }}
-            />
           {
             Object.values(currentDate).map( (item ,index) => {
                 return renderItem(item, index, new Date(item.publishTime))
@@ -1239,11 +1255,11 @@ class UserAccount extends React.Component {
       );
     };
     return (Object.entries(currentDate).length === 0
-            ? <div className={"f f-align-2-33 admin-feed u-mx-3 u-my-2"}>
-                <div className={"admin-feed__avatar"}>
+            ? <div className={"f f-align-2-33 admin-historypost u-mx-3 u-my-2"}>
+                <div className={"admin-historypost__avatar"}>
                     <img src={avatar} />
                 </div>
-                <div className={"f f-align-2-2 admin-feed__placeholder"}>
+                <div className={"f f-align-2-2 admin-historypost__placeholder"}>
                     <span>История отсутствуют</span>
                 </div>
               </div>
@@ -1305,34 +1321,23 @@ class UserAccount extends React.Component {
 }
 
 
-class HistoryList extends React.Component {
+class Appeal extends React.Component {
+
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
+
   render() {
-    let { currentDate, isTablet, _self,  } = this.props;
+    let { currentDate, _self  } = this.props;
+  
     const RenderCollection = renderItem => {
       return (
         <div>
-            <BreadCrumbs
-                this={_self}
-                isTablet={isTablet}
-                Title={{
-                    title:  currentDate[Object.keys(currentDate)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
-                    shownOnDesktop: false
-                }}
-                Left={{
-                    leftBtn: true,
-                    leftBtnName: "Меню",
-                    newLeftBtnState: { mainScreen: true, sidebar: true }
-                    }}
-                Right={{
-                rightBtn: true,
-                rightBtnName: "История",
-                newRightBtnState: {
-                    mainScreen: false,
-                    secondScreen: true,
-                    sidebar: false
-                }
-                }}
-            />
           {Object.values(currentDate).map((data, index) => {
             let publishTime = new Date(data.publishTime);
             return renderItem(data, index, publishTime);
@@ -1341,128 +1346,39 @@ class HistoryList extends React.Component {
       );
     };
     return (Object.entries(currentDate).length === 0
-            ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
-                <div className={"translator-feed__avatar"}>
+            ? <div className={"f f-align-2-33 admin-appeal u-mx-3 u-my-2"}>
+                <div className={"admin-feed__avatar"}>
                     <img src={avatar} />
                 </div>
-                <div className={"f f-align-2-2 translator-feed__placeholder"}>
+                <div className={"f f-align-2-2 admin-appeal__placeholder"}>
                     <span>История отсутствуют</span>
                 </div>
               </div>
             : RenderCollection((currentDate, index, publishTime) => (
-                <div key={index} className={"f f-col f-align-1-1 translator-history"}>
-                    <div className={"data__delimiter"}>
-                    {publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())}
-                    ,
-                    {" "}{publishTime.getFullYear()}{" "}
-                    </div>
-                    <div className={"f f-align-1-1 f-gap-2 translator-history-post "}>
-                    <div className={"translator-history-post__avatar"}>
-                        <img src={currentDate.avatar} alt={currentDate.nickname} />
-                    </div>
-                    <div className={"translator-history-post__content"}>
-                        <div className={"translator-history-post__content__text"}>
-                        {currentDate.content}
+              <div>
+                <div className={"data__delimiter admin-history-data__delimiter "}>{publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}</div>
+                <div key={index} className={"f f-row f-align-13-1 admin-history"}>
+                    <div className={"f f-align-1-1 f-col f-gap-2 admin-history-post "}>
+                      <div className="admin-user-details__topArea">
+                        <figure className="f f-align-2-2 admin-user-details__avatar">
+                          <img src={currentDate.avatar} alt={currentDate.nickname} />
+                        </figure>
+                        <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
+                          <div className="admin-user-details__personalInfo__title">{currentDate.title} </div>
+                          <div className="admin-user-details__personalInfo__email">{currentDate.email}</div>
+                          <div className={`admin-user-details__personalInfo__type admin-user-details__personalInfo__type${String.prototype.toUpperCase.call(currentDate.type)}`}>
+                            {findIcon(Roles, currentDate.type, 'text')}
+                          </div>
                         </div>
-                        <div
-                        className={
-                            "f f-align-1-2 f-gap-4 translator-history-post__content__bottombar"
-                        }
-                        >
-                        <LangLabel from={currentDate.from} to={currentDate.to} />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={icon_dur}
-                            value={humanReadableTime(currentDate.duration)}
-                            hint={"Длительность перевода"}
-                        />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={
-                            <Timer
-                                start={currentDate.startWorkingTime}
-                                duration={currentDate.duration}
-                                isBig={true}
-                            />
-                            }
-                            value={humanReadableTime(
-                            currentDate.duration -
-                                (new Date() - new Date(currentDate.startWorkingTime)) / 1000
-                            )}
-                            hint={"Оставшееся время"}
-                        />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={icon_letternum}
-                            value={currentDate.letterNumber}
-                            hint={"Количество символов"}
-                        />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={icon_cost}
-                            value={currentDate.cost}
-                            hint={"Стоимость"}
-                        />
-
-                        </div>
+                      </div>
+                      <div className={"admin-history-post__content"}>
+                          <p className={"admin-history-post__content__text"}>{currentDate.content}</p>
+                      </div>
                     </div>
-                    <div className={"translator-history-post__constols"} />
-                    <div className={"translator-history-post__date"}>
+                    <div className={"admin-history-post__date"}>
                         {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
                     </div>
-                    </div>
-
-                    <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
-                    <div className={"translator-history-reply__avatar"}>
-                        <img src={currentDate.avatar} alt={currentDate.nickname} />
-                    </div>
-                    <div className={"translator-history-reply__content"}>
-                        <textarea
-                        className={"translator-history-reply__content__text"}
-                        disabled
-                        value={currentDate.content}
-                        />
-                    </div>
-                    <div className={"translator-history-reply__constols"}>
-                        <button
-                        className={"btn btn-primiry btn-mini f f-align-2-2"}
-                        onClick={this.copy}
-                        >
-                        <img src={copy} alt="copy" />
-                        <span>Копировать</span>
-
-                        </button>
-                    </div>
-                    <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-                    </div>
-                    </div>
-                    <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
-                    <div className={"translator-history-reply__avatar"}>
-                        <img src={currentDate.avatar} alt={currentDate.nickname} />
-                    </div>
-                    <div className={"translator-history-reply__content"}>
-                        <textarea
-                        className={"translator-history-reply__content__text"}
-                        disabled
-                        value={currentDate.content}
-                        />
-                    </div>
-                    <div className={"translator-history-reply__constols"}>
-                        <button
-                        className={"btn btn-primiry btn-mini f f-align-2-2"}
-                        onClick={this.copy}
-                        >
-                        <img src={copy} alt="copy" />
-                        <span>Копировать</span>
-                        <input type="hidden" value={currentDate.content} />
-                        </button>
-                    </div>
-                    <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-                    </div>
-                    </div>
-
+                  </div>
                 </div>
                 ))
     );

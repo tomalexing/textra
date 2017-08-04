@@ -117,7 +117,7 @@ const AuthButton = withRouter(({ history }) => (
 const PrivateRoute =  ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
     Auth.isAuthenticated && rest.role.includes(Auth.role) ? (
-       <Component {...rest}/>
+       <Component currentRole={Auth.role} {...rest}/>
     ) : (
         Auth.isAuthenticated ?
         <Redirect to={{
