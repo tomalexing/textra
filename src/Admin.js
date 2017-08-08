@@ -178,6 +178,8 @@ function quickSort(items, left, right, item, comporator) {
 
     return items;
 };
+
+
     // Types of user :
     // u - user
     // c - controller
@@ -185,228 +187,7 @@ function quickSort(items, left, right, item, comporator) {
     // p - possibility
     // a - appeal
     // o - other
-let UsersList = [];
-const UsersList1 = [
-      {
-        uuid: "qwerqwerqwer",
-        nickname: "aaaa",
-        type: 'u',
-        email: 'nickmy@yandex.ru',
-        avatar: avatar,
-        title: "Инна Константинопольская",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10000),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-       {
-        uuid: "lkhgghk",
-        nickname: "zfdfsddf",
-        email: 'helpme@yandex.ru',
-        avatar: avatar,
-        type: 'c',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10065500),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      {
-        uuid: "vnbmnbmhg",
-        nickname: "alex",
-        email: 'yiyiyiyi@mail.ru',
-        avatar: avatar,
-        type: 't',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        registrationTime: new Date(new Date() - 10000000),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      {
-        uuid: "bertu",
-        nickname: "rgsgfgsa",
-        email: 'yiyiyiyi@mail.ru',
-        avatar: avatar,
-        type: 'u',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      {
-        uuid: "wasdffeq",
-        nickname: "bfsbs",
-        email: 'dsgsgsgdg@mail.ru',
-        avatar: avatar,
-        type: 'c',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        registrationTime: new Date(new Date() - 1000),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      {
-        uuid: "wasgfasrq",
-        nickname: "asdasdas",
-        email: 'mtnbvcx@mail.ru',
-        avatar: avatar,
-        type: 'c',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 1000000),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      }
-];
 
-const UsersList2 = [
-      {
-        uuid: "qwerqwerqwer",
-        nickname: "aaaa",
-        type: 'g',
-        email: 'nickmy@yandex.ru',
-        avatar: avatar,
-        title: "Инна Константинопольская",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10000),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-       {
-        uuid: "lkhgghk",
-        nickname: "zfdfsddf",
-        email: 'helpme@yandex.ru',
-        avatar: avatar,
-        type: 'o',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10065500),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      {
-        uuid: "vnbmnbmhg",
-        nickname: "alex",
-        email: 'yiyiyiyi@mail.ru',
-        avatar: avatar,
-        type: 'p',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        registrationTime: new Date(new Date() - 10000000),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      {
-        uuid: "bertu",
-        nickname: "rgsgfgsa",
-        email: 'yiyiyiyi@mail.ru',
-        avatar: avatar,
-        type: 'p',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      {
-        uuid: "wasdffeq",
-        nickname: "bfsbs",
-        email: 'dsgsgsgdg@mail.ru',
-        avatar: avatar,
-        type: 'g',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        registrationTime: new Date(new Date() - 1000),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      {
-        uuid: "wasgfasrq",
-        nickname: "asdasdas",
-        email: 'mtnbvcx@mail.ru',
-        avatar: avatar,
-        type: 'g',
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 1000000),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      }
-];
 
 
 const HistoryList = {
@@ -476,8 +257,9 @@ class Admin extends React.Component {
       id: undefined,
       historyId: undefined
     },
-    UsersList: null,
-    UsersListFetched: null
+    usersList: null,
+    usersListFetched: null,
+    usedRoles: []
   };
 
   addStyleSeheet(){
@@ -488,94 +270,75 @@ class Admin extends React.Component {
     element.insertAdjacentElement('afterend',style);
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     this.doAtDidMount.forEach(func => func());
     this.addStyleSeheet();
 
-
-    let { location: { pathname } } = this.props;
+    let { location: { pathname, state: RouterState } } = this.props;
+    console.log(RouterState);
     let activeTabA = pathname.split("/");
-    this.setState({
+    let _self = this;
+    await this.setState({
       page:{
-        pageType: ((/user(\/.+)?$/.test(pathname))
-                  ? 'User'
-                  : /users/.test(pathname)
-                  ? 'Users'
-                  : (/appeals/.test(pathname))
-                  ? 'Appeals'
-                  : /appeal(\/.+)?$/.test(pathname)
-                  ? 'Appeal'
-                  : ''),
+        pageType: RouterState ? RouterState.pageType : 'users',
         id: /history/.test(pathname) ? pathname.split("/").filter(el => el !== '').splice(-3)[0] : pathname.split("/").filter(el => el !== '').splice(-1)[0],
         historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
       }
     })
-    if(this.state.pageType === 'Users' || 'User'){
-      try {
-        fetch('/users', {
-          method: 'GET',
-          credentials: 'include',
-        }).then(response => {
-          return response.json();
-        }).then(data => {
-          if (data.err) throw Error(data.err);
-         this.setState({UsersList: data, UsersListFetched: data}, () => {
-           console.log(this.state)
-         });
-        })
-      }
-      catch (err) {
-        console.trace(err.stack)
-      }
-    }
-    if(/appeals/.test(pathname) || /appeal/.test(pathname) ){
-      this.setState({UsersListFetched: UsersList2});
-    }
-    //sleep(1000);
 
+    console.log(await this.getData(this.state.page.pageType));
+    //sleep(1000);
+    
+  }
+
+  getData(path){
+    let _self = this;
+    return new Promise( (resolve, reject) => {
+        try { 
+          fetch(`/${path.toLowerCase()}`, {
+            method: 'GET',
+            credentials: 'include'
+          }).then(response => {
+            return response.json();
+          }).then( async data => {
+            if (data.err) throw Error(data.err);
+              _self.setState({usersList: data, usersListFetched: data},()=>{
+                    _self.setUsedRoled(data, resolve);
+              })
+  
+          })
+        }
+        catch (err) {
+          console.trace(err.stack);
+          reject(err);
+        }
+    })
+  }
+
+  setUsedRoled(currentDate,cb){
+
+    let usedRoles = {},
+        roles = [];
+    currentDate.map(o => usedRoles[o.type] = true)
+    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
+    this.setState({
+      usedRoles: roles
+    },cb('Roles Are Setted')) 
   }
 
   componentWillReceiveProps(nextProps){
-    let { location: { pathname } } = nextProps;
+    let { location: { pathname, state: {pageType} } } = nextProps;
     let activeTabA = pathname.split("/");
+    let _self = this;
     this.setState({
       page:{
-        pageType: ((/user(\/.+)?$/.test(pathname))
-                  ? 'User'
-                  : /users/.test(pathname)
-                  ? 'Users'
-                  : (/appeals/.test(pathname))
-                  ? 'Appeals'
-                  : (/appeal(\/.+)?$/.test(pathname)))
-                  ? 'Appeal'
-                  : '',
-        id: /history/.test(pathname) ? pathname.split("/").filter(el => el !== '')[activeTabA.length - 3] : pathname.split("/").filter(el => el !== '')[activeTabA.length - 1],
+        pageType: pageType ? pageType : 'users',
+        id: /history/.test(pathname) ? pathname.split("/").filter(el => el !== '').splice(-3)[0] : pathname.split("/").filter(el => el !== '').splice(-1)[0],
         historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
       }
     })
 
-    if(/users/.test(pathname)){
-      try {
-        fetch('/users', {
-          method: 'GET',
-          credentials: 'include',
-        }).then(response => {
-          return response.json();
-        }).then(data => {
-          if (data.err) throw Error(data.err);
-           this.setState({UsersListFetched: data});
-        })
-      }
-      catch (err) {
-        console.trace(err.stack)
-      }
-    }
-
-    if(/appeals/.test(pathname)){
-      this.setState({UsersListFetched: UsersList2});
-    }
-
-     //this.setState({UsersList});
+    this.getData(pageType);
    
   }
 
@@ -589,8 +352,6 @@ class Admin extends React.Component {
   }
 
   async componentDidMount() {
-    console.log("componentDidMount");
-    console.log(this.test);
     this.listeners.push(
       delegate.call(
         this,
@@ -617,23 +378,23 @@ class Admin extends React.Component {
   changeUsersList(uuid, value){
     let self = this;
     let inx
-    self.state.UsersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+    self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
      return new Promise(r => {
-       this.setState(Object.assign(self.state.UsersList[inx], {type: value}),r)
+       this.setState(Object.assign(self.state.usersList[inx], {type: value}),r)
      })
   }
 
   deleteUserFromList(uuid){
     let self = this;
     let inx, inx2;
-    self.state.UsersList.find((o,i) => {if(o.uuid == uuid) inx = i});
-    self.state.UsersListFetched.find((o,i) => {if(o.uuid == uuid) inx2 = i});
+    self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+    self.state.usersListFetched.find((o,i) => {if(o.uuid == uuid) inx2 = i});
 
     return new Promise(r => {
-        let list = Object.assign([], this.state.UsersList);
+        let list = Object.assign([], this.state.usersList);
         list.splice(inx,1);
-        self.state.UsersListFetched.splice(inx2,1);
-        this.setState(Object.assign(self.state.UsersList, {UsersList:list}),r);
+        self.state.usersListFetched.splice(inx2,1);
+        this.setState(Object.assign(self.state.usersList, {usersList:list}),r);
       })
   }
 
@@ -641,7 +402,7 @@ class Admin extends React.Component {
     const _self = this
     return new Promise(r => {
       console.time('sort');
-      let sortedList = quickSort(Object.assign([], _self.state.UsersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
+      let sortedList = quickSort(Object.assign([], _self.state.usersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
         if (item){ // if its object
           if(!(item in val1))
             throw new Error('Item not in the Object, check Object for Comporator');
@@ -699,7 +460,7 @@ class Admin extends React.Component {
         sortedList = sortedList.reverse();
       }
 
-      _self.setState(Object.assign({}, _self.state, {UsersList:sortedList}),r);
+      _self.setState(Object.assign({}, _self.state, {usersList:sortedList}),r);
     });
 
   }
@@ -707,11 +468,11 @@ class Admin extends React.Component {
   changeListByFilter({field, value}){
     return new Promise(r => {
       if(value === 'a'){
-        this.setState({UsersList:this.state.UsersListFetched},r);
+        this.setState({usersList:this.state.usersListFetched},r);
         return
       }
       this.setState({
-        UsersList: this.state.UsersListFetched.filter(o => o[field] === value)
+        usersList: this.state.usersListFetched.filter(o => o[field] === value)
       },r)
     });
   }
@@ -720,12 +481,12 @@ class Admin extends React.Component {
     return new Promise(r => {
       if(filter === 'a'){
         this.setState({
-        UsersList: this.state.UsersListFetched.filter(o => o['nickname'].includes(value))
+        usersList: this.state.usersListFetched.filter(o => o['nickname'].includes(value))
         },r)
         return
       }
       this.setState({
-        UsersList: this.state.UsersListFetched.filter(o => o['nickname'].includes(value) &&  o[field] === filter)
+        usersList: this.state.usersListFetched.filter(o => o['nickname'].includes(value) &&  o[field] === filter)
       },r)
     });
   }
@@ -762,21 +523,21 @@ class Admin extends React.Component {
 
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
-    let {UsersList, UsersListFetched, page:{pageType, id, historyId}} = this.state;
+    let {usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
     let currentDate, user, allUsers = false;
 
     switch(pageType){
-    case('Users'): 
-      currentDate = UsersList || [];
+    case('users'): 
+      currentDate = usersList || [];
       allUsers = true
       break;
-    case('Appeals'): 
-      currentDate = UsersList || [];
+    case('appeals'): 
+      currentDate = usersList || [];
       allUsers = true
       break;
-    case('User'):
+    case('user'):
       currentDate = HistoryList || [];
-      user = UsersList && UsersList.find(v => v.uuid === id) ||       {
+      user = usersList && usersList.find(v => v.uuid === id) ||       {
         uuid: "qwerqwerqwer",
         nickname: "aaaa",
         type: 'u',
@@ -795,9 +556,9 @@ class Admin extends React.Component {
         isPersonal: false
       };
       break;
-    case('Appeal'):
-      currentDate = UsersList || [];
-      user = UsersList.find(v => v.uuid === id);
+    case('appeal'):
+      currentDate = usersList || [];
+      user = usersList.find(v => v.uuid === id);
       break;
     }
 
@@ -812,34 +573,24 @@ class Admin extends React.Component {
             <div className="f sidebar sidebar__menu"> 
               <ul className="f f-align-1-1 f-col admin-menu">
                 <NavLink
-                  className={
-                    "f f-align-1-2 admin-menu__item admin-menu__item__level-1"
-                  }
+                  className={"f f-align-1-2 admin-menu__item admin-menu__item__level-1"}
                   to={{
                     pathname: Routes["users"].path,
-                    state: { mainScreen: true }
+                    state: { pageType: "users" }
                   }}
                 >
-                  <span className={"f f-align-2-2 admin-menu__item__icon"}>
-                    <img src={users} />
-                  </span>
+                  <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={users} /></span>
                   <span>Пользователи</span>
-                 
                 </NavLink>
                 <div className="admin-menu__delimiter" />
                 <NavLink
-                  className={
-                    "f f-align-1-2 admin-menu__item admin-menu__item__level-1"
-                  }
+                  className={"f f-align-1-2 admin-menu__item admin-menu__item__level-1"}
                   to={{
                     pathname: Routes["appeals"].path,
-                    state: { mainScreen: false,
-                            secondScreen: true }
+                    state: { pageType: "appeals"}
                   }}
                 >
-                  <span className={"f f-align-2-2 admin-menu__item__icon"}>
-                    <img src={appeals} />
-                  </span>
+                  <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={appeals} /></span>
                   <span>Запросы</span>
                 </NavLink>
                 <div className="admin-menu__delimiter" />
@@ -885,6 +636,7 @@ class Admin extends React.Component {
                       component={Users}
                       currentDate={currentDate}
                       _self={this}
+                      roles={usedRoles}
                     />
                     <RoutePassProps
                       exact
@@ -898,6 +650,7 @@ class Admin extends React.Component {
                       changeListByFilter = {this.changeListByFilter}
                       changeListBySearch = {this.changeListBySearch}
                       pageType={pageType}
+                      roles={usedRoles}
                     />
                     <RoutePassProps
                       exact
@@ -911,6 +664,7 @@ class Admin extends React.Component {
                       changeListByFilter = {this.changeListByFilter}
                       changeListBySearch = {this.changeListBySearch}
                       pageType={pageType}
+                      roles={usedRoles}
                     />
                     <RoutePassProps
                       path={`${Routes["user"].path}${Routes["user"].param}/history${Routes["history"].param}`}
@@ -918,6 +672,7 @@ class Admin extends React.Component {
                       currentDate={currentDate}
                       user = {user}
                       _self={this}
+                      roles={usedRoles}
                     />
                     <RoutePassProps
                       path={`${Routes["appeal"].path}${Routes["appeal"].param}`}
@@ -925,6 +680,7 @@ class Admin extends React.Component {
                       user = {user}
                       currentDate={currentDate}
                       _self={this}
+                      roles={usedRoles}
                     />
                   </Switch>
                 </div>
@@ -1069,7 +825,6 @@ class Users extends React.Component {
   }
 
   state = {
-    roles: [],
     loading: {
       is: false,
       uuid: undefined
@@ -1091,34 +846,11 @@ class Users extends React.Component {
     }
   }
 
-  componentWillMount(){
-    let {currentDate} = this.props,
-        usedRoles = {},
-        roles = [];
-    currentDate && currentDate.map(o => usedRoles[o.type] = true)
-    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
-    this.setState({
-      roles
-    })
-  } 
-
-  componentWillReceiveProps(newProps){
-    let {currentDate} = newProps,  // TODO FIX bug with new props and roles
-      usedRoles = {},
-      roles = [];
-    currentDate.map(o => usedRoles[o.type] = true)
-    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
-    this.setState({
-      roles
-    })
-  }
 
   rememberLastValue(_, {value}) { this.lastDropDownOpenedValue = value }
 
   changeTypeOfUser(uuid, _ , {value}){
     let argsAr  = Array.prototype.slice.call(arguments);
-    console.log(argsAr);
-
     if( this.lastDropDownOpenedValue == value) // do nothing if nothing has changed
       return 
 
@@ -1226,10 +958,9 @@ class Users extends React.Component {
 
   render() {
   
-    let { currentDate, location: { pathname },  _self, pageType} = this.props;
-    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search, roles} = this.state;
+    let { currentDate, location: { pathname },  _self, pageType, roles } = this.props;
+    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search} = this.state;
     let self = this;
-
     return  (<div>
               <div className="f f-align-1-2 admin-list__topbar">
                 <Dropdown text={`${text}`} options={Object.assign([],roles,[{ 
@@ -1240,7 +971,7 @@ class Users extends React.Component {
                   floating
                   labeled 
                   button 
-                  header={ <Dropdown.Header icon='tags' content='Search Issues' /> }
+                  header={ <Dropdown.Header icon='tags' content='Фильтр по ролям' /> }
                   className='icon admin-list__filter'
                   onChange={self.changeFilter}/>
                 <Input icon='search' iconPosition='left' className='admin-list__search' value={!!search.value ? search.value : '' } onChange={self.changeSearch} />
@@ -1256,23 +987,28 @@ class Users extends React.Component {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                { currentDate && currentDate.length === 0 ?
+                { Array.isArray(currentDate) && currentDate.length === 0 ?
                 <Table.Row className={"f f-align-2-33 admin-list "} textAlign='center'>
                     <Table.Cell >Пользователи отсутствуют</Table.Cell>
                 </Table.Row>
                 :
-                currentDate && currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
+                Array.isArray(currentDate) && currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
                   <Table.Row key={index}>
-                    <Table.Cell><Link to={`/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`}>{nickname}</Link></Table.Cell>
+                    <Table.Cell><Link to={{
+                        pathname: `/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`,
+                        state: {pageType: pageType.toLowerCase().slice(0,pageType.length - 1)}
+                        }}>
+                        {nickname}
+                      </Link></Table.Cell>
                     <Table.Cell>{email}</Table.Cell>
-                    <Table.Cell style={{overflow: 'visible'}}><Icon {...findIcon(roles, type)} />
-                     {  pageType ===  'Users' ?
+                    <Table.Cell style={{overflow: 'visible'}}> {!!roles.length && <Icon {...findIcon(roles, type)} />}
+                     {  pageType ===  'users' ?
                        <Dropdown inline 
                       {...(loading.is && loading.uuid === uuid && {loading:true})} 
                       {...(loading.is && {disabled:true})} options={roles.map(o => {return { text: o.text, value: o.value }})} value={type}
                       onChange={this.changeTypeOfUser.bind(self, uuid)}
                       onOpen={this.rememberLastValue}/>
-                      : findIcon(roles, type, 'text')
+                      : findIcon(Roles, type, 'text')
                      }
                     </Table.Cell>
                     <Table.Cell>{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
