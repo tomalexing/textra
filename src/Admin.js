@@ -54,7 +54,7 @@ import Indicator from "./components/Indicator";
 import deepEqual from 'deep-equal';
 
 import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
-
+import Store  from './store/Store.js';
 
 const Routes = {
   root: {
@@ -234,7 +234,8 @@ class Admin extends React.Component {
     super(props);
     this.listeners = [];
     this.doAtDidMount = [];
-
+    this.store = null;
+    this._isMounted = false;
     this.list = this.list.bind(this);
     this.renders = 0;
 
@@ -244,6 +245,7 @@ class Admin extends React.Component {
     this.sortCollection = this.sortCollection.bind(this);
     this.changeListByFilter = this.changeListByFilter.bind(this);
     this.changeListBySearch = this.changeListBySearch.bind(this);
+    this.updateHandler = this.updateHandler.bind(this);
   }
 
   state = {
@@ -286,46 +288,27 @@ class Admin extends React.Component {
       }
     })
 
-    console.log(await this.getData(this.state.page.pageType));
     //sleep(1000);
-    
   }
 
-  getData(path){
-    let _self = this;
-    return new Promise( (resolve, reject) => {
-        try { 
-          fetch(`/${path.toLowerCase()}`, {
-            method: 'GET',
-            credentials: 'include'
-          }).then(response => {
-            return response.json();
-          }).then( async data => {
-            if (data.err) throw Error(data.err);
-              _self.setState({usersList: data, usersListFetched: data},()=>{
-                    _self.setUsedRoled(data, resolve);
-              })
+  componentDidMount(){
+    this._isMounted = true;
+    this.listeners.push(
+      delegate.call(this, window, "touchend", `.${Array.from(this.bg.classList).join(".")}`,
+        event => {
+          if (!this.state.sidebar || event.target.closest(".sidebar__menu")) return;
+
+          this.setState({ sidebar: false });
+        },
+        false
+      )
+    );
+    let {page: {pageType,id}} = this.state;
+    this.store = new Store(pageType, id);
+    this.store.start();
+    this.store.addListener('update', this.updateHandler);
+  }
   
-          })
-        }
-        catch (err) {
-          console.trace(err.stack);
-          reject(err);
-        }
-    })
-  }
-
-  setUsedRoled(currentDate,cb){
-
-    let usedRoles = {},
-        roles = [];
-    currentDate.map(o => usedRoles[o.type] = true)
-    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
-    this.setState({
-      usedRoles: roles
-    },cb('Roles Are Setted')) 
-  }
-
   componentWillReceiveProps(nextProps){
     let { location: { pathname, state: {pageType} } } = nextProps;
     let activeTabA = pathname.split("/");
@@ -342,6 +325,22 @@ class Admin extends React.Component {
    
   }
 
+  componentWillReceiveProps(props) {
+    const { mainScreen, secondScreen } = this.props.location.state || {
+      mainScreen: true,
+      secondScreen: false
+    };
+    this.setState({ mainScreen, secondScreen });
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.listeners.forEach(removeEventListener => removeEventListener());
+    this.store.stop();
+    this.store.removeListener('update', this.updateHandler);
+    this.store = null;
+  }
+
   shouldComponentUpdate(nextProps, nextState){
 
     if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
@@ -351,28 +350,23 @@ class Admin extends React.Component {
     return false
   }
 
-  async componentDidMount() {
-    this.listeners.push(
-      delegate.call(
-        this,
-        window,
-        "touchend",
-        `.${Array.from(this.bg.classList).join(".")}`,
-        event => {
-          if (!this.state.sidebar || event.target.closest(".sidebar__menu")) return;
+  updateHandler(data){
+     if(!this._isMounted) return
+      let _self = this;
+      _self.setState({usersList: data.list, usersListFetched: data.list},()=>{
+         _self.setUsedRoled(data.list);
+      })
+  }
 
-          this.setState({ sidebar: false });
-        },
-        false
-      )
-    );
-    while (1) {
-      const prev = this.state.items;
-      const items = [`Hello World #${prev.length}`, ...prev];
-      this.setState({ items });
-      await sleep(Math.random() * 3000000);
-    }
-    console.log(this);
+  setUsedRoled(currentDate,cb){
+
+    let usedRoles = {},
+        roles = [];
+    currentDate.map(o => usedRoles[o.type] = true)
+    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
+    this.setState({
+      usedRoles: roles
+    }) 
   }
 
   changeUsersList(uuid, value){
@@ -507,17 +501,6 @@ class Admin extends React.Component {
 
   boundRef = place => (n => (this[place] = n)).bind(this);
 
-  componentWillReceiveProps(props) {
-    const { mainScreen, secondScreen } = this.props.location.state || {
-      mainScreen: true,
-      secondScreen: false
-    };
-    this.setState({ mainScreen, secondScreen });
-  }
-
-  componentWillUnmount() {
-    this.listeners.forEach(removeEventListener => removeEventListener());
-  }
 
   render() {
 
@@ -851,6 +834,7 @@ class Users extends React.Component {
 
   changeTypeOfUser(uuid, _ , {value}){
     let argsAr  = Array.prototype.slice.call(arguments);
+
     if( this.lastDropDownOpenedValue == value) // do nothing if nothing has changed
       return 
 
