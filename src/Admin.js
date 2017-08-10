@@ -54,7 +54,7 @@ import Indicator from "./components/Indicator";
 import deepEqual from 'deep-equal';
 
 import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
-import Store  from './store/Store.js';
+import Store, {TxRest}  from './store/Store.js';
 
 const Routes = {
   root: {
@@ -240,12 +240,6 @@ class Admin extends React.Component {
     this.renders = 0;
 
     this.boundRef = this.boundRef.bind(this);
-    this.changeUsersList = this.changeUsersList.bind(this);
-    this.deleteUserFromList = this.deleteUserFromList.bind(this);
-    this.sortCollection = this.sortCollection.bind(this);
-    this.changeListByFilter = this.changeListByFilter.bind(this);
-    this.changeListBySearch = this.changeListBySearch.bind(this);
-    this.updateHandler = this.updateHandler.bind(this);
   }
 
   state = {
@@ -258,10 +252,7 @@ class Admin extends React.Component {
       pageType: 'users',
       id: undefined,
       historyId: undefined
-    },
-    usersList: null,
-    usersListFetched: null,
-    usedRoles: []
+    }
   };
 
   addStyleSeheet(){
@@ -283,12 +274,10 @@ class Admin extends React.Component {
     await this.setState({
       page:{
         pageType: RouterState ? RouterState.pageType : 'users',
-        id: /history/.test(pathname) ? pathname.split("/").filter(el => el !== '').splice(-3)[0] : pathname.split("/").filter(el => el !== '').splice(-1)[0],
+        id: RouterState ? RouterState.id : undefined ,
         historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
       }
     })
-
-    //sleep(1000);
   }
 
   componentDidMount(){
@@ -303,10 +292,6 @@ class Admin extends React.Component {
         false
       )
     );
-    let {page: {pageType,id}} = this.state;
-    this.store = new Store(pageType, id);
-    this.store.start();
-    this.store.addListener('update', this.updateHandler);
   }
   
   componentWillReceiveProps(nextProps){
@@ -322,7 +307,6 @@ class Admin extends React.Component {
     })
 
     this.getData(pageType);
-   
   }
 
   componentWillReceiveProps(props) {
@@ -336,9 +320,6 @@ class Admin extends React.Component {
   componentWillUnmount() {
     this._isMounted = false;
     this.listeners.forEach(removeEventListener => removeEventListener());
-    this.store.stop();
-    this.store.removeListener('update', this.updateHandler);
-    this.store = null;
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -350,140 +331,7 @@ class Admin extends React.Component {
     return false
   }
 
-  updateHandler(data){
-     if(!this._isMounted) return
-      let _self = this;
-      _self.setState({usersList: data.list, usersListFetched: data.list},()=>{
-         _self.setUsedRoled(data.list);
-      })
-  }
-
-  setUsedRoled(currentDate,cb){
-
-    let usedRoles = {},
-        roles = [];
-    currentDate.map(o => usedRoles[o.type] = true)
-    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
-    this.setState({
-      usedRoles: roles
-    }) 
-  }
-
-  changeUsersList(uuid, value){
-    let self = this;
-    let inx
-    self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
-     return new Promise(r => {
-       this.setState(Object.assign(self.state.usersList[inx], {type: value}),r)
-     })
-  }
-
-  deleteUserFromList(uuid){
-    let self = this;
-    let inx, inx2;
-    self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
-    self.state.usersListFetched.find((o,i) => {if(o.uuid == uuid) inx2 = i});
-
-    return new Promise(r => {
-        let list = Object.assign([], this.state.usersList);
-        list.splice(inx,1);
-        self.state.usersListFetched.splice(inx2,1);
-        this.setState(Object.assign(self.state.usersList, {usersList:list}),r);
-      })
-  }
-
-  sortCollection({columnNameToSort, columnSortDirection}){
-    const _self = this
-    return new Promise(r => {
-      console.time('sort');
-      let sortedList = quickSort(Object.assign([], _self.state.usersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
-        if (item){ // if its object
-          if(!(item in val1))
-            throw new Error('Item not in the Object, check Object for Comporator');
-
-          val1 = val1[item];
-          val2 = val2[item];
-        }
-
-        if(typeof val1 === 'number' &&  typeof val2 === 'number'){
-        if(pos)
-            return val1 > val2
-        else 
-            return val1 < val2
-        }
-
-        if(typeof val1 === 'string' &&  typeof val2 === 'string'){
-          let l1 = val1.length, l2 = val2.length, i = 0;
-
-          while(i < Math.min(l1, l2)){
-            if(val1.charCodeAt(i) === val2.charCodeAt(i)){
-              i++;
-              if( i === Math.min(l1, l2) ){
-                if (pos)
-                  return l1 > l2
-                else 
-                  return l1 < l2
-                }
-              continue;
-            }
-            if (pos)
-              return val1.charCodeAt(i) > val2.charCodeAt(i)
-            else 
-              return val1.charCodeAt(i) < val2.charCodeAt(i)
-          }
-        }
-
-        if(val1 instanceof Date &&  val2 instanceof Date){
-
-          val1 = val1.getTime();
-          val2 = val2.getTime();
-
-          if(pos)
-            return val1 > val2
-          else 
-            return val1 < val2
-        }
-      }); // null for omit
-      console.timeEnd('sort');
-      // sortedList = sortedList.reduce((acum, val, idx) => {
-      //   acum[val['uuid']] = val;
-      //   return acum;
-      // }, {})
-
-      if (columnSortDirection == 'ascending'){
-        sortedList = sortedList.reverse();
-      }
-
-      _self.setState(Object.assign({}, _self.state, {usersList:sortedList}),r);
-    });
-
-  }
-
-  changeListByFilter({field, value}){
-    return new Promise(r => {
-      if(value === 'a'){
-        this.setState({usersList:this.state.usersListFetched},r);
-        return
-      }
-      this.setState({
-        usersList: this.state.usersListFetched.filter(o => o[field] === value)
-      },r)
-    });
-  }
-
-  changeListBySearch({value, field, filter}){
-    return new Promise(r => {
-      if(filter === 'a'){
-        this.setState({
-        usersList: this.state.usersListFetched.filter(o => o['nickname'].includes(value))
-        },r)
-        return
-      }
-      this.setState({
-        usersList: this.state.usersListFetched.filter(o => o['nickname'].includes(value) &&  o[field] === filter)
-      },r)
-    });
-  }
+ 
 
   list() {
     const { items } = this.state;
@@ -617,23 +465,14 @@ class Admin extends React.Component {
                       redirect={Routes["users"].path}
                       path={Routes["root"].path}
                       component={Users}
-                      currentDate={currentDate}
                       _self={this}
-                      roles={usedRoles}
                     />
                     <RoutePassProps
                       exact
                       path={Routes["users"].path}
                       component={Users}
-                      currentDate={currentDate}
                       _self={this}
-                      changeUsersList = {this.changeUsersList}
-                      deleteUserFromList = {this.deleteUserFromList} 
-                      sortCollection = {this.sortCollection}
-                      changeListByFilter = {this.changeListByFilter}
-                      changeListBySearch = {this.changeListBySearch}
-                      pageType={pageType}
-                      roles={usedRoles}
+                      page={this.state.page}
                     />
                     <RoutePassProps
                       exact
@@ -754,56 +593,19 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
 
 
 
-const lcMatch = (q, s) => s && s.toLowerCase().indexOf(q.toLowerCase()) >= 0;
-
-class Query {
-  constructor(data, query) {
-    this.isNotExeed = this.isNotExeed.bind(this);
-    this.eqField = this.eqField.bind(this);
-    this.filter = this.filter.bind(this);
-    this.displayedCount = 0;
-    this.data = data;
-    this.query = query;
-  }
-  eqField = (fieldList, item, rule = "every") => {
-    switch (rule) {
-      case "every":
-        return Object.values(fieldList).every(
-          f => (f.diactivate ? true : item[f.name] === f.equals)
-        );
-      case "some":
-        return Object.values(fieldList).some(
-          f => (f.diactivate ? true : item[f.name] === f.equals)
-        );
-    }
-  };
-  isNotExeed = (q, ind) => {
-    if (q.perPage < 0) return true;
-    return q.perPage * q.page - 1 >= this.displayedCount++;
-  };
-
-  filter = () =>
-    Object.values(this.data).filter(
-      (item, idx) =>
-        this.eqField(
-          this.query["fielteredField"],
-          item,
-          this.query["fielteredFieldRule"]
-        ) && this.isNotExeed(this.query, idx)
-    );
-}
-
 class Users extends React.Component {
 
   constructor(p){
     super(p);
-
+    this.store = null;
+    this._isMounted = false;
     this.changeTypeOfUser = this.changeTypeOfUser.bind(this)
     this.deleteUser = this.deleteUser.bind(this)
     this.sortMe = this.sortMe.bind(this)
     this.changeFilter = this.changeFilter.bind(this)
     this.changeSearch = this.changeSearch.bind(this)
     this.rememberLastValue = this.rememberLastValue.bind(this)
+    this.updateHandler = this.updateHandler.bind(this)
     this.lastDropDownOpenedValue = undefined;
   }
 
@@ -825,16 +627,148 @@ class Users extends React.Component {
       value: 'a'
     },
     search: {
-      value: undefined
+      value: ''
+    },
+    usersList: null,
+    usersListFetched: null,
+    usedRoles: []
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+    let {page: {pageType, id}} = this.props;
+    this.store = new Store(pageType);
+    this.store.start();
+    this.store.addListener('update', this.updateHandler);
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.store.stop();
+    this.store.removeListener('update', this.updateHandler);
+    this.store = null;
+  }
+
+  updateHandler(data){
+    if(!this._isMounted) return
+    let _self = this;
+    if( data.list[0] === null ) {
+      Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
+            .then((list) => {
+                list.map((item, index) => _self.store.itemUpdated(item.value, index))
+                let {list: usersList , ids} = _self.store.getState();
+                _self.setUsedRoled(usersList);
+                _self.setState({usersList: usersList, usersListFetched: usersList})})
+    }else{
+        _self.setUsedRoled(data.list);
+        _self.setState({usersList: data.list, usersListFetched: data.list})
+        Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
+            .then(async list => { await sleep(10000); return Promise.resolve(list)})
+            .then((list) => {
+                list.map((item, index) => _self.store.itemUpdated(item.value, index))
+                let {list: usersList , ids} = _self.store.getState();
+                _self.setUsedRoled(usersList);
+                _self.setState({usersList: usersList, usersListFetched: usersList})})
     }
   }
 
+  setUsedRoled(currentDate,cb){
+    let usedRoles = {},
+        roles = [];
+    currentDate.map(o => usedRoles[o.type] = true)
+    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
+    this.setState({
+      usedRoles: roles
+    },() =>{
+      if(typeof cb === 'function'){
+        cb();
+      }
+    })
+  }
 
-  rememberLastValue(_, {value}) { this.lastDropDownOpenedValue = value }
+  changeUsersList(uuid, value){
+    let self = this;
+    let inx
+    self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+     return new Promise(r => {
+       this.setState(Object.assign(self.state.usersList[inx], {type: value}),r)
+     })
+  }
+
+  sortCollection({columnNameToSort, columnSortDirection}){
+    const _self = this
+    return new Promise(r => {
+      console.time('sort');
+      let sortedList = quickSort(Object.assign([], _self.state.usersList), null, null, columnNameToSort, (val1, val2, pos, item) => {
+        if (item){ // if its object
+          if(!(item in val1))
+            throw new Error('Item not in the Object, check Object for Comporator');
+
+          val1 = val1[item];
+          val2 = val2[item];
+        }
+
+        if(typeof val1 === 'number' &&  typeof val2 === 'number'){
+        if(pos)
+            return val1 > val2
+        else 
+            return val1 < val2
+        }
+
+        if(typeof val1 === 'string' &&  typeof val2 === 'string'){
+          let l1 = val1.length, l2 = val2.length, i = 0;
+
+          while(i < Math.min(l1, l2)){
+            if(val1.charCodeAt(i) === val2.charCodeAt(i)){
+              i++;
+              if( i === Math.min(l1, l2) ){
+                if (pos)
+                  return l1 > l2
+                else 
+                  return l1 < l2
+                }
+              continue;
+            }
+            if (pos)
+              return val1.charCodeAt(i) > val2.charCodeAt(i)
+            else 
+              return val1.charCodeAt(i) < val2.charCodeAt(i)
+          }
+        }
+
+        if(val1 instanceof Date &&  val2 instanceof Date){
+
+          val1 = val1.getTime();
+          val2 = val2.getTime();
+
+          if(pos)
+            return val1 > val2
+          else 
+            return val1 < val2
+        }
+      }); // null for omit
+      console.timeEnd('sort');
+      // sortedList = sortedList.reduce((acum, val, idx) => {
+      //   acum[val['uuid']] = val;
+      //   return acum;
+      // }, {})
+
+      if (columnSortDirection == 'ascending'){
+        sortedList = sortedList.reverse();
+      }
+
+      _self.setState(Object.assign({}, _self.state, {usersList:sortedList}),r);
+    });
+
+  }
+
+
+
+  rememberLastValue(_, {value}){ this.lastDropDownOpenedValue = value }
 
   changeTypeOfUser(uuid, _ , {value}){
-    let argsAr  = Array.prototype.slice.call(arguments);
-
+    let _self = this;
+    let searchValue = this.state.search.value;
     if( this.lastDropDownOpenedValue == value) // do nothing if nothing has changed
       return 
 
@@ -847,9 +781,23 @@ class Users extends React.Component {
 
     return new Promise(resolve => setTimeout(resolve ,1000))
                   .then(_ => {
-                    return this.props.changeUsersList(uuid, value)
+                    let inx
+                    _self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+                    return new Promise(r => {
+                      this.setState(Object.assign(_self.state.usersList[inx], {type: value}),r)
+                    })
                   }).then(_ => {  
-                    return this.props.changeListByFilter({field: 'type', value: this.state.filter.value || 'c'});
+                    return new Promise(r => {
+                        if(this.state.filter.value === 'a'){
+                          _self.setState({
+                            usersList: _self.state.usersListFetched.filter(o => o['nickname'].includes(searchValue))
+                          },r)
+                          return
+                        }
+                        _self.setState({
+                          usersList: _self.state.usersListFetched.filter(o => o['nickname'].includes(searchValue) &&  o['type'] === _self.state.filter.value)
+                        },r)
+                      });
                   }).then(_ => {
                     this.setState(Object.assign({},this.state,{
                       loading:{
@@ -861,7 +809,7 @@ class Users extends React.Component {
   }
 
   deleteUser (uuid){
-
+    let _self = this;
     this.setState(Object.assign({}, this.state,{
       deleting:{
         is: true,
@@ -871,7 +819,17 @@ class Users extends React.Component {
 
     return new Promise(resolve => setTimeout(resolve ,1000))
               .then(_ => {
-                return this.props.deleteUserFromList(uuid)
+                let inx, inx2;
+                _self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+                _self.state.usersListFetched.find((o,i) => {if(o.uuid == uuid) inx2 = i});
+
+                return new Promise(r => {
+                    let list = Object.assign([], this.state.usersList);
+                    list.splice(inx,1);
+                    _self.state.usersListFetched.splice(inx2,1);
+                    this.setState(Object.assign(_self.state.usersList, {usersList:list}),r);
+                  })
+  
               }).then(_ => {
                 this.setState(Object.assign(this.state,{
                   deleting:{
@@ -889,7 +847,7 @@ class Users extends React.Component {
       self.setState(Object.assign(self.state.sorting, {
         columnSortDirection: self.state.sorting.columnSortDirection === 'ascending' ? 'descending' : 'ascending'
       }), () => {
-         self.props.sortCollection({
+         self.sortCollection({
           columnNameToSort,
           columnSortDirection: self.state.sorting.columnSortDirection
         })
@@ -903,7 +861,7 @@ class Users extends React.Component {
         columnSortDirection: 'descending'
       }
     }), () => {
-      self.props.sortCollection({
+      self.sortCollection({
         columnNameToSort,
         columnSortDirection: 'descending'
       })
@@ -911,40 +869,81 @@ class Users extends React.Component {
   }
 
   changeFilter(_ , {options, value}){
-    let self = this,
+    let _self = this,
         text = options.find(o => o.value === value)['text'];
-        
-    self.setState(Object.assign({},self.state,{
+    let filter = 'type';
+    _self.setState(Object.assign({},_self.state,{
       filter:{
         text,
         value
       }
     }), () => {
-      this.props.changeListByFilter({field: 'type', value});
+      new Promise(r => {
+        if(value === 'a'){
+          _self.setState({usersList: _self.state.usersListFetched},r);
+          return
+        }
+        _self.setState({
+          usersList: _self.state.usersListFetched.filter(o => o['type'] === value)
+        },r)
+     });
     })
   }
 
   changeSearch(_ , {value}){
-    let self = this;
-
-    self.setState(Object.assign({}, self.state,{
+    let _self = this;
+    _self.setState(Object.assign({}, ..._self.state, {
       search:{
         value
       }
     }), () => {
       Promise.resolve().then( _ => {
-        return self.props.changeListBySearch({value, field: 'type', filter: self.state.filter.value})})
-      .then(_ => {  
-        //return self.props.changeListByFilter({field: 'type', value: self.state.filter.value || 'c'});
-    })
+            return new Promise(r => {
+              if(_self.state.filter.value === 'a'){
+                _self.setState({
+                  usersList: _self.state.usersListFetched.filter(o => o['nickname'].includes(value))
+                },r)
+                return
+              }
+              _self.setState({
+                usersList: _self.state.usersListFetched.filter(o => o['nickname'].includes(value) &&  o['type'] === _self.state.filter.value)
+              },r)
+            });
+          })
     })
   }
 
   render() {
   
-    let { currentDate, location: { pathname },  _self, pageType, roles } = this.props;
-    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search} = this.state;
+    let {location: { pathname }, page: {pageType} } = this.props;
+    let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search, usedRoles: roles} = this.state;
+    let currentDate = this.state.usersList;
     let self = this;
+    if(currentDate === null){
+      return(<div>
+              <div className="f f-align-1-2 admin-list__topbar">
+                <div className=" className='icon admin-list__filter'"></div>
+                <Input icon='search' iconPosition='left' className='admin-list__search' value={!!search.value ? search.value : '' } onChange={self.changeSearch} />
+              </div>
+              <Table color={'blue'} compact fixed celled sortable={true} style={{ width: '90%', minWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'nickname' ? columnSortDirection : null} onClick={this.sortMe('nickname')}>Name</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
+                  <Table.HeaderCell sorted={ columnNameToSort === 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
+                  <Table.HeaderCell textAlign='center' >Delete</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                <Table.Row className={"f f-align-2-33 admin-list "} textAlign='center'>
+                    <Table.Cell >Загрузка</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+            </Table>
+        </div>)
+    }
+
     return  (<div>
               <div className="f f-align-1-2 admin-list__topbar">
                 <Dropdown text={`${text}`} options={Object.assign([],roles,[{ 
@@ -980,7 +979,7 @@ class Users extends React.Component {
                   <Table.Row key={index}>
                     <Table.Cell><Link to={{
                         pathname: `/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`,
-                        state: {pageType: pageType.toLowerCase().slice(0,pageType.length - 1)}
+                        state: {pageType: pageType.toLowerCase().slice(0,pageType.length - 1), id: uuid }
                         }}>
                         {nickname}
                       </Link></Table.Cell>
@@ -997,7 +996,7 @@ class Users extends React.Component {
                     </Table.Cell>
                     <Table.Cell>{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
                     <Table.Cell className="f f-align-2-2">
-                      <button {...(deleting.is && {disabled:true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} className="btn btn-block btn-flat btn-normal f f-align-2-2"><img src={deleteIcon} alt="icon"/></button>
+                      <button {...(deleting.is && {'disabled':true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} className="admin-list__delbtn btn btn-block btn-flat btn-normal f f-align-2-2"><img src={deleteIcon} alt="icon"/></button>
                     </Table.Cell>
                   </Table.Row>
                 ))}

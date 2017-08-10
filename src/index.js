@@ -14,6 +14,7 @@ import {
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump } from './utils';
+import Store from './store/Store.js'
 injectTapEventPlugin();
 // ====================================
 // ========= Lazy loadin ==============
@@ -75,30 +76,46 @@ if(Auth.role == undefined){
 const Public = () => <h3>Public</h3>
 const Protected = () => <h3>Protected</h3>
 
-const App = () => (
+class App extends React.Component {
   
-  <Router>
-     <Route render={({ location }) => (
-       
-            <ReactCSSTransitionGroup
-              transitionName="fade"
-              transitionEnterTimeout={300}
-              transitionLeaveTimeout={300}
-            >
-              <ToDashBoard exact path="/" key={getUniqueKey()}/>
-              <Route path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
-              <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
-              <PrivateRoute path="/admin" component={Admin} location={location} role={['admin','dev']} key={getUniqueKey()}/>
-              <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
-              <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
-              <PrivateRoute exact path="/test" component={Test} location={location} role={['dev']}key={getUniqueKey()} />
-              <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
-            </ReactCSSTransitionGroup>
+   componentWillMount() {
+    Store.loadSession()
+    if (typeof window === 'undefined') return
+    window.addEventListener('beforeunload', this.handleBeforeUnload)
+  }
 
-     )}/>
-  </Router>
+  componentWillUnmount() {
+    if (typeof window === 'undefined') return
+    window.removeEventListener('beforeunload', this.handleBeforeUnload)
+  }
 
-)
+  handleBeforeUnload() {
+    Store.saveSession()
+  }
+
+  render(){
+    return(<Router>
+            <Route render={({ location }) => (
+              
+                    <ReactCSSTransitionGroup
+                      transitionName="fade"
+                      transitionEnterTimeout={300}
+                      transitionLeaveTimeout={300}
+                    >
+                      <ToDashBoard exact path="/" key={getUniqueKey()}/>
+                      <Route path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
+                      <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
+                      <PrivateRoute path="/admin" component={Admin} location={location} role={['admin','dev']} key={getUniqueKey()}/>
+                      <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
+                      <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
+                      <PrivateRoute exact path="/test" component={Test} location={location} role={['dev']}key={getUniqueKey()} />
+                      <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
+                    </ReactCSSTransitionGroup>
+
+            )}/>
+          </Router>)
+  }
+}
 
 
 const AuthButton = withRouter(({ history }) => (

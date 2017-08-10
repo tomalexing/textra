@@ -1,7 +1,7 @@
 import {EventEmitter} from 'events';
 
 // Textra Rest Api
-const TxRest = (() => {
+export const TxRest = (() => {
 
   function getData(path, cb){
     let _self = this;
@@ -14,7 +14,10 @@ const TxRest = (() => {
             return response.json();
           }).then( async data => {
             if (data.err) throw Error(data.err);
-            cb(data);
+            if(typeof cb === 'function'){
+                cb(data);
+            }
+            resolve(data);
           })
         } catch (err) {
           console.trace(err.stack);
@@ -36,7 +39,10 @@ const TxRest = (() => {
               return response.json();
             }).then( async data => {
               if (data.err) throw Error(data.err);
-              cb(data);
+              if(typeof cb === 'function'){
+                cb(data);
+              }
+              resolve(data);
             })
           } catch (err) {
             console.trace(err.stack);
@@ -159,23 +165,20 @@ export default class Store extends EventEmitter {
    * Handle 
    */
   onStoriesUpdated(data) {
-    if(Array.isArray(data)){
-      idCache[this.type] = data.map(o => o.uuid);
-      data.map(o => itemCache[o.uuid] = o)
-    }else{
-      idCache[this.type][data.id] = data.value
-    }
+    idCache[this.type] = data
     populateList(this.type)
     this.emit('update', this.getState())
   }
 
+  startForAll() {
+    if (typeof window === 'undefined') return
+    TxRest.getData(this.type, this.onStoriesUpdated) 
+    window.addEventListener('storage', this.onStorage)
+  }
+
   start() {
     if (typeof window === 'undefined') return
-    if(!this.id){
-      TxRest.getData(this.type, this.onStoriesUpdated) 
-    }else{
-      TxRest.getDataByID(this.type, this.id, this.onStoriesUpdated) 
-    }
+    TxRest.getData(this.type, this.onStoriesUpdated) 
     window.addEventListener('storage', this.onStorage)
   }
 
