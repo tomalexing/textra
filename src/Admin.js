@@ -39,7 +39,8 @@ import {
   humanReadableTime,
   getMounthName,
   getFullMinutes,
-  dump
+  dump,
+  quickSort
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -54,8 +55,9 @@ import Indicator from "./components/Indicator";
 import deepEqual from 'deep-equal';
 
 import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
-import Store, {TxRest}  from './store/Store.js';
-
+import Store  from './store/Store.js';
+import History  from './store/History.js';
+import {TxRest}  from './services/Api.js';
 const Routes = {
   root: {
     path: "/admin",
@@ -123,63 +125,6 @@ const Roles = [
 const findIcon = (objs, id, prop = 'icon') => Object.values(objs).find(o => o.value == id)[prop];
 
 
-function swap(items, firstIndex, secondIndex){
-    var temp = items[firstIndex];
-    items[firstIndex] = items[secondIndex];
-    items[secondIndex] = temp;
-}
-
-function partition(items, left, right, item, comporator) {
-
-    var pivot   = items[Math.floor((right + left) / 2)],
-        i       = left,
-        j       = right;
-
-
-    while (i <= j) {
-
-        while (comporator(items[i], pivot, false, item)) {
-            i++;
-        }
-
-        while (comporator(items[j], pivot, true, item)) {
-            j--;
-        }
-
-        if (i <= j) {
-            swap(items, i, j);
-            i++;
-            j--;
-        }
-    }
-
-    return i;
-}
-function quickSort(items, left, right, item, comporator) {
-
-    var index;
-
-    if (items.length > 1) {
-
-        left = typeof left != "number" ? 0 : left;
-        right = typeof right != "number" ? items.length - 1 : right;
-
-        index = partition(items, left, right, item, comporator);
-
-        if (left < index - 1) {
-            quickSort(items, left, index - 1, item, comporator)
-        }
-
-        if (index < right) {
-            quickSort(items, index, right, item, comporator)
-        }
-
-    }
-
-    return items;
-};
-
-
     // Types of user :
     // u - user
     // c - controller
@@ -187,47 +132,6 @@ function quickSort(items, left, right, item, comporator) {
     // p - possibility
     // a - appeal
     // o - other
-
-
-
-const HistoryList = {
-      alex: {
-        uuid: "alex",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        contentFull: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        opened: false,
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 24441,
-        letterNumber: 213,
-        startTime: "12:32",
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        postType: 'post'
-      },
-      wqerq: {
-        uuid: "alex_alex",
-        nickname: "alex_alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        contentFull: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date(new Date() - 100000).toISOString(),
-        duration: 634,
-        startTime: "12:32",
-        letterNumber: 213,
-        opened: false,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        postType: 'reply'
-      }
-    };
 
 class Admin extends React.Component {
   constructor(props) {
@@ -268,7 +172,6 @@ class Admin extends React.Component {
     this.addStyleSeheet();
 
     let { location: { pathname, state: RouterState } } = this.props;
-    console.log(RouterState);
     let activeTabA = pathname.split("/");
     let _self = this;
     await this.setState({
@@ -358,34 +261,8 @@ class Admin extends React.Component {
     let currentDate, user, allUsers = false;
 
     switch(pageType){
-    case('users'): 
-      currentDate = usersList || [];
-      allUsers = true
-      break;
-    case('appeals'): 
-      currentDate = usersList || [];
-      allUsers = true
-      break;
     case('user'):
-      currentDate = HistoryList || [];
-      user = usersList && usersList.find(v => v.uuid === id) ||       {
-        uuid: "qwerqwerqwer",
-        nickname: "aaaa",
-        type: 'u',
-        email: 'nickmy@yandex.ru',
-        avatar: avatar,
-        title: "Инна Константинопольская",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        registrationTime: new Date(new Date() - 10000),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      };
+      currentDate = [];
       break;
     case('appeal'):
       currentDate = usersList || [];
@@ -436,12 +313,12 @@ class Admin extends React.Component {
             render={() => (
               <div ref={n => (this.secondScreen = n)} className="f f-align-2-2 f-col outer-left__expanded">
                 <SideList
-                  List={currentDate}
                   user={user}
-                  uuidOfActiveTab={historyId}
                   route={`${Routes["user"].path}/${id}`}
                   title="Пользователь"
                   this={this}
+                  page={this.state.page}
+                  user={Store.getItem(this.state.page.id)}
                 />
               </div>
             )}
@@ -478,24 +355,17 @@ class Admin extends React.Component {
                       exact
                       path={Routes["appeals"].path}
                       component={Users}
-                      currentDate={currentDate}
                       _self={this}
-                      changeUsersList = {this.changeUsersList}
-                      deleteUserFromList = {this.deleteUserFromList} 
-                      sortCollection = {this.sortCollection}
-                      changeListByFilter = {this.changeListByFilter}
-                      changeListBySearch = {this.changeListBySearch}
-                      pageType={pageType}
-                      roles={usedRoles}
+                      page={this.state.page}
                     />
-                    <RoutePassProps
+                    {/* <RoutePassProps
                       path={`${Routes["user"].path}${Routes["user"].param}/history${Routes["history"].param}`}
                       component={UserAccount}
                       currentDate={currentDate}
                       user = {user}
                       _self={this}
                       roles={usedRoles}
-                    />
+                    /> */}
                     <RoutePassProps
                       path={`${Routes["appeal"].path}${Routes["appeal"].param}`}
                       component = {Appeal}
@@ -517,15 +387,91 @@ class Admin extends React.Component {
 }
 
 
-const SideList = ({
-  List,
-  user,
-  uuidOfActiveTab: activeTab,
-  route
-}) => {
-  let registrationTime = new Date(user.registrationTime);
-  return (
-    <div className="f sidebar">
+class SideList extends React.Component{
+  constructor(p){
+    super(p);
+    this.updateHandler = this.updateHandler.bind(this);
+    this._isMounted =  false;
+    this.historyStore = null;
+  }
+  
+  state = {
+    historyRoom: null
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+    let {user ,page: {pageType, id}} = this.props;
+    this.historyStore = new History('history', id);
+    this.historyStore.start();
+    this.historyStore.addListener('update', this.updateHandler);
+    this.updateHandler(user.historyId);
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.historyStore.stop();
+    this.historyStore.removeListener('update', this.updateHandler);
+    this.historyStore = null;
+  }
+
+  updateHandler(data){
+    if(!this._isMounted) return
+    this.setState({historyRoom: data})
+  } 
+
+  render(){
+    let {user, page: {pageType, id, historyId}} = this.props;
+    let {historyRoom} = this.state;
+    let registrationTime = new Date(user.registrationTime);
+    let route = pageType + id;
+    let activeTab = historyId;
+    if(!user && !historyRoom){
+      return(<div className="f sidebar">
+              <div className="admin-user-details">
+                  <div className="admin-user-details__topArea">
+                    <figure className="f f-align-2-2 admin-user-details__avatar">
+                      <img src={avatar} alt="Textra" />
+                    </figure>
+                    <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
+                      <div className="admin-user-details__personalInfo__title">Загрузка</div>
+                      <div className="admin-user-details__personalInfo__email"></div>
+                    </div>
+                  </div>
+                  <div className="admin-user-details__delimiter"></div>
+              </div>
+          </div>
+    )}
+
+    if(user && !historyRoom){
+      
+      return(<div className="f sidebar">
+                <div className="admin-user-details">
+                <div className="admin-user-details__topArea">
+                  <figure className="f f-align-2-2 admin-user-details__avatar">
+                    <img src={user.avatar} alt="Textra" />
+                  </figure>
+                  <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
+                    <div className="admin-user-details__personalInfo__title">{user.title} </div>
+                    <div className="admin-user-details__personalInfo__email">{user.email}</div>
+                    <div className={`admin-user-details__personalInfo__type admin-user-details__personalInfo__type${String.prototype.toUpperCase.call(user.type)}`}>
+                      {findIcon(Roles, user.type, 'text')}
+                    </div>
+                  </div>
+                </div>
+                <div className="admin-user-details__delimiter"></div>
+                <div className="admin-user-details__serviceInfo">
+                  <div className="f f-align-13-2 admin-user-details__serviceInfo__regData"><span>Дата регистрации:</span>
+                      <data>{registrationTime.getDay()}.{registrationTime.getMonth()}.{registrationTime.getFullYear()}</data></div>
+                  <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.duration)}</data></div>
+                  <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.letterNumber}</data></div>
+                  <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
+                </div>  
+              </div>
+            </div>
+    )}
+
+    return(<div className="f sidebar">
         <div className="admin-user-details">
             <div className="admin-user-details__topArea">
               <figure className="f f-align-2-2 admin-user-details__avatar">
@@ -548,13 +494,14 @@ const SideList = ({
               <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
             </div>  
         </div>
-      {Object.values(List).map((tab, index) => {
+      {Object.values(historyRoom).map((tab, index) => {
         let publishTime = new Date(tab.publishTime);
         return (
           <Link
             to={`${route}/history/${tab.uuid}`}
             className={`f f-align-1-2 admin-tab ${tab.uuid === activeTab ? "selected" : ""}`}
             key={index}
+            historyStore={this.historyStore}
           >
             <figure className="f f-align-2-2 admin-tab-avatar">
               {" "}<img src={tab.avatar} alt="Textra" />{" "}
@@ -567,8 +514,7 @@ const SideList = ({
             </div>
             <div className="f f-col f-align-2-3 admin-tab-info">
               <div className="admin-tab-info__time">
-                <time
-                >{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time>
+                <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time>
               </div>
               <LangLabel
                 from={tab.from}
@@ -583,7 +529,7 @@ const SideList = ({
         );
       })}
     </div>
-  );
+  )}
 };
 
 const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
@@ -665,6 +611,7 @@ class Users extends React.Component {
         Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
             .then(async list => { await sleep(10000); return Promise.resolve(list)})
             .then((list) => {
+                if(!this._isMounted) return
                 list.map((item, index) => _self.store.itemUpdated(item.value, index))
                 let {list: usersList , ids} = _self.store.getState();
                 _self.setUsedRoled(usersList);
@@ -922,7 +869,7 @@ class Users extends React.Component {
     if(currentDate === null){
       return(<div>
               <div className="f f-align-1-2 admin-list__topbar">
-                <div className=" className='icon admin-list__filter'"></div>
+                <div className="admin-list__filter"></div>
                 <Input icon='search' iconPosition='left' className='admin-list__search' value={!!search.value ? search.value : '' } onChange={self.changeSearch} />
               </div>
               <Table color={'blue'} compact fixed celled sortable={true} style={{ width: '90%', minWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>

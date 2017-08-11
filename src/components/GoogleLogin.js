@@ -18,13 +18,12 @@ const getIsMobile = () => {
   try {
     isMobile = !!((window.navigator && window.navigator.standalone) || navigator.userAgent.match('CriOS') || navigator.userAgent.match(/mobile/i));
   } catch (ex) {
-    // continue regardless of error
+ 
   }
 
   return isMobile;
 };
 
-// https://www.w3.org/TR/html5/disabled-elements.html#disabled-elements
 const _shouldAddDisabledProp = (tag) => [
   'button',
   'input',
@@ -131,7 +130,7 @@ class FacebookLogin extends React.Component {
 
   signIn(e) {
     if (e) {
-      e.preventDefault(); // to prevent submit if used within form
+      e.preventDefault();
     }
     this.setState({isProcessing: true});
     if(this.state.isSdkLoaded){
@@ -182,9 +181,7 @@ class FacebookLogin extends React.Component {
     }
   }
   _handleSigninSuccess(res) {
-    /*
-      offer renamed response keys to names that match use
-    */
+
     const basicProfile = res.getBasicProfile();
     const authResponse = res.getAuthResponse();
     res.googleId = basicProfile.getId();

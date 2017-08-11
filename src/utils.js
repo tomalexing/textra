@@ -202,6 +202,62 @@ export const getFullMinutes = (Minutes) => {
   return (('' + Minutes).length == 1) ? ('0' + Minutes) : Minutes
 }
 
+function swap(items, firstIndex, secondIndex){
+  var temp = items[firstIndex];
+  items[firstIndex] = items[secondIndex];
+  items[secondIndex] = temp;
+}
+
+function partition(items, left, right, item, comporator) {
+
+  var pivot   = items[Math.floor((right + left) / 2)],
+      i       = left,
+      j       = right;
+
+
+  while (i <= j) {
+
+      while (comporator(items[i], pivot, false, item)) {
+          i++;
+      }
+
+      while (comporator(items[j], pivot, true, item)) {
+          j--;
+      }
+
+      if (i <= j) {
+          swap(items, i, j);
+          i++;
+          j--;
+      }
+  }
+
+  return i;
+}
+export function quickSort(items, left, right, item, comporator) {
+
+  var index;
+
+  if (items.length > 1) {
+
+      left = typeof left != "number" ? 0 : left;
+      right = typeof right != "number" ? items.length - 1 : right;
+
+      index = partition(items, left, right, item, comporator);
+
+      if (left < index - 1) {
+          quickSort(items, left, index - 1, item, comporator)
+      }
+
+      if (index < right) {
+          quickSort(items, index, right, item, comporator)
+      }
+
+  }
+
+  return items;
+};
+
 util.listener = listener
 util.delegate = delegate
 util.removeClass = removeClass
@@ -214,4 +270,5 @@ util.sleep = sleep
 util.humanReadableTime = humanReadableTime
 util.getFullMinutes = getFullMinutes
 util.getMounthName = getMounthName
+util.quickSort = quickSort
 export default util 
