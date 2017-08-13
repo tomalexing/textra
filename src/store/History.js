@@ -25,26 +25,22 @@ var messagesRoomCache = {}
  * Story items in rank order for display, by type.
  * @type Object.<type, Array.<item>>
  */
-var historyLists = {}
+var showList = {}
 /**
  * Populate the story list for the given story type from the cache.
  */
 function populateRooms(type) {
     var ids = idCache[type]
-    var list = historyLists[type]
-    debugger;
+    var list = showList[type]
     for (var i = 0, l = ids.length; i < l; i++) {
         list[i] = roomCache[ids[i]] || null
     }
   }
 
-  function populateRoom(type, id) {
-    var ids = roomCache[type]
-    debugger;
-    var storyList = historyLists[type][id]
-    for (var i = 0, l = ids.length; i < l; i++) {
-      storyList[i] = messagesRoomCache[ids[i]] || null
-    }
+  function populateRoom(type, value) {
+    var ids = idCache[type]
+    showList[type] = messagesRoomCache[ids] || value
+
   }
 
   function parseJSON(json, defaultValue) {
@@ -96,9 +92,12 @@ function populateRooms(type) {
       if (!(type in idCache)) {
         idCache[type] = []
       }
-
       if (!(type in roomCache)) {
         roomCache[type] = []
+      }
+
+      if (!(type in showList)) {
+        showList[type] = []
         populateRooms(type)
       }
       if (!(type in messagesRoomCache)) {
@@ -107,6 +106,7 @@ function populateRooms(type) {
   
       // Pre-bind event handlers per instance
       this.onStorage = this.onStorage.bind(this)
+      this.onStorageMessage = this.onStorageMessage.bind(this)
       this.onGetRooms = this.onGetRooms.bind(this)
       this.onGetRoom = this.onGetRoom.bind(this)
     }
@@ -115,12 +115,17 @@ function populateRooms(type) {
       return {
         ids: idCache[this.type],
         rooms: roomCache[this.type],
-        massage: historyLists[this.type]
+        list: showList[this.type]
       }
     }
   
-    itemUpdated(item, index) {
-      historyLists[this.type][index] = item
+    roomUpdated(item, index) {
+      showList[this.type][index] = item
+      roomCache[item.uuid] = item
+    }
+
+    messageUpdated(item, index) {
+      showList[this.type][index] = item
       roomCache[item.uuid] = item
     }
   
@@ -129,6 +134,12 @@ function populateRooms(type) {
      * cache has changed.
      */
     onStorage(e) {
+      if (roomCache[e.key]) {
+        this.emit(e.key)
+      }
+    }
+
+    onStorageMessage(e) {
       if (roomCache[e.key]) {
         this.emit(e.key)
       }
@@ -143,20 +154,22 @@ function populateRooms(type) {
         this.emit('updateRooms', this.getState())
     }
 
-    onGetRoom = (id) => ((data) => {
-        roomCache[this.type][data.id] = data.value
-        populateRoom(this.type, id)
-        this.emit('updateRoom', this.getState())
-      }).bind(this)
+    onGetRoom(data){
+        idCache[this.type] = data.id;
+        populateRoom(this.type, data.value)
+        this.emit('updateMessage', this.getState())
+    }
+
+    async startWatchMessage(id){
+      let data = await TxRest.getDataByID('getmessagesroom', id);
+      this.onGetRoom(data);
+      window.addEventListener('storage', this.onStorageMessage)
+    }
 
     async  start() {
       if (typeof window === 'undefined') return
-      let date = await TxRest.getData(this.type);
+      let date = await TxRest.getData('history');
       this.onGetRooms(date);
-      debugger;
-      await idCache[this.type].map(id => {
-          TxRest.getDataByID('getRoom', id, this.onGetRoom(id));
-      });
       window.addEventListener('storage', this.onStorage)
     }
   

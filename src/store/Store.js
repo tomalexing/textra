@@ -5,7 +5,7 @@ import {TxRest}  from './../services/Api.js';
 
 /**
  * Story ids by type, in rank order. Persisted to sessionStorage.
- * @type Object.<type, Array.<id>>
+ * @type Object<type: string, Array.<string>>
  */
 var idCache = {}
 

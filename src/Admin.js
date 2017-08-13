@@ -56,7 +56,8 @@ import deepEqual from 'deep-equal';
 
 import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
 import Store  from './store/Store.js';
-import History  from './store/History.js';
+import HistoryStore  from './store/History.js';
+import MessageStore  from './store/MessageStore.js';
 import {TxRest}  from './services/Api.js';
 const Routes = {
   root: {
@@ -209,7 +210,6 @@ class Admin extends React.Component {
       }
     })
 
-    this.getData(pageType);
   }
 
   componentWillReceiveProps(props) {
@@ -218,6 +218,19 @@ class Admin extends React.Component {
       secondScreen: false
     };
     this.setState({ mainScreen, secondScreen });
+  }
+  
+  componentWillUpdate(nextProps, nextState){
+    let { location: { pathname, state: RouterState } } = this.props;
+    let activeTabA = pathname.split("/");
+    let _self = this;
+    this.setState({
+      page:{
+        pageType: RouterState ? RouterState.pageType : 'users',
+        id: RouterState ? RouterState.id : undefined ,
+        historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
+      }
+    })
   }
 
   componentWillUnmount() {
@@ -262,11 +275,7 @@ class Admin extends React.Component {
 
     switch(pageType){
     case('user'):
-      currentDate = [];
-      break;
-    case('appeal'):
-      currentDate = usersList || [];
-      user = usersList.find(v => v.uuid === id);
+      user = Store.getItem(this.state.page.id)
       break;
     }
 
@@ -318,7 +327,6 @@ class Admin extends React.Component {
                   title="Пользователь"
                   this={this}
                   page={this.state.page}
-                  user={Store.getItem(this.state.page.id)}
                 />
               </div>
             )}
@@ -358,21 +366,17 @@ class Admin extends React.Component {
                       _self={this}
                       page={this.state.page}
                     />
-                    {/* <RoutePassProps
+                    <RoutePassProps
                       path={`${Routes["user"].path}${Routes["user"].param}/history${Routes["history"].param}`}
                       component={UserAccount}
-                      currentDate={currentDate}
-                      user = {user}
+                      page={this.state.page}
                       _self={this}
-                      roles={usedRoles}
-                    /> */}
+                    /> 
                     <RoutePassProps
                       path={`${Routes["appeal"].path}${Routes["appeal"].param}`}
                       component = {Appeal}
-                      user = {user}
-                      currentDate={currentDate}
+                      page = {this.state.page}
                       _self={this}
-                      roles={usedRoles}
                     />
                   </Switch>
                 </div>
@@ -396,37 +400,55 @@ class SideList extends React.Component{
   }
   
   state = {
-    historyRoom: null
+    list: null
   }
 
   componentDidMount(){
     this._isMounted = true;
-    let {user ,page: {pageType, id}} = this.props;
-    this.historyStore = new History('history', id);
+    let {user, page: {pageType, id}} = this.props;
+    this.historyStore = new HistoryStore('history'+ id);
     this.historyStore.start();
-    this.historyStore.addListener('update', this.updateHandler);
-    this.updateHandler(user.historyId);
+    this.historyStore.addListener('updateRooms', this.updateHandler);
+
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     this.historyStore.stop();
-    this.historyStore.removeListener('update', this.updateHandler);
+    this.historyStore.removeListener('updateRooms', this.updateHandler);
     this.historyStore = null;
   }
 
-  updateHandler(data){
+  async updateHandler(data){
     if(!this._isMounted) return
-    this.setState({historyRoom: data})
+    if(data.list[0] === null){ // not cached
+       Promise.all(data.ids.map(id => {
+            return TxRest.getDataByID('getRoom', id);
+        })).then((data => {
+            data.map((item, index) => {
+              if(!this._isMounted) return
+              this.historyStore.roomUpdated(item.value, index)
+            })
+            this.setState(this.historyStore.getState())
+        }).bind(this))
+    }else{
+        this.setState(this.historyStore.getState())
+        Promise.all(data.ids.map(id => {
+            return TxRest.getDataByID('getRoom', id);
+        })).then((data => {
+              this.setState(this.historyStore.getState())
+        }).bind(this))
+    }
   } 
 
   render(){
     let {user, page: {pageType, id, historyId}} = this.props;
-    let {historyRoom} = this.state;
-    let registrationTime = new Date(user.registrationTime);
+  
+    let {list} = this.state;
     let route = pageType + id;
     let activeTab = historyId;
-    if(!user && !historyRoom){
+    if(!user){
+      
       return(<div className="f sidebar">
               <div className="admin-user-details">
                   <div className="admin-user-details__topArea">
@@ -443,13 +465,13 @@ class SideList extends React.Component{
           </div>
     )}
 
-    if(user && !historyRoom){
-      
+    if(user && !list){
+      let registrationTime = new Date(user.registrationTime);
       return(<div className="f sidebar">
                 <div className="admin-user-details">
                 <div className="admin-user-details__topArea">
                   <figure className="f f-align-2-2 admin-user-details__avatar">
-                    <img src={user.avatar} alt="Textra" />
+                    <img src={avatar} alt="Textra" />
                   </figure>
                   <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
                     <div className="admin-user-details__personalInfo__title">{user.title} </div>
@@ -470,12 +492,13 @@ class SideList extends React.Component{
               </div>
             </div>
     )}
+    let registrationTime = new Date(user.registrationTime);
 
     return(<div className="f sidebar">
         <div className="admin-user-details">
             <div className="admin-user-details__topArea">
               <figure className="f f-align-2-2 admin-user-details__avatar">
-                <img src={user.avatar} alt="Textra" />
+                <img src={avatar} alt="Textra" />
               </figure>
               <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
                 <div className="admin-user-details__personalInfo__title">{user.title} </div>
@@ -494,17 +517,16 @@ class SideList extends React.Component{
               <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
             </div>  
         </div>
-      {Object.values(historyRoom).map((tab, index) => {
+      {Object.values(list).map((tab, index) => {
         let publishTime = new Date(tab.publishTime);
         return (
           <Link
-            to={`${route}/history/${tab.uuid}`}
+            to={{pathname: `${route}/history/${tab.uuid}`, state:{pageType: 'user', id: user.uuid, historyId: tab.uuid}}}
             className={`f f-align-1-2 admin-tab ${tab.uuid === activeTab ? "selected" : ""}`}
             key={index}
-            historyStore={this.historyStore}
           >
             <figure className="f f-align-2-2 admin-tab-avatar">
-              {" "}<img src={tab.avatar} alt="Textra" />{" "}
+              {" "}<img src={avatar} alt="Textra" />{" "}
             </figure>
             <div className="f f-col f-align-1-1 admin-tab-details">
               <div className="admin-tab-title">{tab.title} </div>
@@ -955,6 +977,39 @@ class Users extends React.Component {
 
 
 class UserAccount extends React.Component {
+  constructor(props){
+    super(props);
+    this.massageStore =null;
+    this.updateHandler = this.updateHandler.bind(this);
+    this._isMounted = false;
+  }
+
+  state = {
+    list: null
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+    let {pageType ,historyId} = this.props.page;
+    this.massageStore = new HistoryStore('historymassage'+historyId);
+    this.massageStore.startWatchMessage(historyId);
+    this.massageStore.addListener('updateMessage', this.updateHandler)
+  }
+
+  updateHandler(data){
+    if(!this._isMounted) return
+    if(data.list[0] == null){
+      
+    }else{
+      this.setState({list: data.list})
+    }
+  }
+
+  componentWillUnmount(){
+    this.massageStore.removeListener('updateMessage', this.updateHandler);
+    this.massageStore = null;
+    this._isMounted = false;
+  }
 
   shouldComponentUpdate(nextProps, nextState){
 
@@ -963,17 +1018,25 @@ class UserAccount extends React.Component {
     }
     console.log('not rerender')
     return false
-  }
+  }  
 
   render() {
+    let { _self  } = this.props;
 
-    let { currentDate, user,  _self } = this.props;
+    let { list } = this.state;
+
+    if(!list){
+      return(
+        <div/>
+      )
+
+    }
 
     const RenderCollection = renderItem => {
       return (
         <div>
           {
-            Object.values(currentDate).map( (item ,index) => {
+            Object.values(list).map( (item ,index) => {
                 return renderItem(item, index, new Date(item.publishTime))
             })
           }
@@ -981,7 +1044,7 @@ class UserAccount extends React.Component {
         </div>
       );
     };
-    return (Object.entries(currentDate).length === 0
+    return (Object.entries(list).length === 0
             ? <div className={"f f-align-2-33 admin-historypost u-mx-3 u-my-2"}>
                 <div className={"admin-historypost__avatar"}>
                     <img src={avatar} />
@@ -1050,6 +1113,47 @@ class UserAccount extends React.Component {
 
 class Appeal extends React.Component {
 
+  constructor(props){
+    super(props);
+    this.massageStore = null; 
+    this.user = Store.getItem(this.props.page.id)
+    if( this.user )
+    this.userId = this.user.uuid;
+    this.updateHandler = this.updateHandler.bind(this);
+    this._isMounted = false;
+    }
+
+  state = {
+    list: null
+  }
+
+  componentWillMount(){
+    this.setState({list: MessageStore.getMassage('appeal', this.userId) })
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+    let {historyId} = this.props.page;
+    this.massageStore = new MessageStore('appeal', this.userId);
+    this.massageStore.start();
+    this.massageStore.addListener('updateMessage', this.updateHandler)
+  }
+
+  updateHandler(list){
+    if(!this._isMounted) return    
+    if(list !== null){
+      this.setState(list)
+    }else{
+      console.log('iis')
+    }
+  }
+
+  componentWillUnmount(){
+    this.massageStore.removeListener('updateMessage', this.updateHandler);
+    this.massageStore = null;
+    this._isMounted = false;
+  }
+
   shouldComponentUpdate(nextProps, nextState){
 
     if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
@@ -1060,19 +1164,27 @@ class Appeal extends React.Component {
   }
 
   render() {
-    let { currentDate, _self  } = this.props;
-  
+    let { _self  } = this.props;
+
+    let { list } = this.state;
+
+    if(!list){
+      return(
+        <div/>
+      )
+
+    }
     const RenderCollection = renderItem => {
       return (
         <div>
-          {Object.values(currentDate).map((data, index) => {
+          {Object.values(list).map((data, index) => {
             let publishTime = new Date(data.publishTime);
             return renderItem(data, index, publishTime);
           })}
         </div>
       );
     };
-    return (Object.entries(currentDate).length === 0
+    return (Object.entries(list).length === 0
             ? <div className={"f f-align-2-33 admin-appeal u-mx-3 u-my-2"}>
                 <div className={"admin-feed__avatar"}>
                     <img src={avatar} />
@@ -1088,7 +1200,7 @@ class Appeal extends React.Component {
                     <div className={"f f-align-1-1 f-col f-gap-2 admin-history-post "}>
                       <div className="admin-user-details__topArea">
                         <figure className="f f-align-2-2 admin-user-details__avatar">
-                          <img src={currentDate.avatar} alt={currentDate.nickname} />
+                          <img src={avatar} alt={currentDate.nickname} />
                         </figure>
                         <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
                           <div className="admin-user-details__personalInfo__title">{currentDate.title} </div>
