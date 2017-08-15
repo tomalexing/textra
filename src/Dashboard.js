@@ -47,14 +47,17 @@ import Timer from './components/Timer';
 import LangLabel from './components/LangLabel';
 import StatefulEditor from './components/StatefulEditor';
 import deepEqual from 'deep-equal';
+
+import Store from './store/Store.js';
+
 class DashBoard extends React.Component {
 
   constructor(props) {
     super(props);
     this.listeners = [];
     this.doAtDidMount = [];
-    this.list = this.list.bind(this)
     this.renders = 0;
+    this._isMounted = false;
   }
 
   state = {
@@ -80,26 +83,41 @@ class DashBoard extends React.Component {
     this.doAtDidMount.forEach(func => func());
   }
 
-  async componentDidMount() {
-    console.log('componentDidMount')
-    while (1) {
-      const prev = this.state.items
-      const items = [`Hello World #${prev.length}`, ...prev]
-      this.setState({ items })
-      await sleep(Math.random() * 3000000)
-    }
+  componentDidMount(){
+    this._isMounted = true;
+    this.store = new Store('mylist');
+    this.store.start();
+    this.store.addListener('update', this.updateHandler);
   }
 
-  list() {
-    const { items } = this.state
+  updateHandler(data){
+    console.log(data);
+    if(!this._isMounted) return
+    let _self = this;
+    // if( data.list[0] === null ) {
+    //   Promise.all(data.ids.map(id => TxRest.getDataByID('r', id)))
+    //         .then((list) => {
+    //             list.map((item, index) => _self.store.itemUpdated(item.value, index))
+    //             let {list: usersList , ids} = _self.store.getState();
+    //             _self.setState({usersList: usersList, usersListFetched: usersList})})
+    // }else{
 
-    return <div>
-      <p>Count: {items.length}</p>
-      <p>Renders: {this.renders++}</p>
-      <ul>
-        {items.map((v, i) => <li key={i}>{v}</li>)}
-      </ul>
-    </div>
+    //     _self.setState({usersList: data.list, usersListFetched: data.list})
+    //     Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
+    //         .then(async list => { await sleep(10000); return Promise.resolve(list)})
+    //         .then((list) => {
+    //             if(!this._isMounted) return
+    //             list.map((item, index) => _self.store.itemUpdated(item.value, index))
+    //             let {list: usersList , ids} = _self.store.getState();
+    //             _self.setState({usersList: usersList, usersListFetched: usersList})})
+    // }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.store.stop();
+    this.store.removeListener('update', this.updateHandler);
+    this.store = null;
   }
 
   componentWillUnmount() {
@@ -268,7 +286,7 @@ class DashBoard extends React.Component {
               <Switch>
                 <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate} />
                 <RoutePassProps path="/dashboard/searching/:id" component={Search} currentDate={currentDate} />
-                <RoutePassProps path="/dashboard/user/:id" component={HistoryList} currentDate={currentDate} />
+                <RoutePassProps path="/dashboard/user/:id" component={HistoryList} isTablet={this.state.isTablet}currentDate={currentDate} />
               </Switch>
             </div>
           </div>
@@ -320,7 +338,7 @@ class HistoryList extends React.Component {
   }
 
   render() {
-    console.log(this.props)
+    let _self = this;
     let { currentDate } = this.props
     let publishTime = new Date(currentDate.publishTime);
     return (
@@ -364,7 +382,16 @@ class HistoryList extends React.Component {
             <img src={currentDate.avatar} alt={currentDate.nickname} />
           </div>
           <div className={'dashboard-user__history-reply__content'}>
-            <textarea className={'dashboard-user__history-reply__content__text'} disabled value={currentDate.content} />
+            <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
+                    if(node == null ) return
+                    ref = node;
+                    if( !(_self.props.isTablet && isTablet) ){ // when has changed
+                      start = 50;
+                      isTablet = _self.props.isTablet;
+                    }
+                    start = Math.max(ref.scrollHeight, start);
+                    ref.style.height = start + 'px';
+                  }})()}  className={'dashboard-user__history-reply__content__text'} disabled  value={currentDate.content} />
           </div>
           <div className={'dashboard-user__history-reply__constols'}>
             <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy}>
@@ -382,7 +409,17 @@ class HistoryList extends React.Component {
             <img src={currentDate.avatar} alt={currentDate.nickname} />
           </div>
           <div className={'dashboard-user__history-reply__content'}>
-            <textarea className={'dashboard-user__history-reply__content__text'} disabled value={currentDate.content} />
+              <textarea ref={ (() => {let start = 20, ref, isTablet = _self.props.isTablet ; return (node) => {
+                    if(node == null ) return
+                    ref = node;
+                    if( !(_self.props.isTablet && isTablet) ){ // when has changed
+                      start = 20;
+                      isTablet = _self.props.isTablet;
+                    }
+                    start = Math.max(ref.scrollHeight, start);
+                    ref.style.height = start + 'px';
+                  }})()}
+                className={'dashboard-user__history-reply__content__text'} disabled value={currentDate.content} />
           </div>
           <div className={'dashboard-user__history-reply__constols'}>
             <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy} >
@@ -603,8 +640,8 @@ class Create extends React.Component {
               simpleValue
               value={valueLangFrom}
               onChange={this.updateValueLangFrom}
-              searchable={true}
-              autosize={false}
+              searchable={false}
+              autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs} />
             <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language" /></div>
@@ -617,8 +654,8 @@ class Create extends React.Component {
               disabled={false}
               value={valueLangTo}
               onChange={this.updateValueLangTo}
-              searchable={true}
-              autosize={false}
+              searchable={false}
+              autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs}
             />

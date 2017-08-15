@@ -55,10 +55,12 @@ import Indicator from "./components/Indicator";
 import deepEqual from 'deep-equal';
 
 import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
+
 import Store  from './store/Store.js';
-import HistoryStore  from './store/History.js';
+import UserStore  from './store/UserStore.js';
 import MessageStore  from './store/MessageStore.js';
 import {TxRest}  from './services/Api.js';
+
 const Routes = {
   root: {
     path: "/admin",
@@ -394,19 +396,21 @@ class Admin extends React.Component {
 class SideList extends React.Component{
   constructor(p){
     super(p);
+    let {user, page: {pageType, id}} = this.props;
+    this.userId = id;
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted =  false;
     this.historyStore = null;
   }
   
   state = {
-    list: null
+    list: null,
+    ids: null
   }
 
   componentDidMount(){
     this._isMounted = true;
-    let {user, page: {pageType, id}} = this.props;
-    this.historyStore = new HistoryStore('history'+ id);
+    this.historyStore = new UserStore('historyrooms', this.userId);
     this.historyStore.start();
     this.historyStore.addListener('updateRooms', this.updateHandler);
 
@@ -423,29 +427,40 @@ class SideList extends React.Component{
     if(!this._isMounted) return
     if(data.list[0] === null){ // not cached
        Promise.all(data.ids.map(id => {
-            return TxRest.getDataByID('getRoom', id);
+            return TxRest.getDataByID('historyroom', id);
         })).then((data => {
-            data.map((item, index) => {
+            data.map(((item, index) => {
               if(!this._isMounted) return
-              this.historyStore.roomUpdated(item.value, index)
-            })
+              this.historyStore.itemUpdated(item.value, this.userId, index)
+            }).bind(this))
             this.setState(this.historyStore.getState())
-        }).bind(this))
+        }).bind(this));
     }else{
         this.setState(this.historyStore.getState())
         Promise.all(data.ids.map(id => {
-            return TxRest.getDataByID('getRoom', id);
+            if(!this._isMounted) return
+            return TxRest.getDataByID('historyroom', id);
         })).then((data => {
+              if(!this._isMounted) return
               this.setState(this.historyStore.getState())
         }).bind(this))
     }
-  } 
+  
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    console.log('not rerender')
+    return false
+  }
 
   render(){
     let {user, page: {pageType, id, historyId}} = this.props;
-  
+
     let {list} = this.state;
-    let route = pageType + id;
+    let route = `/admin/${pageType}/${id}`;
     let activeTab = historyId;
     if(!user){
       
@@ -980,35 +995,44 @@ class UserAccount extends React.Component {
   constructor(props){
     super(props);
     this.massageStore =null;
+    this.user = Store.getItem(this.props.page.id)
+    if( this.user )
+    this.userId = this.user.uuid;
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted = false;
+    
   }
 
   state = {
     list: null
   }
 
+  componentWillMount(){
+    this.setState({list: MessageStore.getMassage('historymassage', this.userId) })
+  }
+
+
   componentDidMount(){
     this._isMounted = true;
     let {pageType ,historyId} = this.props.page;
-    this.massageStore = new HistoryStore('historymassage'+historyId);
-    this.massageStore.startWatchMessage(historyId);
+    this.massageStore = new MessageStore('historymassage', this.userId);
+    this.massageStore.start();
     this.massageStore.addListener('updateMessage', this.updateHandler)
   }
 
-  updateHandler(data){
-    if(!this._isMounted) return
-    if(data.list[0] == null){
-      
+  updateHandler(list){
+    if(!this._isMounted) return    
+    if(list !== null){
+      this.setState(list)
     }else{
-      this.setState({list: data.list})
+      console.log('iis')
     }
   }
 
   componentWillUnmount(){
+    this._isMounted = false;
     this.massageStore.removeListener('updateMessage', this.updateHandler);
     this.massageStore = null;
-    this._isMounted = false;
   }
 
   shouldComponentUpdate(nextProps, nextState){

@@ -178,6 +178,8 @@
       height: 40px
 
   &__create-topbar
+    .Select
+      width: 40%
     .Select.is-open,
     .Select.is-open .Select-menu-outer
       box-shadow: 0 2px 6px rgba(29, 122, 184, 0.3)
@@ -299,10 +301,9 @@
         +nosel
         color: $text-dark
         margin-top: 10px
-        +r(768)
-          flex-flow: row wrap
-          & > *
-            margin-bottom: 10px
+        flex-flow: row wrap
+        & > *
+          margin-bottom: 10px
     &-post__constols
       flex: 1 1 auto
       +nosel
@@ -411,10 +412,9 @@
         +nosel
         color: $text-dark
         margin-top: 10px
-        +r(768)
-          flex-flow: row wrap
-          & > *
-            margin-bottom: 10px
+        flex-flow: row wrap
+        & > *
+          margin-bottom: 10px
     &-post__constols
       flex: 1 1 auto
       +nosel
@@ -470,12 +470,10 @@
         font-size: 14px
         resize: none
         width: 100%
-        height: 100%
         border: 0
         font-weight: 100
         letter-spacing: -0.06px
         line-height: 20px
-        min-height: 100px
     &-reply__constols
       flex: 1 1 auto
       align-self: flex-end
@@ -791,6 +789,7 @@
     font-weight: 900
     font-size: 9px
     letter-spacing: -0.04px
+    white-space: nowrap
     .selected &
       background-color: #fff
     &-from
@@ -826,6 +825,8 @@
 .String-indicator 
   font-size: 12px
   span
+    white-space: nowrap
+    overflow: hidden
     margin-left: 8px
 
 .Timer
@@ -1064,6 +1065,7 @@
           color: #fff
     &__duration
       align-self: flex-end
+      overflow: hidden
       margin-top: 3px
       width: 84px
       height: 14px
@@ -1119,10 +1121,9 @@
       +nosel
       color: $text-dark
       margin-top: 10px
-      +r(768)
-        flex-flow: wrap
-        > *
-          margin-top: 10px
+      flex-flow: wrap
+      > *
+        margin-top: 10px
   &__constols
     flex: 1 1 auto
     +nosel
@@ -1147,7 +1148,8 @@
   margin-bottom: 25px
   flex: 0 0 auto
   margin-top: auto
-  
+  +r(768)
+    margin-bottom: 0px 
   &:before
     content: ''
     position: absolute
@@ -1161,7 +1163,7 @@
   textarea
     display: block
     font-size: 16px
-    resize: vertical
+    resize: none
     width: 100%
     height: 100%
     border: 0
@@ -1251,7 +1253,7 @@
       line-height: 16px
       padding-bottom: 5px 
     &__content
-      flex: 1 0 auto
+      flex: 1 1 auto
       &__topbar
         padding-right: 12px 
         &__name
@@ -1302,10 +1304,10 @@
         +r(768)
           margin-top: 10px 
       &__bottombar
-        +r(768)
-          flex-flow: wrap
-          > *
-            margin-top: 10px
+        flex-flow: wrap
+        width: 100%
+        > *
+          margin-top: 10px
     &__constols
       height: 100% 
       width: 97px
@@ -1381,10 +1383,9 @@
       +nosel
       color: $text-dark
       margin-top: 10px
-      +r(768)
-        flex-flow: row wrap
-        & > *
-          margin-bottom: 10px
+      flex-flow: row wrap
+      & > *
+        margin-bottom: 10px
           
   &-post__constols
     flex: 1 1 auto
@@ -1655,9 +1656,10 @@
       color: #fff
       height: 14px
       line-height: 14px
-      padding: 1px 4px
+      padding: 0px 4px
       border-radius: 4px
       text-align: center
+      vertical-align: middle
       font-weight: 500
       letter-spacing: -0.05px
     &__typeU,
@@ -1763,6 +1765,7 @@
           color: #fff
     &__duration
       align-self: flex-end
+      overflow: hidden
       margin-top: 3px
       width: 84px
       height: 14px
@@ -1812,10 +1815,9 @@
       +nosel
       color: $text-dark
       margin-top: 10px
-      +r(768)
-        flex-flow: wrap
-        > *
-          margin-top: 10px
+      flex-flow: wrap
+      > *
+        margin-top: 10px
   &__constols
     flex: 1 1 auto
     +nosel
@@ -1893,10 +1895,9 @@
       +nosel
       color: $text-dark
       margin-top: 10px
-      +r(768)
-        flex-flow: wrap
-        > *
-          margin-top: 10px
+      flex-flow: wrap
+      > *
+        margin-top: 10px
   &__constols
     flex: 1 1 auto
     +nosel

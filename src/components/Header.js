@@ -35,10 +35,12 @@ class Header extends React.Component{
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
+          if(!this.mobile_menu) return
           this.mobile_menu.style.opacity = 0;
           return transitionEndPromise(this.mobile_menu);
       })
       .then( _ => {
+        if(!this.mobile_menu) return
         this.mobile_menu.style.display =  'none';
         this.setState({isMobileMenuOpened: false})
       });
@@ -47,10 +49,11 @@ class Header extends React.Component{
   openMobileMenu = () => {
     this.mobile_menu.style.transition = 'opacity .1s';
     this.mobile_menu.style.opacity = 0;
-    this.mobile_menu.style.display =  'flex';
+    this.mobile_menu.style.display = 'flex';
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
+          if(!this.mobile_menu) return
           this.mobile_menu.style.opacity = 1;
           return transitionEndPromise(this.mobile_menu);
       })

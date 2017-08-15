@@ -23,7 +23,8 @@ import {
   Link,
   Redirect,
   withRouter,
-  Switch
+  Switch,
+  Prompt
 } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import {
@@ -1108,8 +1109,41 @@ class FeedList extends React.Component {
 
 class Reply extends React.Component {
 
+  constructor(props){
+    super(props);
+    this.answerNode = null;
+    this._isMounted = false; 
+    this.startPos = 20;
+    this.timesItWasEnlarge = 0;
+  }
+
+  state = {
+    isBlocking : false
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+  }
+
+  componentWillUnmount(){
+    this._isMounted = false;
+    this.timesItWasEnlarge = 0;
+  }
+
+
+
   currentNumberOfChar({target: {value}}){
       console.log(value);
+      
+      this.setState({isBlocking: value.length > 0})
+   
+      if(this._isMounted && this.answerNode ){
+        this.answerNode.style.height = 'auto';
+        this.startPos =  Math.min(this.answerNode.scrollHeight, 20*10)
+        this.answerNode.style.height = this.startPos + 'px';
+        this.timesItWasEnlarge++
+      }
+
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -1122,14 +1156,15 @@ class Reply extends React.Component {
   }
 
   render() {
-    let { currentDate, isTablet, _self } = this.props;
+    let _self = this;
+    let { currentDate, isTablet } = this.props;
     let publishTime = new Date(currentDate.publishTime);
 
     const RenderCollection = renderItem => {
       return (
         <div>
             <BreadCrumbs
-                this={_self}
+                this={this.props._self}
                 isTablet={isTablet}
                 Title={{
                     title:  currentDate.uuid,  // we get [0] because the very first item in thread can be only from user
@@ -1153,6 +1188,12 @@ class Reply extends React.Component {
                 }
                 }}
             />
+            <Prompt
+                when={this.state.isBlocking}
+                message={location => (
+                  `Вы уверены, что хотите уйти`
+                )}
+             />
           {
             renderItem(Object.assign({},currentDate), 1, new Date(currentDate.publishTime))
           }
@@ -1234,6 +1275,7 @@ class Reply extends React.Component {
                 </div>
                 <div className={"f f-align-2-3 translator-reply"}>
                     <textarea
+                    ref= { (node) => this.answerNode = node }
                     type="text"
                     tabIndex={1}
                     name="translator[reply]"
