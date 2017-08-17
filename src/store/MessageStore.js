@@ -57,6 +57,7 @@ var showList = Object.create(null);
       this.userId = id
       // Ensure cache objects for this type are initialised
       if(id === undefined) {throw new Error('Unappropriate param')}
+
       if (!(type in messagesByUserIdCache)) {
         messagesByUserIdCache[type] = Object.create(null);
       }

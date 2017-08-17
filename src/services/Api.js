@@ -1,14 +1,14 @@
 
 // Textra Rest Api
 export const TxRest = (() => {
-    
+     const host = 'http://localhost' //'http://api-textra.iondigi.com';
+     const port = ':9000';
       function getData(path, cb){
         let _self = this;
         return new Promise( (resolve, reject) => {
             try { 
-              fetch(`/admin/${path.toLowerCase()}`, {
+              fetch(`${host}/${path}`, {
                 method: 'GET',
-                credentials: 'include'
               }).then(response => {
                 return response.json();
               }).then( async data => {
@@ -25,23 +25,25 @@ export const TxRest = (() => {
         })
       }
     
-        function getDataByID(path,id, cb){
+        function getDataByID(path, dataToPath, cb){
           let _self = this;
           return new Promise( (resolve, reject) => {
               try { 
-                fetch(`/admin/${path.toLowerCase()}`, {
+                fetch(`${host}${port}/${path}`, {
                   method: 'POST',
                   credentials: 'include',
-                  body: JSON.stringify({id}),
-                  headers: {'Content-Type': 'application/json'},
+                  mode: 'cors',
+                  cache: "no-cache",
+                  body: JSON.stringify({...dataToPath}),
+                  headers: {'Content-Type': 'application/json',
+                            'Accept': 'application/json'},
                 }).then(response => {
                   return response.json();
                 }).then( async data => {
-                  if (data.err) throw Error(data.err);
                   if(typeof cb === 'function'){
-                    cb(data);
+                    cb(JSON.parse(data));
                   }
-                  resolve(data);
+                  resolve(JSON.parse(data));
                 })
               } catch (err) {
                 console.trace(err.stack);

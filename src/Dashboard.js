@@ -27,7 +27,7 @@ import { createBrowserHistory } from 'history';
 import { 
     getUniqueKey, 
     addClass, 
-    hasClass, 
+    hasClass,
     removeClass, 
     debounce, 
     listener, 
@@ -143,7 +143,7 @@ class DashBoard extends React.Component {
     let activeTabA = pathname.split('/');
     let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
-
+    
     const Searching = {
       'wqefeq': {
         uuid: 'wqefeq',

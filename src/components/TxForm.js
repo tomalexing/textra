@@ -159,16 +159,16 @@ export default class TxForm extends React.Component{
     }
 
     render(){
-        let { children } = this.props;
+        let { children, getErrorField } = this.props;
         let { mounted } = this.state;
         return(
              <form onSubmit={this._submitHandler.bind(this)} ref={(n) => this.element = n} className="registform-regist__inputs ">
-                <div className={"field-error u-mb-2"} ref={ (n) => this.errorField = n} />
                 {  !!mounted && 
                     Object.values(children).map((child, i) =>(
                         React.cloneElement(child, {key: i, ...child.props, errorElementOuter: this.errorField, getChildInstance: this._getChildInstance})
                     ))
                 }
+              <div className={"field-error u-my-2"} ref={ (n) => {this.errorField = n; getErrorField(n); }} />
              </form>
         )
 
@@ -182,7 +182,8 @@ TxForm.defaultProps = {
   errorClass: 'form-error',
   autoValidate: true,
   onValid: () => {},
-  onError: () => {}
+  onError: () => {},
+  getErrorField: () => {}
 };
 
 TxForm.propTypes = {
@@ -192,5 +193,6 @@ TxForm.propTypes = {
   errorClass: PropTypes.string,
   autoValidate: PropTypes.bool,
   onValid: PropTypes.func,
-  onError: PropTypes.func
+  onError: PropTypes.func,
+  getErrorField: PropTypes.func
 };

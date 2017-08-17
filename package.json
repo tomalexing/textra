@@ -26,7 +26,7 @@
   "devDependencies": {
     "flow-bin": "^0.45.0",
     "node-sass-chokidar": "0.0.1",
-    "react-scripts": "1.0.4",
+    "react-scripts": "1.0.11",
     "react-tap-event-plugin": "^2.0.1",
     "why-did-you-update": "^0.0.8"
   },
@@ -38,6 +38,5 @@
     "build": "npm run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "flow": "flow"
-  },
-  "proxy": "http://localhost:9000"
+  }
 }

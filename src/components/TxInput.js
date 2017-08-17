@@ -146,7 +146,9 @@ const messages = {
     maxLength: 'Это поле должно содержать максимум {n} символов',
     required: 'Ви не заполнили все поле',
     number: 'Поле должно содержать только числа',
-    listen: 'Поля должны совпадать'
+    listen: 'Поля должны совпадать',
+    numbercontain: 'Это поле должно содержать хотя бы одну цифру',
+    lettercontain: 'Это поле должно содержать хотя бы одну букву'
 };
 
 const validationRules = {
@@ -156,7 +158,9 @@ const validationRules = {
     required: (s) => !! s.length || messages.required,
     number: (s) => NUMBER_RE.test(escapeRegex(s)) || messages.number,
     emit: (s, event, emit) =>  emit(event, escapeRegex(s)) || true, // Always true because if emitter will not be able to sent event its not a field error 
-    listen: (s, event) => s === EventEmitterSingleton.getLastMessageFromEvent(event) || messages.listen
+    listen: (s, event) => s === EventEmitterSingleton.getLastMessageFromEvent(event) || messages.listen,
+    numbercontain : (s) =>  /[0-9]+/.test(escapeRegex(s)) || messages.numbercontain,
+    lettercontain : (s) =>  /[A-Za-z]+/.test(escapeRegex(s)) || messages.lettercontain,
   };
 
 /**

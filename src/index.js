@@ -14,7 +14,11 @@ import {
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump } from './utils';
-import Store from './store/Store.js'
+import Store from './store/Store.js';
+import Auth from './store/AuthStore.js';
+
+
+
 injectTapEventPlugin();
 // ====================================
 // ========= Lazy loadin ==============
@@ -24,7 +28,7 @@ injectTapEventPlugin();
 // import Registration from './Registration';
 
   // eslint-disable-next-line
-const Registration = () => <Lazy load={() => import('./Registration')}/>
+const SignUp = () => <Lazy load={() => import('./SignUp')}/>
 
   // eslint-disable-next-line
 const Login = () => <Lazy  load={() => import('./Login')}/>
@@ -45,33 +49,6 @@ const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>
 // ====================================
 
 
-export const Auth = {
-  isAuthenticated: true,
-  role: 'dev',
-  authenticate(cb, role) {
-    this.isAuthenticated = true;
-    this.role = role;
-    if(this.isAuthenticated!= null && this.role!= null){
-        window.localStorage.setItem('isLoggedIn', this.isAuthenticated);
-        window.localStorage.setItem('userId', this.isAuthenticated)
-    }
-    cb();
-  },
-  signout(cb) {
-    this.isAuthenticated = false;
-    this.role = undefined;
-    window.localStorage.removeItem('isLoggedIn');
-    window.localStorage.removeItem('userId');
-    cb();
-  }
-}
-if(Auth.role == undefined){
-  
-  // TODO: Make Ajax request to server for obtain role of the user 
-  // I Should keep role only in App because it can be malfunction
-
-}
-
 
 const Public = () => <h3>Public</h3>
 const Protected = () => <h3>Protected</h3>
@@ -79,6 +56,7 @@ const Protected = () => <h3>Protected</h3>
 class App extends React.Component {
   
    componentWillMount() {
+    Auth.init();
     Store.loadSession()
     if (typeof window === 'undefined') return
     window.addEventListener('beforeunload', this.handleBeforeUnload)
@@ -103,10 +81,10 @@ class App extends React.Component {
                       transitionLeaveTimeout={300}
                     >
                       <ToDashBoard exact path="/" key={getUniqueKey()}/>
-                      <Route path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
+                      <PrivateRoute path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
                       <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
                       <PrivateRoute path="/admin" component={Admin} location={location} role={['admin','dev']} key={getUniqueKey()}/>
-                      <Route path="/registration" component={Registration} location={location}  key={getUniqueKey()}/>
+                      <Route path="/signup" component={SignUp} location={location}  key={getUniqueKey()}/>
                       <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
                       <PrivateRoute exact path="/test" component={Test} location={location} role={['dev']}key={getUniqueKey()} />
                       <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>

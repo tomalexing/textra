@@ -1,11 +1,10 @@
 import React from 'react';
-import {Auth} from './index';
-
+import Auth from './store/AuthStore.js';
 import mainbg from './assets/main.png';
 import logo from './assets/logo.png';
 import fb from './assets/fb.svg';
 import google from './assets/google.svg';
-
+import warningMark  from './assets/warning.svg';
 import TxInput from './components/TxInput';
 import TxForm from './components/TxForm';
 import { hasClass, addClass , removeClass, debounce, listener} from './utils';
@@ -18,22 +17,30 @@ import {
 } from 'react-router-dom';
 import FacebookLogin from './components/FacebookLogin';
 import GoogleLogin from './components/GoogleLogin';
+import {TxRest} from './services/Api.js'
+
 class Login extends React.Component {
 
- constructor(props){
-   super(props);
-   this.removeMe = [];
-   this.doAtDidMount = [];
-   this.login = this.login.bind(this);
-   this.loginGoog = this.loginGoog.bind(this);
-   this.loginFb = this.loginFb.bind(this);
+  constructor(props){
+    super(props);
+    this.removeMe = [];
+    this.doAtDidMount = [];
+    this.login = this.login.bind(this);
+    this.loginGoog = this.loginGoog.bind(this);
+    this.loginFb = this.loginFb.bind(this);
+    this.errorField = null;
+    this.errorFieldIn = null;
+    this._getErrorField = this._getErrorField.bind(this)
+  }
 
- }
+  componentWillMount(){
+    console.log( process.env.NODE_ENV )
+  }
 
- componentWillMount(){
-  console.log( process.env.NODE_ENV )
-
- }
+  state = {
+    redirectToReferrer: false,
+    isTablet: false
+  }
 
   componentDidMount(){
     this.removeMe.push(
@@ -58,36 +65,29 @@ class Login extends React.Component {
     this.removeMe.forEach(removeEventListener => removeEventListener())
   }
 
-  state = {
-    redirectToReferrer: false,
-    isTablet: false
+  login = async (e, _ , form) => {
+    let data = await TxRest.getDataByID('signIn', form)
+    if(data.errors){
+      let errors = Object.values(data.errors).reduce((acc, item) => {
+        return Array.isArray(item)?
+        acc.concat( item.map(value => `<p><img src=${warningMark} alt='warning'/> ${value.message}</p>`))
+        : 
+        acc.concat( `<p><img src=${warningMark} alt='warning'/> ${item}</p>`)
+      },[])
+      if(this.errorFieldIn) this.errorFieldIn.parentNode.innerHTML = ''; // clean UP
+      this.errorFieldIn = this.errorField.insertAdjacentElement('beforeend' , document.createElement('div'));
+      this.errorFieldIn.innerHTML = errors; // new Error from Server
+    }else{
+      if(this.errorFieldIn) this.errorFieldIn.innerHTML = ''; // clean UP
+      let _self = this;
+      Auth.authenticate(() => {
+        _self.setState({ redirectToReferrer: true })
+      }, data)
+    }
   }
 
-  login = (e, _ , info) => {
-
-    try {
-      fetch('/login', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept'      : 'application/json'},
-        body: JSON.stringify(info)
-      }).then(response => {
-        return response.json();
-      }).then(data => {
-        if (data.err) throw Error(data.err);
-        
-        Auth.authenticate(() => {
-          this.setState({ redirectToReferrer: true })
-        }, data.role)
-      })
-    }
-    catch (err) {
-      console.trace(err.stack)
-    }
-
-
+  _getErrorField(errorField){
+    this.errorField = errorField;
   }
 
   switchPanel = (e) => {
@@ -194,9 +194,9 @@ class Login extends React.Component {
                 <div className="registform-delimiter " ><span>или</span></div>
 
                 {/* Login Form */}
-                <TxForm submit={this.login} >
+                <TxForm submit={this.login} getErrorField={this._getErrorField}>
                   <TxInput ref='name' tabIndex='1' setFocusToInput={true} type="email" name="email" validate={['email', 'required']}   className="field-block u-mb-3" placeholder="Email"/>
-                  <TxInput type="password" name="password" validate={[{'minLength':6}, 'required']}  className="field-block  u-my-3" placeholder="Пароль"/>
+                  <TxInput type="password"tabIndex='1' name="password" validate={[{'minLength':6}, 'required']}  className="field-block  u-my-3" placeholder="Пароль"/>
                   <TxInput type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
                 </TxForm>
 
@@ -206,7 +206,7 @@ class Login extends React.Component {
           </div>
         </div>
         <div className="f outer-right" ref={n => this.toggleElem = n}>
-          <Link to={'/registration'}className="main f f-col f-fill f-align-2-2 u-text-undecor"  style={bgPic}>
+          <Link to={'/signup'}className="main f f-col f-fill f-align-2-2 u-text-undecor"  style={bgPic}>
             <div className="main-toregister">
                   <div className="main-regist__mini" >
                     <h1 className="h3 u-mb-1" >

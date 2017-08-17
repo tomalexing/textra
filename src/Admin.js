@@ -326,8 +326,6 @@ class Admin extends React.Component {
                 <SideList
                   user={user}
                   route={`${Routes["user"].path}/${id}`}
-                  title="Пользователь"
-                  this={this}
                   page={this.state.page}
                 />
               </div>
@@ -393,7 +391,7 @@ class Admin extends React.Component {
 }
 
 
-class SideList extends React.Component{
+class SideList extends React.PureComponent{
   constructor(p){
     super(p);
     let {user, page: {pageType, id}} = this.props;
@@ -436,6 +434,7 @@ class SideList extends React.Component{
             this.setState(this.historyStore.getState())
         }).bind(this));
     }else{
+      
         this.setState(this.historyStore.getState())
         Promise.all(data.ids.map(id => {
             if(!this._isMounted) return
@@ -445,16 +444,7 @@ class SideList extends React.Component{
               this.setState(this.historyStore.getState())
         }).bind(this))
     }
-  
-  }
-
-  shouldComponentUpdate(nextProps, nextState){
-    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
-      return true
-    }
-    console.log('not rerender')
-    return false
-  }
+  } 
 
   render(){
     let {user, page: {pageType, id, historyId}} = this.props;

@@ -1,5 +1,8 @@
 // registr styles
-
+.signup-layout.outer
+  .main
+    padding: 50px
+    overflow: auto
 .login-layout.outer
   .outer-left
     min-width: 334px
@@ -178,8 +181,9 @@
       height: 40px
 
   &__create-topbar
-    .Select
+    > .Select
       width: 40%
+      max-width: 150px
     .Select.is-open,
     .Select.is-open .Select-menu-outer
       box-shadow: 0 2px 6px rgba(29, 122, 184, 0.3)
