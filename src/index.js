@@ -13,13 +13,18 @@ import {
   withRouter
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
-import  { Lazy, getUniqueKey, dump } from './utils';
+import  { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
 import Auth from './store/AuthStore.js';
 
 
 
 injectTapEventPlugin();
+
+if (navigator.userAgent.indexOf('Safari') != -1 &&  navigator.userAgent.indexOf('Chrome') == -1) {
+    addClass(document.body, "safari");
+}
+
 // ====================================
 // ========= Lazy loadin ==============
 // ====================================
@@ -28,19 +33,19 @@ injectTapEventPlugin();
 // import Registration from './Registration';
 
   // eslint-disable-next-line
-const SignUp = () => <Lazy load={() => import('./SignUp')}/>
+const SignUp = (props) => <Lazy {...props} load={() => import('./SignUp')}/>
 
   // eslint-disable-next-line
-const Login = () => <Lazy  load={() => import('./Login')}/>
+const Login = (props) => <Lazy {...props} load={() => import('./Login')}/>
 
   // eslint-disable-next-line
-const DashBoard = () => <Lazy  load={() => import('./Dashboard')}/>
+const DashBoard = (props) => <Lazy {...props} load={() => import('./Dashboard')}/>
 
   // eslint-disable-next-line
 const Test = (props) => <Lazy {...props} load={() => import('./Test')}/>
 
   // eslint-disable-next-line
-const Translator = () => <Lazy load={() => import('./Translator')}/>
+const Translator = (props) => <Lazy  {...props} load={() => import('./Translator')}/>
 
   // eslint-disable-next-line
 const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>
@@ -57,6 +62,7 @@ class App extends React.Component {
   
    componentWillMount() {
     Auth.init();
+    Auth.refreshToken();
     Store.loadSession()
     if (typeof window === 'undefined') return
     window.addEventListener('beforeunload', this.handleBeforeUnload)
@@ -68,6 +74,7 @@ class App extends React.Component {
   }
 
   handleBeforeUnload() {
+    Auth.refreshToken();
     Store.saveSession()
   }
 

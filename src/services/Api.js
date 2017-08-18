@@ -1,14 +1,15 @@
-
+import AuthStore from './../store/AuthStore.js';
 // Textra Rest Api
 export const TxRest = (() => {
-     const host = 'http://localhost' //'http://api-textra.iondigi.com';
-     const port = ':9000';
-      function getData(path, cb){
+    const host = 'http://api-textra.iondigi.com' //'http://api-textra.iondigi.com';
+    const port = ':80';
+    function getData(path, cb){
         let _self = this;
         return new Promise( (resolve, reject) => {
             try { 
-              fetch(`${host}/${path}`, {
+              fetch(`${host}${port}/${path}`, {
                 method: 'GET',
+                headers: new Headers({"Authorization": `Bearer ${AuthStore.token}`}),
               }).then(response => {
                 return response.json();
               }).then( async data => {
@@ -41,9 +42,9 @@ export const TxRest = (() => {
                   return response.json();
                 }).then( async data => {
                   if(typeof cb === 'function'){
-                    cb(JSON.parse(data));
+                    cb(data);
                   }
-                  resolve(JSON.parse(data));
+                  resolve(data);
                 })
               } catch (err) {
                 console.trace(err.stack);

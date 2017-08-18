@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, withRouter} from 'react-router-dom';
+import { Link, withRouter, Redirect} from 'react-router-dom';
 import logo from './../assets/logo.png';
 import avatar from './../assets/default-avatar.png';
 import {hasClass, addClass, removeClass, delegate} from './../utils';
@@ -23,11 +23,13 @@ class Header extends React.Component{
     this.closeMobileMenu = this.closeMobileMenu.bind(this);
     this.openMobileMenu = this.openMobileMenu.bind(this);
     this.closeListener = null;
+    this.logout = this.logout.bind(this);
   }
 
   state = {
     isMobileMenuOpened: false,
-    user: Auth.user
+    user: Auth.user,
+    redirect: false
   }
 
   closeMobileMenu = () => {
@@ -73,12 +75,17 @@ class Header extends React.Component{
   }
 
   logout(){
-    Auth.signout();
+    let _self = this;
+    Auth.signout().then((res , rej) => {
+        _self.setState({redirect: true});
+    });
   }
 
   render(){
-    let { user } = this.state;
-
+    let { user, redirect } = this.state;
+    if(redirect) return(
+      <Redirect to={'/'}/>
+    ) 
     return(  <header className="f main__header">
                 <div className="f f-align-2-2 header-logo">
                   <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>

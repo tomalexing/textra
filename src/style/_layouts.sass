@@ -3,6 +3,14 @@
   .main
     padding: 50px
     overflow: auto
+    &-regist__form
+      width: 327px
+      min-height: 418px
+      padding: 20px
+      border-radius: 4px
+      background-color: rgba(255, 255, 255, 0.8)
+      margin: auto
+
 .login-layout.outer
   .outer-left
     min-width: 334px
@@ -11,6 +19,68 @@
       min-width: 100%
       width: 100%
       z-index: 10
+    .sidebar
+      border: none
+      .sidebar-regist__logo
+        flex-basis: 27%
+        padding: 28px
+        padding-bottom: 0px
+        +r(768)
+          flex-basis: 20%
+        +rh(578)
+          display: none
+        .safari &
+          /* autoprefixer: off */
+          -webkit-flex-basis: auto
+      .registform
+        flex-basis: 73%
+        padding: 28px
+        padding-top: 0px
+        +r(768)
+          flex-basis: 80%
+        +rh(578)
+          flex-basis: 100%
+          padding-top: 28px
+        .safari & 
+          /* autoprefixer: off */
+          -webkit-flex-basis: auto
+        &-delimiter
+          width: 100%
+          position: relative
+          z-index: 102
+          text-align: center
+          margin: 40px 0
+          &:before,
+          &:after
+            position: absolute
+            top: 50%
+            width: 100%
+            z-index: 101
+            content: ''
+            width: 106px
+            height: 1px
+            background: rgba($text-light, .5)
+          &:after
+            left: 1px
+          &:before
+            right: 1px
+          span
+            height: 14px
+            color: #9ca9b2
+            font-size: 12px
+            font-weight: 400
+            letter-spacing: -0.06px
+            line-height: 14px
+        &-textlink
+          font-size: 12px
+          font-weight: 400
+          letter-spacing: -0.05px
+          line-height: 14px
+          color: #9ca9b2
+          &__blue
+            color: #1e7bcf
+        &__forgotpassword
+          color: $text-light
   .outer-right
     width: calc(100% -  334px)
     +r(768)
@@ -22,51 +92,17 @@
         display: flex
         transition: transform 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
         transform: translateX(0)
+    .main
+      &-toregister
+        display: block
+        margin-top: 25%
+        width: 200px
+        text-decoration: none
+      &-regist__mini p
+        color: $text-light
 
-.sidebar-regist__logo
-  flex-basis: 27%
-  padding: 28px
-  padding-bottom: 0px
 
-.registform
-    flex-basis: 73%
-    padding: 28px
-    padding-top: 0px
-    &-delimiter
-      width: 100%
-      position: relative
-      z-index: 102
-      text-align: center
-      margin: 40px 0
-      &:before,
-      &:after
-        position: absolute
-        top: 50%
-        width: 100%
-        z-index: 101
-        content: ''
-        width: 106px
-        height: 1px
-        background: rgba($text-light, .5)
-      &:after
-        left: 1px
-      &:before
-        right: 1px
-      span
-        height: 14px
-        color: #9ca9b2
-        font-size: 12px
-        font-weight: 400
-        letter-spacing: -0.06px
-        line-height: 14px
-    &-textlink
-      font-size: 12px
-      font-weight: 400
-      letter-spacing: -0.05px
-      line-height: 14px
-      color: #9ca9b2
-      &__blue
-        color: #1e7bcf
+
 // registr end
 
 //
@@ -78,8 +114,11 @@
     min-width: 334px
     width: 334px
     background: #fff
+    align-items: flex-start
+    height: 100%
   .sidebar
     flex: 0 1 344px
+    height: 100%
   .outer-right
     width: calc(100% -  334px)
 .dashboard-user .outer-right
@@ -131,6 +170,7 @@
     margin: auto
   &__back
     position: absolute
+    top: 5px
     color: rgb(0, 192, 255)
     font-size: 10px
     margin-left: 10px
@@ -138,10 +178,16 @@
     text-decoration: none
     svg
       height: 5px
+      position: absolute
+      top: 4px
+      left: -3px
+      .safari &
+        top: 3px
     &:hover
       color: darken(rgb(0, 192, 255),10)
   &__next
     position: absolute
+    top: 5px
     right: 0
     font-size: 10px
     color: rgb(0, 192, 255)
@@ -150,6 +196,11 @@
     line-height: 21px
     svg
       height: 5px
+      position: absolute
+      top: 4px
+      right: -3px
+      .safari &
+        top: 3px
     &:hover
       color: darken(rgb(0, 192, 255),10)
 

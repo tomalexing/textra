@@ -42,6 +42,10 @@ class Login extends React.Component {
     isTablet: false
   }
 
+  componentWillMount(){
+    if(Auth.isAuthenticated) this.setState({redirectToReferrer: true})
+  }
+
   componentDidMount(){
     this.removeMe.push(
           listener(window, 'resize', debounce((e) => {
@@ -54,7 +58,6 @@ class Login extends React.Component {
       this.setState({ isTablet: true })
     }
     this.doAtDidMount.forEach(func => func());
-
   }
 
   setSubmit(input){
@@ -200,7 +203,7 @@ class Login extends React.Component {
                   <TxInput type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
                 </TxForm>
 
-                <p className="f f-align-3-3 u-mt-1">Забыли пароль?</p>
+                <Link to={'/'} className="f f-align-3-3 u-mt-1 registform-forgotpassword">Забыли пароль?</Link>
                 <div id="status"></div>
               </div>
           </div>
