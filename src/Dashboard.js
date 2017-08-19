@@ -36,7 +36,7 @@ import {
     getMounthName,
     getFullMinutes
 } from './utils';
-
+import formSerialize from 'form-serialize';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 
@@ -49,6 +49,7 @@ import StatefulEditor from './components/StatefulEditor';
 import deepEqual from 'deep-equal';
 
 import Store from './store/Store.js';
+import {TxRest} from './services/Api.js';
 
 class DashBoard extends React.Component {
 
@@ -58,13 +59,18 @@ class DashBoard extends React.Component {
     this.doAtDidMount = [];
     this.renders = 0;
     this._isMounted = false;
+    this.updateHandler = this.updateHandler.bind(this);
   }
 
   state = {
     redirectToReferrer: false,
     isTablet: false,
     items: [],
-    mainScreen: false
+    mainScreen: false,
+    searchingTab: [],
+    page:{
+      pageType: ''
+    }
   }
 
 
@@ -85,7 +91,7 @@ class DashBoard extends React.Component {
 
   componentDidMount(){
     this._isMounted = true;
-    this.store = new Store('mylist');
+    this.store = new Store('topic');
     this.store.start();
     this.store.addListener('update', this.updateHandler);
   }
@@ -94,23 +100,15 @@ class DashBoard extends React.Component {
     console.log(data);
     if(!this._isMounted) return
     let _self = this;
-    // if( data.list[0] === null ) {
-    //   Promise.all(data.ids.map(id => TxRest.getDataByID('r', id)))
-    //         .then((list) => {
-    //             list.map((item, index) => _self.store.itemUpdated(item.value, index))
-    //             let {list: usersList , ids} = _self.store.getState();
-    //             _self.setState({usersList: usersList, usersListFetched: usersList})})
-    // }else{
-
-    //     _self.setState({usersList: data.list, usersListFetched: data.list})
-    //     Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
-    //         .then(async list => { await sleep(10000); return Promise.resolve(list)})
-    //         .then((list) => {
-    //             if(!this._isMounted) return
-    //             list.map((item, index) => _self.store.itemUpdated(item.value, index))
-    //             let {list: usersList , ids} = _self.store.getState();
-    //             _self.setState({usersList: usersList, usersListFetched: usersList})})
-    // }
+    this.setState({searchingTab : data.list.map( item => {
+        return {
+          uuid: item.id,
+          avatar: avatar,
+          title: 'Создать запрос на перевод',
+          content: item.source_messages[0].content
+        }
+      })
+    })
   }
 
   componentWillUnmount() {
@@ -144,34 +142,6 @@ class DashBoard extends React.Component {
     let activeTab = /user/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     let activeSearch = /searching/.test(pathname) && pathname.split('/')[activeTabA.length - 1] || false;
     
-    const Searching = {
-      'wqefeq': {
-        uuid: 'wqefeq',
-        avatar: avatar,
-        title: 'Создать запрос на перевод',
-        content: 'Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
-        publishTime: (new Date).toISOString(),
-        startWorkingTime: (new Date(new Date - 1000000)).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: 'RUS',
-        to: 'ENG',
-        cost: '$0.33'
-      },
-      'wqerq': {
-        uuid: 'wqerq',
-        avatar: avatar,
-        title: 'Создать запрос на перевод',
-        content: 'Создать запрос на перевод',
-        publishTime: (new Date).toISOString(),
-        startWorkingTime: (new Date).toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: 'ENG',
-        to: 'CHN',
-        cost: '$11.33'
-      }
-    }
     const Users = {
       'wqefeq': {
         uuid: 'alex',
@@ -211,8 +181,8 @@ class DashBoard extends React.Component {
 
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id)
 
-    let currentDate = activeTab ? find(Users, activeTab) : activeSearch ? find(Searching, activeSearch) : {};
-    let {isTablet,mainScreen} = this.state || {isTablet: false, mainScreen: false}
+    let currentDate = activeTab ? find(Users, activeTab) : activeSearch ;
+    let {isTablet, mainScreen} = this.state || {isTablet: false, mainScreen: false}
     return (
       <div className="f f-col outer dashboard-user">
         <Header />
@@ -234,20 +204,16 @@ class DashBoard extends React.Component {
                 debug
               />*/}
 
-              {Object.values(Searching).map((tab, index) => {
-                let publishTime = new Date(tab.publishTime);
+              { this.state.searchingTab.map((tab, index) => {
                 return (
-                  <Link  to={{pathname:`/dashboard/searching/${tab.uuid}`,state: {mainScreen: true}}} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === activeSearch ? 'selected' : ''}`} key={index}>
+                  <Link  to={{pathname:`/dashboard/searching/${tab.uuid}`,state: {mainScreen: true}}} className={`f f-align-1-2 dashboard-user__search-tab ${tab.id === activeSearch ? 'selected' : ''}`} key={index}>
                     <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
-                      <div className="dashboard-user__search-tab-title">{tab.title} </div>
+                      <div className="dashboard-user__search-tab-title"> Поиск переводчика </div>
                       <div className="dashboard-user__search-tab-content"> {tab.content}</div>
                     </div>
                     <div className="f  f-col f-align-2-3 dashboard-user__search-tab-info">
-                      <div className="dashboard-user__search-tab-info__time">
-                        <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time></div>
-                      <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === activeTab} />
-                      <div className="dashboard-user__search-tab-info__money">{tab.cost}</div>
+                
                     </div>
                   </Link>
                 )
@@ -284,7 +250,7 @@ class DashBoard extends React.Component {
                 </div>
               :''}
               <Switch>
-                <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate} />
+                <RoutePassProps path="/dashboard/create" component={Create} currentDate={currentDate} store={this.store}/>
                 <RoutePassProps path="/dashboard/searching/:id" component={Search} currentDate={currentDate} />
                 <RoutePassProps path="/dashboard/user/:id" component={HistoryList} isTablet={this.state.isTablet}currentDate={currentDate} />
               </Switch>
@@ -503,6 +469,19 @@ class Search extends React.Component {
   }
 }
 
+const LANGUAGES = [
+  { value: 'Eng', label: 'Английский', id: 1 },
+  { value: 'Rus', label: 'Русский', id: 2 },
+];
+
+function getIdLang(value){
+  return LANGUAGES.filter(o => o.value === value)[0]['id']
+}
+
+function getValueLang(id){
+  return LANGUAGES.filter(o => o.id === id)[0]['ivalued']
+}
+
 class Create extends React.Component {
   constructor(props) {
     super(props);
@@ -515,19 +494,19 @@ class Create extends React.Component {
     this.swapLang = this.swapLang.bind(this);
     this.callTranslatorSearchNenu = this.callTranslatorSearchNenu.bind(this);
     this.makeSearchMenuTranslatorUnnisible = this.makeSearchMenuTranslatorUnnisible.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
   }
 
+
   state = {
-    optionsLang: [
-      { value: 'Eng', label: 'Английский' },
-      { value: 'Rus', label: 'Русский' },
-    ],
+    optionsLang: LANGUAGES,
     valueLangFrom: 'Rus',
     valueLangTo: 'Eng',
     valueTranslator: undefined,
     currentNumberOfChar: 0,
     isSearchMenuTranslatorVisible: false,
-    isBlocking: false
+    isBlocking: false,
+    translatorMessage: ''
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -539,9 +518,26 @@ class Create extends React.Component {
     return false
   }
 
+  onSubmit(e){
+    e.preventDefault();
+    let {create:{to, from, message}} = formSerialize(e.target, { hash: true, empty: true });
+    let data = {
+      "source_language": getIdLang(from),
+      "translate_language": getIdLang(to),
+       message
+    }
+    TxRest.putData('topic', data).then((data, err) => {
+      if(err) return
+      this.setState({ translatorMessage: '', isBlocking: false },()=>{
+        this.props.store.stop();
+        this.props.store.start();
+      })
+    })
+  } 
+ 
   currentNumberOfChar({target: {value}}) {
     let currentNumberOfChar = value.length;
-    this.setState({ currentNumberOfChar, isBlocking: value.length >  0 })
+    this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value })
   }
 
   updateValueLangFrom(valueLangFrom) {
@@ -619,11 +615,11 @@ class Create extends React.Component {
 
   render() {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
-      valueTranslator, isSearchMenuTranslatorVisible, isBlocking } = this.state;
+      valueTranslator, isSearchMenuTranslatorVisible, isBlocking, translatorMessage } = this.state;
 
     return (
       <div ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
-      <form className={'f f-col dashboard-user__create-forms'}>
+      <form onSubmit={this.onSubmit} className={'f f-col dashboard-user__create-forms'}>
          <Prompt
                 when={this.state.isBlocking}
                 message={location => (
@@ -697,7 +693,8 @@ class Create extends React.Component {
             <textarea
               type="text"
               tabIndex={1}
-              name="create[posteditor]"
+              name="create[message]"
+              value={translatorMessage}
               placeholder={'Ваш запрос на перевод...'}
               onChange={this.currentNumberOfChar}
             />

@@ -5,28 +5,32 @@ import {TxRest}  from './../services/Api.js';
 
 /**
  * Story ids by type, in rank order. Persisted to sessionStorage.
- * @type Object<type: string, Array.<string>>
+ * Object.<type, Array.<id>>,
+ * @type {{string : Array<string>}}  
  */
 var idCache = {}
 
 /**
  * Item cache. Persisted to sessionStorage.
- * @type Object.<id, item>
+ * Object.<id, item>
+ * @type {{string:{}}}  
  */
 var itemCache = {}
 
 /**
  * Story items in rank order for display, by type.
- * @type Object.<type, Array.<item>>
+ * Object.<type, Array.<item>>
+ * @type {{string:Array<{}>}}  
  */
 var showLists = {}
+
 
 /**
  * Populate the story list for the given story type from the cache.
  */
 function populateList(type) {
   var ids = idCache[type]
-  var storyList = showLists[type]
+  var storyList = showLists[type] 
   for (var i = 0, l = ids.length; i < l; i++) {
     storyList[i] = itemCache[ids[i]] || null
   }
@@ -92,7 +96,7 @@ export default class Store extends EventEmitter {
 
   itemUpdated(item, index) {
     showLists[this.type][index] = item
-    itemCache[item.uuid] = item
+    itemCache[item.id] = item
   }
 
   /**
@@ -109,16 +113,22 @@ export default class Store extends EventEmitter {
    * Handle 
    */
   onStoriesUpdated(data) {
-    idCache[this.type] = data
+    if(data.length === 0) return
+    let _self = this;
+    if(Array.isArray(data)){
+      let ids = data.reduce((acc, item, idx) => {
+        itemCache[item.id] = item
+        return acc.concat(item.id);
+      },[]);
+      idCache[this.type]= ids;
+    }else{
+      
+    }
+
     populateList(this.type)
     this.emit('update', this.getState())
   }
 
-  startForAll() {
-    if (typeof window === 'undefined') return
-    TxRest.getData(this.type, this.onStoriesUpdated) 
-    window.addEventListener('storage', this.onStorage)
-  }
 
   start() {
     if (typeof window === 'undefined') return

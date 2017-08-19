@@ -34,7 +34,7 @@ class Login extends React.Component {
   }
 
   componentWillMount(){
-    console.log( process.env.NODE_ENV )
+    console.log( process.env )
   }
 
   state = {
@@ -163,7 +163,7 @@ class Login extends React.Component {
                   this.state.isTablet ? (
                       <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this),500,false)} > Создать аккаунт</button>
                     ):(
-                      <Link to="/registration" className="btn btn-flat"> Создать аккаунт</Link>
+                      <Link to="/signup" className="btn btn-flat"> Создать аккаунт</Link>
                     )
                 )}</p>
                 <div className="f f-gap-2 registform-regist__social"> 

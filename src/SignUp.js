@@ -41,8 +41,9 @@ class SignUp extends React.Component {
           this.errorFieldIn.innerHTML = errors; // new Error from Server
         }else{
           if(this.errorFieldIn) this.errorFieldIn.innerHTML = ''; // clean UP
+          let self = this;
           Auth.authorize(() => {
-            this.setState({ redirectToReferrer: true })
+            self.setState({ redirectToReferrer: true })
           }, data)
         }
   }
@@ -61,7 +62,7 @@ class SignUp extends React.Component {
   }
   
   render() {
-    const { from } = this.props.location.state || { from: { pathname: '/' } }
+    const { from } = this.props.location.state || { from: { pathname: '/login' } }
     const bgPic = {
       backgroundImage : `url(${mainbg})`
     }

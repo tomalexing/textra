@@ -1,4 +1,4 @@
-// registr styles
+// signup styles
 .signup-layout.outer
   .main
     padding: 50px
@@ -10,7 +10,56 @@
       border-radius: 4px
       background-color: rgba(255, 255, 255, 0.8)
       margin: auto
-
+      .registform
+        flex-basis: 73%
+        padding: 28px
+        padding-top: 0px
+        +r(768)
+          flex-basis: 80%
+        +rh(578)
+          flex-basis: 100%
+          padding-top: 28px
+        .safari & 
+          /* autoprefixer: off */
+          -webkit-flex-basis: auto
+        &-delimiter
+          width: 100%
+          position: relative
+          z-index: 102
+          text-align: center
+          margin: 40px 0
+          &:before,
+          &:after
+            position: absolute
+            top: 50%
+            width: 100%
+            z-index: 101
+            content: ''
+            width: 106px
+            height: 1px
+            background: rgba($text-light, .5)
+          &:after
+            left: 1px
+          &:before
+            right: 1px
+          span
+            height: 14px
+            color: #9ca9b2
+            font-size: 12px
+            font-weight: 400
+            letter-spacing: -0.06px
+            line-height: 14px
+        &-textlink
+          font-size: 12px
+          font-weight: 400
+          letter-spacing: -0.05px
+          line-height: 14px
+          color: #9ca9b2
+          &__blue
+            color: #1e7bcf
+        &__forgotpassword
+          color: $text-light
+// registr styles
 .login-layout.outer
   .outer-left
     min-width: 334px
@@ -634,6 +683,7 @@
   text-decoration: none
   color: $selected-blue
   border-bottom: 1px $grey solid
+  flex-shrink: 0
   +nosel
   &:hover
     background: darken($bg-blue, 10%)
@@ -670,6 +720,7 @@
 .dashboard-user__search-tab
   height: 66px
   text-decoration: none
+  flex-shrink: 0
   padding: 7px
   background: $bg-blue
   border-bottom: 1px $grey solid
@@ -751,6 +802,7 @@
   color: $selected-blue
   padding: 7px
   border-bottom: 1px $grey solid
+  flex-shrink: 0
   +nosel
   &:hover
     background: $bg-blue

@@ -62,7 +62,7 @@ class App extends React.Component {
   
    componentWillMount() {
     Auth.init();
-    Auth.refreshToken();
+    //Auth.refreshToken();
     Store.loadSession()
     if (typeof window === 'undefined') return
     window.addEventListener('beforeunload', this.handleBeforeUnload)
@@ -74,14 +74,13 @@ class App extends React.Component {
   }
 
   handleBeforeUnload() {
-    Auth.refreshToken();
-    Store.saveSession()
+    //Auth.refreshToken();
+    Store.saveSession();
   }
 
   render(){
     return(<Router>
             <Route render={({ location }) => (
-              
                     <ReactCSSTransitionGroup
                       transitionName="fade"
                       transitionEnterTimeout={300}
@@ -90,7 +89,7 @@ class App extends React.Component {
                       <ToDashBoard exact path="/" key={getUniqueKey()}/>
                       <PrivateRoute path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
                       <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
-                      <PrivateRoute path="/admin" component={Admin} location={location} role={['admin','dev']} key={getUniqueKey()}/>
+                      <PrivateRoute path="/admin" component={Admin} location={location} role={['user','dev']} key={getUniqueKey()}/>
                       <Route path="/signup" component={SignUp} location={location}  key={getUniqueKey()}/>
                       <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
                       <PrivateRoute exact path="/test" component={Test} location={location} role={['dev']}key={getUniqueKey()} />

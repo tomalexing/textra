@@ -17,7 +17,7 @@ const  Auth = {
           window.localStorage.setItem('user', JSON.stringify(this.user));
           window.localStorage.setItem('token', JSON.stringify(this.token));
       }
-      if (typeof cd === 'function') cb();
+      if (typeof cb === 'function') cb();
       resolve();
     })
   },
@@ -31,7 +31,7 @@ const  Auth = {
           if(typeof window === 'undefined') return reject();
           window.localStorage.setItem('isLoggedIn', JSON.stringify(this.isAuthenticated));
           window.localStorage.setItem('user', JSON.stringify(this.user));
-          window.localStorage.setItem('token', JSON.stringify(this.token));
+          window.localStorage.setItem('token', this.token);
       }
       if (typeof cb === 'function') cb();
       resolve();
@@ -41,15 +41,16 @@ const  Auth = {
     if( typeof window === 'undefined' ) return 
     this.isAuthenticated = JSON.parse(window.localStorage.getItem('isLoggedIn'));
     this.user = JSON.parse(window.localStorage.getItem('user'));
-    this.token = JSON.parse(window.localStorage.getItem('token'));
+    this.token = window.localStorage.getItem('token');
     this.role = this.user ? this.user.role : undefined;
   },
   refreshToken(){
+    let self = this;
     if( typeof window === 'undefined' ) return 
     if( this.token ) 
       TxRest.getData('refreshToken').then(data => {
-        console.log(data)
-        window.localStorage.setItem('token', JSON.stringify(this.token));
+        self.token = data.token;
+        window.localStorage.setItem('token', self.token);
         
       })
   },
