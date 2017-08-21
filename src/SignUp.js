@@ -32,10 +32,9 @@ class SignUp extends React.Component {
 
   login = async (e, _ , form) => {
         let data = await TxRest.getDataByID('signUp', form)
-        if(data.errors){
-          let errors = Object.values(data.errors).reduce((acc, item) =>
-            acc.concat( item.map(value => `<p><img src=${warningMark} alt='warning'/> ${value.message}</p>`))
-          ,[])
+        debugger;
+        if(data.message){
+          let errors = `<p><img src=${warningMark} alt='warning'/> ${data.message}</p>`;
           if(this.errorFieldIn) this.errorFieldIn.parentNode.innerHTML = ''; // clean UP
           this.errorFieldIn = this.errorField.insertAdjacentElement('beforeend' , document.createElement('div'));
           this.errorFieldIn.innerHTML = errors; // new Error from Server
@@ -52,7 +51,7 @@ class SignUp extends React.Component {
     this.errorField = errorField;
   }
 
-  switchPanel = (e) => {
+  switchPanel = (e) => {  
     !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
   }
 

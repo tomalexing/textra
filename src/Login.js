@@ -70,13 +70,8 @@ class Login extends React.Component {
 
   login = async (e, _ , form) => {
     let data = await TxRest.getDataByID('signIn', form)
-    if(data.errors){
-      let errors = Object.values(data.errors).reduce((acc, item) => {
-        return Array.isArray(item)?
-        acc.concat( item.map(value => `<p><img src=${warningMark} alt='warning'/> ${value.message}</p>`))
-        : 
-        acc.concat( `<p><img src=${warningMark} alt='warning'/> ${item}</p>`)
-      },[])
+    if(data.message){
+      let errors = `<p><img src=${warningMark} alt='warning'/> ${data.message}</p>`;
       if(this.errorFieldIn) this.errorFieldIn.parentNode.innerHTML = ''; // clean UP
       this.errorFieldIn = this.errorField.insertAdjacentElement('beforeend' , document.createElement('div'));
       this.errorFieldIn.innerHTML = errors; // new Error from Server
@@ -137,7 +132,6 @@ class Login extends React.Component {
         //   console.trace(err.stack)
         // }
   
-
       console.log(info);
   }
 

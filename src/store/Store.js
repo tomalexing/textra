@@ -42,6 +42,14 @@ function parseJSON(json, defaultValue) {
 
 export default class Store extends EventEmitter {
 
+
+  /**
+   * Get an ids by type from the cache.
+   */
+  static getIds(type) {
+    return idCache[type] || null
+  }
+
   /**
    * Get an item from the cache.
    */
@@ -96,7 +104,7 @@ export default class Store extends EventEmitter {
 
   itemUpdated(item, index) {
     showLists[this.type][index] = item
-    itemCache[item.id] = item
+    itemCache[this.type + item.id] = item
   }
 
   /**
@@ -117,8 +125,8 @@ export default class Store extends EventEmitter {
     let _self = this;
     if(Array.isArray(data)){
       let ids = data.reduce((acc, item, idx) => {
-        itemCache[item.id] = item
-        return acc.concat(item.id);
+        itemCache[_self.type + item.id] = item
+        return acc.concat(_self.type + item.id);
       },[]);
       idCache[this.type]= ids;
     }else{
@@ -128,7 +136,6 @@ export default class Store extends EventEmitter {
     populateList(this.type)
     this.emit('update', this.getState())
   }
-
 
   start() {
     if (typeof window === 'undefined') return
