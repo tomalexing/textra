@@ -77,7 +77,7 @@ export default class Batch extends Component {
    */
 
   checkAge() {
-    if (this.age() >= this.flushInterval && this.pending() != 0) {
+    if (this.age() >= this.flushInterval) {
       this.log('flush forced interval')
       this.forceUpdate()
     }

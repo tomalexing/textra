@@ -69,7 +69,7 @@ class DashBoard extends React.Component {
     items: [],
     mainScreen: false,
     pendingTabs: [],
-    historyTab: [],
+    historyTabs: [],
     page:{
       typePage: '',
       id: ''
@@ -93,42 +93,52 @@ class DashBoard extends React.Component {
     this.setState({page:{typePage, id: pageTypeId}});
 
     let ids = Store.getIds('topic');
-    let listItems = ids.map(id => {
-      return Store.getItem(id);
-    })
-    this.updateHandler({from: 'cache', list: listItems})
-    
+    if(ids && ids.length > 0){ // get from cache 
+      let listItems = ids.map(id => {
+        return Store.getItem(id);
+      })
+      this.updateHandler({from: 'cache', list: listItems})
+    }
+
+    this.store = new Store('topic');
   }
 
   componentDidMount(){
     this._isMounted = true;
-    this.store = new Store('topic');
     this.store.start();
     this.store.addListener('update', this.updateHandler);
   }
 
   updateHandler(data){
-
     console.log(data);
-    if(!this._isMounted) return
     let _self = this;
     this.setState(
     {
-      pendingTabs : data.list.filter(o => o.status === "0").map( item => {
+      pendingTabs : data.list.filter(o => o.status === "0").map((item, idx) => {
         return {
-          uuid: item.id,
+          ...item,
           avatar: avatar,
-          title: 'Создать запрос на перевод',
-          content: item.source_messages[0].content
+          index: idx
         }
       }),
-      historyTab : data.list.filter(o => o.status === "1").map( item => {
+      workingTabs : data.list.filter(o => o.status === "1").map((item, idx) => {
         return {
           uuid: item.id,
           avatar: avatar,
           title: 'Создать запрос на перевод',
           content: item.source_messages[0].content,
           cost: item.price,
+          index: idx
+        }
+      }),
+      historyTabs : data.list.filter(o => o.status === "2").map((item, idx) => {
+        return {
+          uuid: item.id,
+          avatar: avatar,
+          title: 'Создать запрос на перевод',
+          content: item.source_messages[0].content,
+          cost: item.price,
+          index: idx
         }
       })
     })
@@ -160,46 +170,8 @@ class DashBoard extends React.Component {
   }
 
   render() {
-    let { page: {typePage, id: pageTypeId} } = this.state;
-    debugger;
-    // const Users = {
-    //   'wqefeq': {
-    //     uuid: 'alex',
-    //     nickname: 'alex',
-    //     avatar: avatar,
-    //     title: 'Создать запрос на перевод',
-    //     content: 'Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d',
-    //     contentFull: 'Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d',
-    //     opened: false,
-    //     publishTime: (new Date(new Date - 100000)).toISOString(),
-    //     startWorkingTime: (new Date).toISOString(),
-    //     duration: 241,
-    //     letterNumber: 213,
-    //     startTime: '12:32',
-    //     from: 'RUS',
-    //     to: 'ENG',
-    //     cost: '$0.33'
-    //   }, 
-    //   'wqerq': {
-    //     uuid: 'alex_alex',
-    //     nickname: 'alex_alex',
-    //     avatar: avatar,
-    //     title: 'Создать запрос на перевод',
-    //     content: 'Создать запрос на перевод',
-    //     contentFull: 'ффффффСоздать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
-    //     publishTime: (new Date(new Date - 100000)).toISOString(),
-    //     startWorkingTime: (new Date(new Date - 100000)).toISOString(),
-    //     duration: 634,
-    //     startTime: '12:32',
-    //     letterNumber: 213,
-    //     opened: false,
-    //     from: 'ENG',
-    //     to: 'CHN',
-    //     cost: '$11.33'
-    //   }
-    // }
-
-    let {isTablet, mainScreen} = this.state || {isTablet: false, mainScreen: false}
+    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs } = this.state;
+ 
     return (
       <div className="f f-col outer dashboard-user">
         <Header />
@@ -217,13 +189,13 @@ class DashBoard extends React.Component {
 
 
               {/* PENDINGS/INWORK TAB */} 
-              { this.state.pendingTabs.map((tab, index) => {
+              { pendingTabs.map(tab => {
                 return (
-                  <Link  to={{pathname:`/dashboard/searching/${tab.uuid}`,state: {mainScreen: true, page:{typePage: 'searching', id: tab.uuid}}}} className={`f f-align-1-2 dashboard-user__search-tab ${tab.uuid === pageTypeId ? 'selected' : ''}`} key={index}>
+                  <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__search-tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
                     <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
                       <div className="dashboard-user__search-tab-title"> Поиск переводчика </div>
-                      <div className="dashboard-user__search-tab-content"> {tab.content}</div>
+                      <div className="dashboard-user__search-tab-content"> {tab.source_messages[0].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__search-tab-info">
                     </div>
@@ -231,22 +203,21 @@ class DashBoard extends React.Component {
                 )
               })}
 
-
               {/* History TAB */}
-              {this.state.historyTab.map((tab, index) => {
+              {this.state.historyTabs.map(tab => {
                 let publishTime = new Date(tab.publishTime);
                 return (
-                  <Link to={{pathname:`/dashboard/user/${tab.uuid}`, state: {mainScreen: true}, page:{typePage: 'history', id: tab.uuid}}}  className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === pageTypeId ? 'selected' : ''}`} key={index}>
+                  <Link to={{pathname:`/dashboard/user/${tab.uuid}`, state: {mainScreen: true}, page:{typePage: 'history', id: tab.id}}}  className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === pageTypeId ? 'selected' : ''}`} key={tab.index}>
                     <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
                       <div className="dashboard-user__history-tab-title"> {tab.title} </div>
-                      <div className="dashboard-user__history-tab-content"> {tab.content}</div>
+                      <div className="dashboard-user__history-tab-content"> {tab.source_messages[0].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__history-tab-info">
                       <div className="dashboard-user__history-tab-info__time">
                         <Timer start={tab.startWorkingTime} duration={tab.duration} />
                         <time>{`${publishTime.getHours()}:${getFullMinutes(publishTime.getMinutes())}`}</time></div>
-                        <LangLabel from={tab.from} to={tab.to} selected={tab.uuid === pageTypeId} />
+                        <LangLabel from={tab.from} to={tab.to} selected={tab.id === pageTypeId} />
                       <div className="dashboard-user__history-tab-info__money">{tab.cost}</div>
                     </div>
                   </Link>
@@ -265,7 +236,8 @@ class DashBoard extends React.Component {
               :''}
               <Switch>
                 <RoutePassProps path="/dashboard/create" component={Create} store={this.store}/>
-                <RoutePassProps path="/dashboard/searching/:id" component={Search} typePage={typePage} id={pageTypeId}  store={this.store} />
+                <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
+                 data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} />
                 <RoutePassProps path="/dashboard/user/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}  store={this.store}/>
               </Switch>
             </div>
@@ -343,10 +315,10 @@ class HistoryList extends React.Component {
                     duration={currentDate.duration}
                     isBig={true} />
                 }
-                value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)}
+                value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)} // sec
                 hint={'Оставшееся время'} />
               <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
-              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
+              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={Math.round(currentDate.cost)} hint={'Стоимость'} />
 
             </div>
           </div>
@@ -428,12 +400,66 @@ class HistoryList extends React.Component {
   }
 }
 
-class Search extends React.Component {
+class Pending extends React.Component {
 
 
   constructor(p){
     super(p);
+    this.store = this.props.store;
     this.id = this.props.id;
+    this.languageStore = null;
+    this.updateLanguageHandler = this.updateLanguageHandler.bind(this);
+  }
+
+  state= {
+    currentData: this.props.data,
+    language: null
+  }
+
+  componentWillMount(){
+    this.languageStore = new Store('language');
+    let languageStoredIds = Store.getIds('language');
+    if(languageStoredIds.length) {
+      let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
+      this.updateLanguageHandler({list : langsFromStore});
+    }
+  }
+  async componentDidMount() {
+    while (1) {
+      const prev = this.state.items
+      const items = [`Hello World #${prev.length}`, ...prev]
+      this.setState({ items })
+      await sleep(Math.random() * 30)
+    }
+  }
+  async componentDidMount(){
+    let _self = this; 
+    TxRest.getData(`topic/${this.id}`).then((data, err) => {
+        if(err) return;
+        let item = Object.assign({}, _self.state.currentData, data, _self.state.currentData.index );
+        _self.setState({ currentData: item});
+        _self.store && _self.store.itemUpdated(item, item.index);
+    })
+
+    if(!this.store.language){
+      this.languageStore.start(); //this will updates not on every click 
+    }
+    this.languageStore.addListener('update', this.updateLanguageHandler);
+  }
+
+  componentWillReceiveProps(newProps){
+    this.store = newProps.store;
+  }
+
+  updateLanguageHandler({list}){
+      this.setState({language: list})
+  }
+
+
+  componentWillUnmount(){
+    this.languageStore.removeListener('update', this.updateLanguageHandler);
+    this.languageStore.stop();
+    this.languageStore = null;
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -444,45 +470,70 @@ class Search extends React.Component {
     console.log('not rerender')
     return false
   }
-  render() {
 
-    let { currentDate } = this.props
-    let publishTime = new Date(currentDate.publishTime);
+  getLangPropInObj({id,slug}){
+    return this.state.language.find(o => o.id === id)[slug]
+  }
+
+  render() {
+  
+    let { currentData } = this.state,
+      created_at = null;
+    if(!currentData)
+        return <div/>
+    if(currentData.created_at){
+      created_at = new Date(currentData.created_at);
+      currentData.duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
+    }
     return (
-      <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
-        <div className={'data__delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
-        <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
-          <div className={'dashboard-user__searching-post__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
-          <div className={'dashboard-user__searching-post__content'}>
-            <div className={'dashboard-user__searching-post__content__text'}>
-              {currentDate.content}
+        <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
+            {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMounthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
+            <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
+              <div className={'dashboard-user__searching-post__avatar'}>
+                <img src={currentData.avatar} />
+              </div>
+              <div className={'dashboard-user__searching-post__content'}>
+                <div className={'dashboard-user__searching-post__content__text'}>
+                  {currentData.source_messages[0].content}
+                </div>
+                <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
+                  {currentData.source_language_id && currentData.translate_language_id &&  
+                  <LangLabel 
+                    from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
+                    to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
+                    />
+                  }
+
+                  <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentData.duration)} hint={'Длительность перевода'} />
+                  <Batch
+                    flushCount={0}
+                    flushInterval={150} 
+                    count={1}
+                    debug={false}
+                    render={()=> {
+                      let value = ~~Math.abs(currentData.duration - (new Date - new Date(currentData.startWorkingTime || currentData.created_at)) / 1000);
+                      //console.log(value)
+                      return(<Indicator
+                        className={'f f-align-2-2'}
+                        icon={
+                          <Timer
+                            start={currentData.created_at}
+                            duration={currentData.duration}
+                            isBig={true} />}
+                        value={humanReadableTime(value)}
+                        hint={'Оставшееся время'} />)
+                    }}/>
+                  <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />
+                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_price'})} hint={'Стоимость'} />
+                </div>
+              </div>
+              <div className={'dashboard-user__searching-post__constols'}>
+              </div>
+              {created_at && <div className={'dashboard-user__searching-post__date'}>
+                {created_at.getHours()}:{getFullMinutes(created_at.getMinutes())}
+              </div>}
             </div>
-            <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
-              <LangLabel from={currentDate.from} to={currentDate.to} />
-              <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
-              <Indicator
-                className={'f f-align-2-2'}
-                icon={
-                  <Timer
-                    start={currentDate.startWorkingTime}
-                    duration={currentDate.duration}
-                    isBig={true} />
-                }
-                value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)}
-                hint={'Оставшееся время'} />
-              <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
-              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentDate.cost} hint={'Стоимость'} />
-            </div>
           </div>
-          <div className={'dashboard-user__searching-post__constols'}>
-          </div>
-          <div className={'dashboard-user__searching-post__date'}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
-          </div>
-        </div>
-      </div>
     )
   }
 }
@@ -544,6 +595,7 @@ class Create extends React.Component {
 
   componentWillUnmount(){
     this.languageStore.removeListener('update', this.updateHandler);
+    this.languageStore.stop();
     this.languageStore = null;
   }
 
@@ -788,3 +840,41 @@ class Create extends React.Component {
 
 
 export default withRouter(DashBoard);
+
+
+   // const Users = {
+    //   'wqefeq': {
+    //     uuid: 'alex',
+    //     nickname: 'alex',
+    //     avatar: avatar,
+    //     title: 'Создать запрос на перевод',
+    //     content: 'Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d',
+    //     contentFull: 'Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d',
+    //     opened: false,
+    //     publishTime: (new Date(new Date - 100000)).toISOString(),
+    //     startWorkingTime: (new Date).toISOString(),
+    //     duration: 241,
+    //     letterNumber: 213,
+    //     startTime: '12:32',
+    //     from: 'RUS',
+    //     to: 'ENG',
+    //     cost: '$0.33'
+    //   }, 
+    //   'wqerq': {
+    //     uuid: 'alex_alex',
+    //     nickname: 'alex_alex',
+    //     avatar: avatar,
+    //     title: 'Создать запрос на перевод',
+    //     content: 'Создать запрос на перевод',
+    //     contentFull: 'ффффффСоздать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d',
+    //     publishTime: (new Date(new Date - 100000)).toISOString(),
+    //     startWorkingTime: (new Date(new Date - 100000)).toISOString(),
+    //     duration: 634,
+    //     startTime: '12:32',
+    //     letterNumber: 213,
+    //     opened: false,
+    //     from: 'ENG',
+    //     to: 'CHN',
+    //     cost: '$11.33'
+    //   }
+    // }

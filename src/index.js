@@ -92,7 +92,7 @@ class App extends React.Component {
                       <PrivateRoute path="/admin" component={Admin} location={location} role={['user','dev']} key={getUniqueKey()}/>
                       <Route path="/signup" component={SignUp} location={location}  key={getUniqueKey()}/>
                       <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
-                      <PrivateRoute exact path="/test" component={Test} location={location} role={['dev']}key={getUniqueKey()} />
+                      <Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} />
                       <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
                     </ReactCSSTransitionGroup>
 

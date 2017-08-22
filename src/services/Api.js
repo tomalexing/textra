@@ -1,8 +1,8 @@
 import AuthStore from './../store/AuthStore.js';
 // Textra Rest Api
 export const TxRest = (() => {
-    const host = 'http://localhost' //'http://api-textra.iondigi.com';
-    const port = ':9000';
+    const host = 'http://api-textra.iondigi.com' //'http://api-textra.iondigi.com';
+    const port = ':80';
     /**
      *
      * 

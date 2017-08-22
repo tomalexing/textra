@@ -1,51 +1,43 @@
 import React from 'react';
 import Select from 'react-select-plus';
-
-// Be sure to include styles at some point, probably during your bootstrapping
-import 'react-select-plus/dist/react-select-plus.css';
+import Batch from './components/Batch';
+import {sleep} from './utils';
 
 export default class Test extends React.Component {
-
-    state = {
-        multi: true,
-        multiValue: [],
-        options: [
-            { value: 'R', label: 'Red' },
-            { value: 'G', label: 'Green' },
-            { value: 'B', label: 'Blue' }
-        ],
-        value: undefined
+    constructor() {
+      super()
+      this.list = this.list.bind(this)
+      this.state = { items: [] }
+      this.renders = 0
     }
-
-    shouldComponentUpdate() {
-        return true
+  
+    async componentDidMount() {
+      while (1) {
+        const prev = this.state.items
+        const items = [`Hello World #${prev.length}`, ...prev]
+        this.setState({ items })
+        await sleep(Math.random() * 30)
+      }
     }
-
-	handleOnChange (value) {
-		const { multi } = this.state;
-		if (multi) {
-			this.setState({ multiValue: value });
-		} else {
-			this.setState({ value });
-		}
-	}
-
+  
+    list() {
+      const { items } = this.state
+  
+      return <div>
+        <p>Count: {items.length}</p>
+        <p>Renders: {this.renders++}</p>
+        <ul>
+          {items.map((v, i) => <li key={i}>{v}</li>)}
+        </ul>
+      </div>
+    }
+  
     render() {
-
-
-        function logChange(val) {
-            console.log(val);
-        }
-        const { multi, multiValue, options, value } = this.state;
-        return (
-            <Select.Creatable
-                multi={multi}
-                options={options}
-                onChange={this.handleOnChange.bind(this)}
-                value={multi ? multiValue : value}
-            />
-        )
-
-
+      return <Batch
+        flushCount={10}
+        flushInterval={150}
+        count={this.state.items.length}
+        render={this.list}
+        debug />
     }
-}
+  }

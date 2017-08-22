@@ -2,7 +2,7 @@ import React from 'react';
 
 const Timer = ({ start, duration, isBig = false } = {}) => {
 
-  const percentage = ((new Date() - new Date(start))) / duration / 1000;
+  const percentage = ((new Date() - new Date(start))) / duration / 1000; // duration in sec
 
   const START = Math.PI * 0.5;
   const TAU = Math.PI * 2;
