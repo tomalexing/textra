@@ -195,7 +195,7 @@ class DashBoard extends React.Component {
                     <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
                       <div className="dashboard-user__search-tab-title"> Поиск переводчика </div>
-                      <div className="dashboard-user__search-tab-content"> {tab.source_messages[0].content}</div>
+                      <div className="dashboard-user__search-tab-content"> {Array.isArray(tab.source_messages) && tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__search-tab-info">
                     </div>
@@ -413,9 +413,9 @@ class Pending extends React.Component {
 
   state= {
     currentData: this.props.data,
-    language: null
+    language: []
   }
-
+ 
   componentWillMount(){
     this.languageStore = new Store('language');
     let languageStoredIds = Store.getIds('language');
@@ -424,14 +424,7 @@ class Pending extends React.Component {
       this.updateLanguageHandler({list : langsFromStore});
     }
   }
-  async componentDidMount() {
-    while (1) {
-      const prev = this.state.items
-      const items = [`Hello World #${prev.length}`, ...prev]
-      this.setState({ items })
-      await sleep(Math.random() * 30)
-    }
-  }
+
   async componentDidMount(){
     let _self = this; 
     TxRest.getData(`topic/${this.id}`).then((data, err) => {
@@ -472,7 +465,7 @@ class Pending extends React.Component {
   }
 
   getLangPropInObj({id,slug}){
-    return this.state.language.find(o => o.id === id)[slug]
+    return this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : undefined
   }
 
   render() {
@@ -483,6 +476,8 @@ class Pending extends React.Component {
         return <div/>
     if(currentData.created_at){
       created_at = new Date(currentData.created_at);
+    }
+    if(currentData.source_messages.length > 0){
       currentData.duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
     }
     return (
@@ -494,7 +489,7 @@ class Pending extends React.Component {
               </div>
               <div className={'dashboard-user__searching-post__content'}>
                 <div className={'dashboard-user__searching-post__content__text'}>
-                  {currentData.source_messages[0].content}
+                  {currentData.source_messages.length > 0 && currentData.source_messages[0].content}
                 </div>
                 <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
                   {currentData.source_language_id && currentData.translate_language_id &&  
@@ -503,8 +498,9 @@ class Pending extends React.Component {
                     to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
                     />
                   }
-
-                  <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentData.duration)} hint={'Длительность перевода'} />
+                {currentData.source_messages.length > 0 &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentData.duration)} hint={'Длительность перевода'} /> }
+                {currentData.source_messages.length > 0 &&
                   <Batch
                     flushCount={0}
                     flushInterval={150} 
@@ -522,9 +518,11 @@ class Pending extends React.Component {
                             isBig={true} />}
                         value={humanReadableTime(value)}
                         hint={'Оставшееся время'} />)
-                    }}/>
-                  <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />
-                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_price'})} hint={'Стоимость'} />
+                    }}/>}
+                  {currentData.source_messages.length > 0 &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
+                  {currentData.source_messages.length > 0 &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_price'})} hint={'Стоимость'} />}
                 </div>
               </div>
               <div className={'dashboard-user__searching-post__constols'}>
@@ -633,6 +631,7 @@ class Create extends React.Component {
   onSubmit(e){
     e.preventDefault();
     let {create:{to, from, message}} = formSerialize(e.target, { hash: true, empty: true });
+    if(message.length === 0) return
     let data = {
       "source_language_id": this.getIdLang(from),
       "translate_language_id": this.getIdLang(to),
@@ -720,7 +719,8 @@ class Create extends React.Component {
       return <img style={{ transform: 'rotate(90deg)' }} src={icon_arrow} />
   }
 
-  swapLang() {
+  swapLang(e) {
+    e.preventDefault();
     let to = this.state.valueLangTo,
       from = this.state.valueLangFrom,
       toLangObj = this.getAttrByValue(this.state.optionsLang, to);
@@ -743,7 +743,7 @@ class Create extends React.Component {
          <Prompt
                 when={this.state.isBlocking}
                 message={location => (
-                  `Вы уверены, что хотите уйти`
+                  `Ваше запрос на перевод будет удален`
                 )}
           />
           <div className={'dashboard-user__create-topbar f f-align-1-2 f-row f-gap-4'}>
@@ -760,7 +760,7 @@ class Create extends React.Component {
               autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs} />
-            <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} alt="swap language" /></div>
+            <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} /></div>
             <Select
               ref={(n) => this.createLangTo = n}
               name="create[to]"
@@ -786,7 +786,7 @@ class Create extends React.Component {
                   ref={(n) => this.createTranslatorMenu = n}
                   name="create[translator]"
                   autofocus
-                  options={optionsLang}
+                  
                   disabled={false}
                   value={valueTranslator}
                   onChange={this.updateValueTranslator}
