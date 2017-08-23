@@ -86,10 +86,10 @@ class App extends React.Component {
                       transitionEnterTimeout={300}
                       transitionLeaveTimeout={300}
                     >
-                      <ToDashBoard exact path="/" key={getUniqueKey()}/>
+                      <ToDashBoard exact path="/" auth={Auth} key={getUniqueKey()}/>
                       <PrivateRoute path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
                       <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
-                      <PrivateRoute path="/admin" component={Admin} location={location} role={['user','dev']} key={getUniqueKey()}/>
+                      <PrivateRoute path="/admin" component={Admin} location={location} role={['controller','admin','dev']} key={getUniqueKey()}/>
                       <Route path="/signup" component={SignUp} location={location}  key={getUniqueKey()}/>
                       <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
                       <Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} />
@@ -135,10 +135,27 @@ const PrivateRoute =  ({ component: Component, ...rest }) => (
 )
 
 
-const ToDashBoard = ({ component: Component, ...rest }) => (
-  <Route exact {...rest} render={props => (
-      <Redirect to={'/dashboard'} />
-    ) 
+const ToDashBoard = ({ component: Component,auth: Auth, ...rest }) => (
+  <Route exact {...rest} render={props => {
+    if(!Auth.isAuthenticated) return  <div {...props}/>
+    switch (Auth.role) {
+    case 'admin':
+        return   <Redirect to={'/admin'} />
+        break;
+    case 'controller':
+        return   <Redirect to={'/admin'} />
+         break;
+    case 'translator':
+        return  <Redirect to={'/translator'} />
+        break;
+    case 'user':
+        return   <Redirect to={'/dashboard'} />
+        break;
+    default:
+        return  <div {...props}/>
+        break;
+    }
+    }
   } />
 )
 

@@ -156,50 +156,18 @@ export function humanReadableTime(date) {
         return '';
     }
 }
-export const getMounthName = (numberOfMonth) => {
-  let Mounth = 'Янв';
-  switch (numberOfMonth) {
-    case (0):
-      Mounth = 'Янв'
-      break;
-    case (1):
-      Mounth = 'Фев'
-      break;
-    case (2):
-      Mounth = 'Мрт'
-      break;
-    case (3):
-      Mounth = 'Апр'
-      break;
-    case (4):
-      Mounth = 'Май'
-      break;
-    case (5):
-      Mounth = 'Июн'
-      break;
-    case (6):
-      Mounth = 'Июл'
-      break;
-    case (7):
-      Mounth = 'Авг'
-      break;
-    case (8):
-      Mounth = 'Сен'
-      break;
-    case (9):
-      Mounth = 'Окт'
-      break;
-    case (10):
-      Mounth = 'Нбр'
-      break;
-    case (11):
-      Mounth = 'Дек'
-      break;
-  }
-  return Mounth
+export const getMonthName = (month) => {
+  let months = ['Янв','Фев','Мрт','Апр','Май','Июн','Июл','Авг','Сен','Окт','Нбр','Дек'];
+  return months[ month || 0 ];
 }
-export const getFullMinutes = (Minutes) => {
+
+export const getFullTimeDigits = (Minutes) => {
   return (('' + Minutes).length == 1) ? ('0' + Minutes) : Minutes
+}
+export const getDayName = (day) => {
+  let days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  return days[ day || 0 ];
+
 }
 
 function swap(items, firstIndex, secondIndex){
@@ -271,7 +239,8 @@ util.dump = dump
 util.Lazy = Lazy
 util.sleep = sleep
 util.humanReadableTime = humanReadableTime
-util.getFullMinutes = getFullMinutes
-util.getMounthName = getMounthName
+util.getFullTimeDigits = getFullTimeDigits
+util.getDayName = getDayName
+util.getMonthName = getMonthName
 util.quickSort = quickSort
 export default util 

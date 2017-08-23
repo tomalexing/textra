@@ -1,9 +1,17 @@
 import React from 'react';
 
-const Timer = ({ start, duration, isBig = false } = {}) => {
+const Timer = ({ start, duration, isBig = false, isExpired = false } = {}) => {
 
-  const percentage = ((new Date() - new Date(start))) / duration / 1000; // duration in sec
+  let percentage = ((new Date() - new Date(start))) / duration / 1000; // duration in sec
 
+  if((new Date() - new Date(start))/1000 > duration) {
+    // expired
+    percentage = 0.99;
+    isExpired = true;
+  }
+  if(isNaN(percentage)) {
+    percentage = 0.5; // Fill circle
+  }
   const START = Math.PI * 0.5;
   const TAU = Math.PI * 2;
   const radius = isBig ? 7 : 5;
@@ -26,7 +34,7 @@ const Timer = ({ start, duration, isBig = false } = {}) => {
   ];
 
   return (
-    <svg className={`Timer ${isBig ? 'Timer-big' : ''}`} xmlns="http://www.w3.org/2000/svg">
+    <svg className={`Timer ${isBig ? 'Timer-big' : ''} ${isExpired ? 'Timer-red' : ''}`} xmlns="http://www.w3.org/2000/svg">
       <path d={points.join(' ')} />
     </svg>
   )

@@ -37,8 +37,8 @@ import {
   delegate,
   sleep,
   humanReadableTime,
-  getMounthName,
-  getFullMinutes,
+  getMonthName,
+  getFullTimeDigits,
   dump,
   quickSort
 } from "./utils";
@@ -1070,7 +1070,7 @@ class UserAccount extends React.Component {
             : RenderCollection((currentDate, index, publishTime) => (
             <div key={index} className={"f f-col f-align-1-1 admin-historypost"}>
                 {currentDate.postType === 'post' &&<div className={"data__delimiter"}>
-                  {publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}
+                  {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}
                 </div>}
                 <div className={`f f-align-1-1 admin-historypost-${currentDate.postType}`}>
                 <div className={`admin-historypost-${currentDate.postType}__content`}>
@@ -1116,7 +1116,7 @@ class UserAccount extends React.Component {
                     </div>}
                 </div>
                 <div className={`admin-historypost-${currentDate.postType}__date`}>
-                    {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                    {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
                 </div>
                 </div>
             </div>)
@@ -1209,7 +1209,7 @@ class Appeal extends React.Component {
               </div>
             : RenderCollection((currentDate, index, publishTime) => (
               <div>
-                <div className={"data__delimiter admin-history-data__delimiter "}>{publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}</div>
+                <div className={"data__delimiter admin-history-data__delimiter "}>{publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}</div>
                 <div key={index} className={"f f-row f-align-13-1 admin-history"}>
                     <div className={"f f-align-1-1 f-col f-gap-2 admin-history-post "}>
                       <div className="admin-user-details__topArea">
@@ -1229,7 +1229,7 @@ class Appeal extends React.Component {
                       </div>
                     </div>
                     <div className={"admin-history-post__date"}>
-                        {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
                     </div>
                   </div>
                 </div>

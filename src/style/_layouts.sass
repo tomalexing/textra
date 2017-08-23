@@ -720,7 +720,7 @@
   &-content
     margin-left: 20px 
 
-.dashboard-user__search-tab
+.dashboard-user__searchtab
   height: 66px
   text-decoration: none
   flex-shrink: 0
@@ -799,7 +799,7 @@
       .selected &
         color: #fff
 
-.dashboard-user__history-tab
+.dashboard-user__tab
   height: 66px
   text-decoration: none
   color: $selected-blue
@@ -853,6 +853,8 @@
   &-info
     &__time
       align-self: flex-end
+      margin-top: -4px
+      margin-bottom: 4px
       time
         width: 30px
         height: 11px
@@ -959,6 +961,10 @@
       border: 1px solid $selected-blue
       path
         fill: #fff
+    &-red
+      background: #E16666
+      & path
+          fill: #E16666 !important
 
 .DisplaySwitcher
   position: absolute
@@ -1775,13 +1781,13 @@
       letter-spacing: -0.05px
     &__typeU,
     &__typeO
-      background-color: #C8CED3
+      background-color: #C8CED3 // grey
     &__typeC,
     &__typeG
-      background-color: #E16666
+      background-color: #E16666 // red
     &__typeT,
     &__typeP
-      background-color: #268ED6
+      background-color: #268ED6 // blue
   &__delimiter
     margin: 0 14px
     height: 1px

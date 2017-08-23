@@ -37,8 +37,8 @@ import {
   delegate,
   sleep,
   humanReadableTime,
-  getMounthName,
-  getFullMinutes
+  getMonthName,
+  getFullTimeDigits
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -1011,13 +1011,13 @@ class FeedList extends React.Component {
                 </div>}
               {currentDate.isTablet &&
                 <div className={"translator-feed__content__topbar__date"}>
-                  {publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())}
+                  {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())}
                   ,
                   {" "}{publishTime.getFullYear()}{" "}
                   -
                   {" "}{publishTime.getHours()}
                   :
-                  {getFullMinutes(publishTime.getMinutes())}
+                  {getFullTimeDigits(publishTime.getMinutes())}
                 </div>}
             </div>
             <div className={"f f-1-2 f-col translator-feed__content"}>
@@ -1035,7 +1035,7 @@ class FeedList extends React.Component {
                   <div className={"translator-feed__content__topbar__date"}>
                     {publishTime.getDate()}
                     {" "}
-                    {getMounthName(publishTime.getMonth())}
+                    {getMonthName(publishTime.getMonth())}
                     ,
                     {" "}
                     {publishTime.getFullYear()}
@@ -1044,7 +1044,7 @@ class FeedList extends React.Component {
                     {" "}
                     {publishTime.getHours()}
                     :
-                    {getFullMinutes(publishTime.getMinutes())}
+                    {getFullTimeDigits(publishTime.getMinutes())}
                   </div>}
               </div>
               <div className={"translator-feed__content__text"}>
@@ -1216,7 +1216,7 @@ class Reply extends React.Component {
                 <div className={"data__delimiter"}>
                 {publishTime.getDate()}
                 {" "}
-                {getMounthName(publishTime.getMonth())}
+                {getMonthName(publishTime.getMonth())}
                 ,
                 {" "}
                 {publishTime.getFullYear()}
@@ -1270,7 +1270,7 @@ class Reply extends React.Component {
                     </div>
                 </div>
                 <div className={"translator-post__date"}>
-                    {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                    {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
                 </div>
                 </div>
                 <div className={"f f-align-2-3 translator-reply"}>
@@ -1349,7 +1349,7 @@ class HistoryList extends React.Component {
             : RenderCollection((currentDate, index, publishTime) => (
                 <div key={index} className={"f f-col f-align-1-1 translator-history"}>
                     <div className={"data__delimiter"}>
-                    {publishTime.getDate()}{" "}{getMounthName(publishTime.getMonth())}
+                    {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())}
                     ,
                     {" "}{publishTime.getFullYear()}{" "}
                     </div>
@@ -1405,7 +1405,7 @@ class HistoryList extends React.Component {
                     </div>
                     <div className={"translator-history-post__constols"} />
                     <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
                     </div>
                     </div>
 
@@ -1431,7 +1431,7 @@ class HistoryList extends React.Component {
                         </button>
                     </div>
                     <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
                     </div>
                     </div>
                     <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
@@ -1456,7 +1456,7 @@ class HistoryList extends React.Component {
                         </button>
                     </div>
                     <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
                     </div>
                     </div>
 

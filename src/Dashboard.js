@@ -33,8 +33,9 @@ import {
     listener, 
     sleep,
     humanReadableTime,
-    getMounthName,
-    getFullMinutes
+    getMonthName,
+    getFullTimeDigits,
+    getDayName
 } from './utils';
 import formSerialize from 'form-serialize';
 import Select from 'react-select';
@@ -60,20 +61,23 @@ class DashBoard extends React.Component {
     this.renders = 0;
     this._isMounted = false;
     this.updateHandler = this.updateHandler.bind(this);
+    this.updateLanguageHandler = this.updateLanguageHandler.bind(this);
+    this.getLangPropInObj = this.getLangPropInObj.bind(this);
     this.store = null;
   }
 
   state = {
     redirectToReferrer: false,
     isTablet: false,
-    items: [],
     mainScreen: false,
     pendingTabs: [],
     historyTabs: [],
+    workingTabs: [],
     page:{
       typePage: '',
       id: ''
-    }
+    },
+    language: []
   }
 
   componentWillMount() {
@@ -101,12 +105,26 @@ class DashBoard extends React.Component {
     }
 
     this.store = new Store('topic');
+
+
+    
+    let languageStoredIds = Store.getIds('language');
+    if(languageStoredIds && languageStoredIds.length) {
+      let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
+      this.updateLanguageHandler({list : langsFromStore});
+    }
+    this.languageStore = new Store('language');
   }
 
   componentDidMount(){
     this._isMounted = true;
     this.store.start();
     this.store.addListener('update', this.updateHandler);
+
+    if(!this.state.language){
+      this.languageStore.start(); //this will updates not on every click 
+    }
+    this.languageStore.addListener('update', this.updateLanguageHandler);
   }
 
   updateHandler(data){
@@ -117,37 +135,41 @@ class DashBoard extends React.Component {
       pendingTabs : data.list.filter(o => o.status === "0").map((item, idx) => {
         return {
           ...item,
-          avatar: avatar,
+          avatar: avatar, 
           index: idx
         }
       }),
       workingTabs : data.list.filter(o => o.status === "1").map((item, idx) => {
         return {
-          uuid: item.id,
-          avatar: avatar,
-          title: 'Создать запрос на перевод',
-          content: item.source_messages[0].content,
-          cost: item.price,
+          ...item,
+          avatar: avatar, 
           index: idx
         }
       }),
       historyTabs : data.list.filter(o => o.status === "2").map((item, idx) => {
         return {
-          uuid: item.id,
-          avatar: avatar,
-          title: 'Создать запрос на перевод',
-          content: item.source_messages[0].content,
-          cost: item.price,
+          ...item,
+          avatar: avatar, 
           index: idx
         }
       })
     })
   }
 
+  updateLanguageHandler({list}){
+    this.setState({language: list})
+  }
+
   componentWillUnmount() {
     this._isMounted = false;
+
     this.store.stop();
     this.store.removeListener('update', this.updateHandler);
+
+    this.languageStore.stop();
+    this.languageStore.removeListener('update', this.updateLanguageHandler);
+
+    this.languageStore = null;
     this.store = null;
   }
 
@@ -169,8 +191,12 @@ class DashBoard extends React.Component {
     return false
   }
 
+  getLangPropInObj({id,slug}){
+    return this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : undefined
+  }
+
   render() {
-    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs } = this.state;
+    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language } = this.state;
  
     return (
       <div className="f f-col outer dashboard-user">
@@ -188,37 +214,94 @@ class DashBoard extends React.Component {
               </Link>
 
 
-              {/* PENDINGS/INWORK TAB */} 
+              {/* PENDINGS TAB */} 
               { pendingTabs.map(tab => {
                 return (
-                  <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__search-tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
-                    <figure className="f f-align-2-2 dashboard-user__search-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
-                    <div className="f f-col f-align-1-1 dashboard-user__search-tab-details">
-                      <div className="dashboard-user__search-tab-title"> Поиск переводчика </div>
-                      <div className="dashboard-user__search-tab-content"> {Array.isArray(tab.source_messages) && tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
+                  <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
+                    <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <div className="f f-col f-align-1-1 dashboard-user__searchtab-details">
+                      <div className="dashboard-user__searchtab-title"> Поиск переводчика </div>
+                      <div className="dashboard-user__searchtab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
                     </div>
-                    <div className="f f-col f-align-2-3 dashboard-user__search-tab-info">
+                    <div className="f f-col f-align-2-3 dashboard-user__searchtab-info">
                     </div>
                   </Link>
                 )
               })}
 
+              {/* INWORK TAB */}
+              { workingTabs.map(tab => {
+                let publishTime = new Date(tab.created_at);
+                let now = new Date();
+                let outputPublishTime = ''; 
+               
+                if(publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() + 7 >  now.getDay() ){
+                  outputPublishTime = getDayName(publishTime.getDay());
+                }
+                if(publishTime.getFullYear() !== now.getFullYear() || publishTime.getMonth() !== now.getMonth() || publishTime.getDate() + 7 <=  now.getDay()){
+                  outputPublishTime = `${publishTime.getDate()}.${getFullTimeDigits(publishTime.getMonth())}.${publishTime.getFullYear().toString().substr(-2, 2)}`;
+                }
+                if( publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() === now.getDate()){
+                  outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
+                }
+                return (
+                  <Link  to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
+                    <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+                      <div className="dashboard-user__tab-title">{ tab.id }</div>
+                      <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
+                    </div>
+                    <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+                        <div className="dashboard-user__tab-info__time">
+                        <Batch
+                          flushCount={0}
+                          flushInterval={200} 
+                          count={1}
+                          debug={false}
+                          render={(()=> {
+                            let start = tab['updated_at'];
+                            let duration = tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
+                            //console.log(value)
+                            return <Timer start={start} duration={duration} />
+                          }).bind(this)}/>
+                        <time>{`${outputPublishTime}`}</time>
+                        </div>
+                        <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId} />
+                      <div className="dashboard-user__tab-info__money">{tab.price.toFixed(2)}₴</div>
+                    </div>
+                  </Link>
+                )
+              })}
+              
               {/* History TAB */}
               {this.state.historyTabs.map(tab => {
-                let publishTime = new Date(tab.publishTime);
+                let publishTime = new Date(tab.started_at);
+                let now = new Date();
+                let outputPublishTime = ''; 
+                if( publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() === now.getDate()){
+                  outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
+                }
+                if(publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() + 7 >  now.getDay()){
+                  outputPublishTime = getDayName(publishTime.getDay());
+                }
+                if(publishTime.getFullYear() !== now.getFullYear() || publishTime.getMonth() !== now.getMonth() || publishTime.getDate() + 7 <=  now.getDay()){
+                  outputPublishTime = `${publishTime.getDate()}.${getFullTimeDigits(publishTime.getMonth())}.${publishTime.getFullYear().toString().substr(-2, 2)}`;
+                }
+                let start = tab['updated_at'];
+                let duration = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
                 return (
-                  <Link to={{pathname:`/dashboard/user/${tab.uuid}`, state: {mainScreen: true}, page:{typePage: 'history', id: tab.id}}}  className={`f f-align-1-2 dashboard-user__history-tab ${tab.uuid === pageTypeId ? 'selected' : ''}`} key={tab.index}>
-                    <figure className="f f-align-2-2 dashboard-user__history-tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
-                    <div className="f f-col f-align-1-1 dashboard-user__history-tab-details">
-                      <div className="dashboard-user__history-tab-title"> {tab.title} </div>
-                      <div className="dashboard-user__history-tab-content"> {tab.source_messages[0].content}</div>
+                  <Link to={{pathname:`/dashboard/history/${tab.id}`, state: {mainScreen: true}, page:{typePage: 'history', id: tab.id}}}  className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
+                    <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+                      <div className="dashboard-user__tab-title"> {tab.id} </div>
+                      <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
                     </div>
-                    <div className="f f-col f-align-2-3 dashboard-user__history-tab-info">
-                      <div className="dashboard-user__history-tab-info__time">
-                        <Timer start={tab.startWorkingTime} duration={tab.duration} />
-                        <time>{`${publishTime.getHours()}:${getFullMinutes(publishTime.getMinutes())}`}</time></div>
+                    <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+                      <div className="dashboard-user__tab-info__time">
+                        <Timer start={start} duration={duration} />
+                        <time>{`${outputPublishTime}`}</time></div>
                         <LangLabel from={tab.from} to={tab.to} selected={tab.id === pageTypeId} />
-                      <div className="dashboard-user__history-tab-info__money">{tab.cost}</div>
+                      <div className="dashboard-user__tab-info__money">{tab.price}₴</div>
                     </div>
                   </Link>
                 )
@@ -238,6 +321,8 @@ class DashBoard extends React.Component {
                 <RoutePassProps path="/dashboard/create" component={Create} store={this.store}/>
                 <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} />
+                 <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
+                 data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} />
                 <RoutePassProps path="/dashboard/user/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}  store={this.store}/>
               </Switch>
             </div>
@@ -260,7 +345,7 @@ const RoutePassProps = ({ component: Component, ...rest }) => (
 class HistoryList extends React.Component { 
   
   constructor(props) {
-    super(props);
+    super(props); 
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -295,7 +380,7 @@ class HistoryList extends React.Component {
     let publishTime = new Date(currentDate.publishTime);
     return (
       <div className={'f f-col f-align-1-1 dashboard-user__history'}>
-        <div className={'data__delimiter'}>{publishTime.getDate()} {getMounthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
+        <div className={'data__delimiter'}>{publishTime.getDate()} {getMonthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
         <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
           <div className={'dashboard-user__history-post__avatar'}>
             <img src={currentDate.avatar} alt={currentDate.nickname} />
@@ -325,7 +410,7 @@ class HistoryList extends React.Component {
           <div className={'dashboard-user__history-post__constols'}>
           </div>
           <div className={'dashboard-user__history-post__date'}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
           </div>
         </div>
 
@@ -353,7 +438,7 @@ class HistoryList extends React.Component {
             </button>
           </div>
           <div className={'dashboard-user__history-reply__date'}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
           </div>
         </div>
         <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
@@ -381,7 +466,7 @@ class HistoryList extends React.Component {
             </button>
           </div>
           <div className={'dashboard-user__history-reply__date'}>
-            {publishTime.getHours()}:{getFullMinutes(publishTime.getMinutes())}
+            {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
           </div>
         </div>
 
@@ -401,8 +486,6 @@ class HistoryList extends React.Component {
 }
 
 class Pending extends React.Component {
-
-
   constructor(p){
     super(p);
     this.store = this.props.store;
@@ -415,7 +498,7 @@ class Pending extends React.Component {
     currentData: this.props.data,
     language: []
   }
- 
+
   componentWillMount(){
     this.languageStore = new Store('language');
     let languageStoredIds = Store.getIds('language');
@@ -447,7 +530,6 @@ class Pending extends React.Component {
   updateLanguageHandler({list}){
       this.setState({language: list})
   }
-
 
   componentWillUnmount(){
     this.languageStore.removeListener('update', this.updateLanguageHandler);
@@ -482,7 +564,7 @@ class Pending extends React.Component {
     }
     return (
         <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
-            {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMounthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
+            {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
             <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
               <div className={'dashboard-user__searching-post__avatar'}>
                 <img src={currentData.avatar} />
@@ -500,20 +582,20 @@ class Pending extends React.Component {
                   }
                 {currentData.source_messages.length > 0 &&
                   <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentData.duration)} hint={'Длительность перевода'} /> }
-                {currentData.source_messages.length > 0 &&
+                {currentData.source_messages.length > 0 && currentData.translator_id &&
                   <Batch
                     flushCount={0}
-                    flushInterval={150} 
+                    flushInterval={150}
                     count={1}
                     debug={false}
                     render={()=> {
-                      let value = ~~Math.abs(currentData.duration - (new Date - new Date(currentData.startWorkingTime || currentData.created_at)) / 1000);
+                      let value = ~~Math.abs(currentData.duration - (new Date - new Date(currentData.updated_at)) / 1000);
                       //console.log(value)
                       return(<Indicator
                         className={'f f-align-2-2'}
                         icon={
                           <Timer
-                            start={currentData.created_at}
+                            start={currentData.updated_at}
                             duration={currentData.duration}
                             isBig={true} />}
                         value={humanReadableTime(value)}
@@ -522,13 +604,13 @@ class Pending extends React.Component {
                   {currentData.source_messages.length > 0 &&
                   <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
                   {currentData.source_messages.length > 0 &&
-                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_price'})} hint={'Стоимость'} />}
+                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={Number(currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_price'})).toFixed(2) + '₴'} hint={'Стоимость'} />}
                 </div>
               </div>
               <div className={'dashboard-user__searching-post__constols'}>
               </div>
               {created_at && <div className={'dashboard-user__searching-post__date'}>
-                {created_at.getHours()}:{getFullMinutes(created_at.getMinutes())}
+                {created_at.getHours()}:{getFullTimeDigits(created_at.getMinutes())}
               </div>}
             </div>
           </div>
@@ -647,7 +729,7 @@ class Create extends React.Component {
   } 
  
   currentNumberOfChar({target: {value}}) {
-    let currentNumberOfChar = value.length;
+    let currentNumberOfChar = value.replace(/\s/g,'').length;
     this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value })
   }
 
