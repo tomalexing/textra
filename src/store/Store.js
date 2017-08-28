@@ -121,7 +121,10 @@ export default class Store extends EventEmitter {
    * Handle 
    */
   onStoriesUpdated(data) {
-    if(data.length === 0) return
+    if(data.length === 0) {
+      idCache[this.type]= [];
+      return
+    }
     let _self = this;
     if(Array.isArray(data)){
       let ids = data.reduce((acc, item, idx) => {

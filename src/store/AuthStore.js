@@ -62,6 +62,7 @@ const  Auth = {
     this.user = JSON.parse(window.localStorage.getItem('user'));
     this.token = window.localStorage.getItem('token');
     this.role = this.user ? ROLES(this.user.role) : undefined;
+
   },
   refreshToken(){
     let self = this;

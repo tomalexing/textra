@@ -18,7 +18,7 @@ var itemCacheByUserId = {}
 /**
  * Story items in rank order for display, by type.
  * @type Object.<type, Array.<item>>
- */
+ */ 
 var showLists = {}
 
 /**

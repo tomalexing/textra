@@ -445,7 +445,7 @@ class SideList extends React.PureComponent{
         }).bind(this))
     }
   } 
-
+ 
   render(){
     let {user, page: {pageType, id, historyId}} = this.props;
 

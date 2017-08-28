@@ -1,8 +1,8 @@
 import AuthStore from './../store/AuthStore.js';
 // Textra Rest Api
 export const TxRest = (() => {
-    const host = 'http://api-textra.iondigi.com' //'http://api-textra.iondigi.com';
-    const port = ':80';
+    const host = 'http://138.68.95.226' //'http://api-textra.iondigi.com';
+    const port = ':8080';
     /**
      *
      * 
@@ -17,7 +17,10 @@ export const TxRest = (() => {
             try { 
               fetch(`${host}${port}/${path}`, {
                 method: 'GET',
-                headers: new Headers({"Authorization": `Bearer ${AuthStore.token}`}),
+                headers: {'Content-Type': 'application/json',
+                          'Accept': 'application/json',
+                          'Authorization': `Bearer ${AuthStore.token}`
+                        },
               }).then(response => {
                 return response.json();
               }).then( async data => {
@@ -51,6 +54,7 @@ export const TxRest = (() => {
                 body: JSON.stringify({...dataToPath}),
                 headers: {'Content-Type': 'application/json',
                           'Accept': 'application/json',
+                          'Authorization': `Bearer ${AuthStore.token}`
                         },
               }).then(response => {
                 return response.json();
@@ -81,12 +85,11 @@ export const TxRest = (() => {
           try { 
             fetch(`${host}${port}/${path}`, {
               method: 'PUT',
-              credentials: 'include',
               mode: 'cors',
               cache: "no-cache",
               body: JSON.stringify({...dataToPath}),
               headers: new Headers({
-                        "Authorization": `Bearer ${AuthStore.token}`,
+                        'Authorization': `Bearer ${AuthStore.token}`,
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'}),
             }).then(response => {

@@ -226,7 +226,11 @@ export function quickSort(items, left, right, item, comporator) {
   return items;
 };
 
-
+export const call = (fn, ...args) => {
+if (typeof fn === 'function') {
+    return fn(...args);
+}
+};
 
 
 util.listener = listener
@@ -243,4 +247,5 @@ util.getFullTimeDigits = getFullTimeDigits
 util.getDayName = getDayName
 util.getMonthName = getMonthName
 util.quickSort = quickSort
+util.call = call
 export default util 

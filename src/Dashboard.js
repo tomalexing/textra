@@ -267,7 +267,7 @@ class DashBoard extends React.Component {
                         <time>{`${outputPublishTime}`}</time>
                         </div>
                         <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId} />
-                      <div className="dashboard-user__tab-info__money">{tab.price.toFixed(2)}₴</div>
+                      <div className="dashboard-user__tab-info__money">{(tab.price/100).toFixed(2)}₴</div>
                     </div>
                   </Link>
                 )
@@ -403,7 +403,7 @@ class HistoryList extends React.Component {
                 value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)} // sec
                 hint={'Оставшееся время'} />
               <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
-              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={Math.round(currentDate.cost)} hint={'Стоимость'} />
+              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={(currentDate.cost/100).toFixed(2)} hint={'Стоимость'} />
 
             </div>
           </div>
@@ -517,7 +517,7 @@ class Pending extends React.Component {
         _self.store && _self.store.itemUpdated(item, item.index);
     })
 
-    if(!this.store.language){
+    if(!this.state.language){
       this.languageStore.start(); //this will updates not on every click 
     }
     this.languageStore.addListener('update', this.updateLanguageHandler);
@@ -567,7 +567,7 @@ class Pending extends React.Component {
             {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
             <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
               <div className={'dashboard-user__searching-post__avatar'}>
-                <img src={currentData.avatar} />
+                <img src={currentData.avatar || avatar } />
               </div>
               <div className={'dashboard-user__searching-post__content'}>
                 <div className={'dashboard-user__searching-post__content__text'}>
@@ -604,7 +604,7 @@ class Pending extends React.Component {
                   {currentData.source_messages.length > 0 &&
                   <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
                   {currentData.source_messages.length > 0 &&
-                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={Number(currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_price'})).toFixed(2) + '₴'} hint={'Стоимость'} />}
+                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={`${Number(currentData.price/100).toFixed(2)}₴`} hint={'Стоимость'} />}
                 </div>
               </div>
               <div className={'dashboard-user__searching-post__constols'}>
@@ -905,7 +905,7 @@ class Create extends React.Component {
 
             <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * letterTime)} hint={'Длительность перевода'} />
             <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
-            <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`$${Number(letterPrice * currentNumberOfChar).toFixed(2)}`} hint={'Стоимость перевода'} />
+            <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100).toFixed(2)}₴`} hint={'Стоимость перевода'} />
 
           <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
              
