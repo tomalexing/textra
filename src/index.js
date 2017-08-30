@@ -49,14 +49,15 @@ const Translator = (props) => <Lazy  {...props} load={() => import('./Translator
 
   // eslint-disable-next-line
 const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>
+
+  // eslint-disable-next-line
+const Landing = (props) => <Lazy {...props} load={() => import('./Landing')}/>
+
 // ====================================
 // ========= Lazy loadin end ==========
 // ====================================
 
 
-
-const Public = () => <h3>Public</h3>
-const Protected = () => <h3>Protected</h3>
 
 class App extends React.Component {
   
@@ -102,19 +103,6 @@ class App extends React.Component {
 }
 
 
-const AuthButton = withRouter(({ history }) => (
-  
-  Auth.isAuthenticated ? (
-    <p>
-      Welcome! <button onClick={() => {
-        Auth.signout(() => history.push('/'))
-      }}>Sign out</button>
-    </p>
-  ) : (
-      <p>You are not logged in.</p>
-    )
-))
-
 const PrivateRoute =  ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
     Auth.isAuthenticated && rest.role.includes(Auth.role) ? (
@@ -137,7 +125,7 @@ const PrivateRoute =  ({ component: Component, ...rest }) => (
 
 const ToDashBoard = ({ component: Component,auth: Auth, ...rest }) => (
   <Route exact {...rest} render={props => {
-    if(!Auth.isAuthenticated) return  <div {...props}/>
+    if(!Auth.isAuthenticated) return  <Landing {...props}/>
     switch (Auth.role) {
     case 'admin':
         return   <Redirect to={'/admin'} />
@@ -152,7 +140,7 @@ const ToDashBoard = ({ component: Component,auth: Auth, ...rest }) => (
         return   <Redirect to={'/dashboard'} />
         break;
     default:
-        return  <div {...props}/>
+        return  <Landing {...props}/>
         break;
     }
     }

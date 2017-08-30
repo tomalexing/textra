@@ -71,7 +71,7 @@ class SignUp extends React.Component {
       <div className="f outer signup-layout">
         <div className="f f-align-2-2 main" style={bgPic}>
             <div className="f f-col main-regist__form">
-              <p className="u-mb-1" >Войти</p>
+              <p className="h3 u-mb-3" >Зарегистрироваться</p>
               <div className="f f-gap-2 registform-regist__social">
                 <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img src={fb} alt="fb"/></button>
                 <button onClick={this.loginVk} className="btn btn-primiry btn-normal btn-block google-color"><img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/></button>
@@ -88,7 +88,7 @@ class SignUp extends React.Component {
                   <TxInput tabIndex='1' type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Зарегистрироваться"/>
                 </TxForm>
 
-              <div className="u-mt-1 registform-textlink">Регистрируясь, вы принимаете <Link to='/' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>
+              <div className="registform-textlink">Регистрируясь, вы принимаете <Link to='/' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>
             </div>
         </div>
       </div>

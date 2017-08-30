@@ -32,6 +32,17 @@ class Header extends React.Component{
     redirect: false
   }
 
+  componentDidMount(){
+    let _self = this;
+    Auth.addListener('headerUpdate', ({user})=>{
+      _self.setState({user});
+    })
+  }
+
+  componentWillUnmount(){
+    Auth.removeListener('headerUpdate');
+  }
+
   closeMobileMenu = () => {
     
     this.mobile_menu.style.transition = 'opacity .3s';
@@ -115,7 +126,7 @@ class Header extends React.Component{
                     <div className="header-email">{user.email}</div>
                     <div className="header-details__more">
                       <Link to={'/'} className="header-replenish">пополнить</Link>
-                      <span className="header-balance">$0.91</span>
+                      <span className="header-balance">{`${Number(user.balance/100).toFixed(2)} ₴`}</span>
                     </div>
                   </div>}
                   <div className="f f-align-2-2 header-avatar">

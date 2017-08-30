@@ -1,17 +1,32 @@
 import React from 'react';
 
-const Timer = ({ start, duration, isBig = false, isExpired = false } = {}) => {
+const Timer = ({ start, duration, isBig = false, isExpired = false, finish } = {}) => {
 
-  let percentage = ((new Date() - new Date(start))) / duration / 1000; // duration in sec
+  if(finish === undefined){
+    var percentage = ((new Date() - new Date(start))) / duration /1000 ; // duration in sec
+    if(percentage < 0) percentage = 0;
+    if((new Date() - new Date(start))/1000 > duration) {
+      // expired
+      percentage = 0.99;
+      isExpired = true;
+    }
+  }
+  if(finish instanceof Date){
+    var percentage = duration / ((new Date(finish) - new Date(start))) * 1000 ; // duration in sec
+    if(percentage < 0) percentage = 0;
+    if((new Date(finish) - new Date(start))/1000 < duration) {
+      // expired
+      percentage = 0.99;
+      isExpired = true;
+    }
+  }
 
-  if((new Date() - new Date(start))/1000 > duration) {
-    // expired
-    percentage = 0.99;
+
+  if(isNaN(percentage) || Number.isNaN(percentage)) {
+    percentage = 0.5; // Fill circle
     isExpired = true;
   }
-  if(isNaN(percentage)) {
-    percentage = 0.5; // Fill circle
-  }
+
   const START = Math.PI * 0.5;
   const TAU = Math.PI * 2;
   const radius = isBig ? 7 : 5;

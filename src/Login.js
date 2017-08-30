@@ -152,7 +152,7 @@ class Login extends React.Component {
                 <Link to={'/'} ><img src={logo} alt="Textra"/> </Link>
               </div>
               <div className="f f-col registform">
-                <h3 className="u-mb-5 u-text-center" >Войти</h3>
+                <h3 className="h1 u-mb-5 u-text-center" >Войти</h3>
                 <p className="u-mb-4"> Нужен акакаунт? {(
                   this.state.isTablet ? (
                       <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this),500,false)} > Создать аккаунт</button>

@@ -13,7 +13,7 @@ import icon_search from './assets/search.svg';
 import sl from './assets/swap-lang.svg';
 import copy from './assets/icon-copy.svg';
 import './polyfill';
-import { Auth } from './index';
+import  Auth from './store/AuthStore.js';
 import {
   BrowserRouter as Router,
   Route,
@@ -35,7 +35,8 @@ import {
     humanReadableTime,
     getMonthName,
     getFullTimeDigits,
-    getDayName
+    getDayName,
+    quickSort
 } from './utils';
 import formSerialize from 'form-serialize';
 import Select from 'react-select';
@@ -51,6 +52,23 @@ import deepEqual from 'deep-equal';
 
 import Store from './store/Store.js';
 import {TxRest} from './services/Api.js';
+
+
+const getTabTime = (time) => {
+    let now = new Date();
+    let outputPublishTime = ''; 
+    
+    if(time.getFullYear() === now.getFullYear() && time.getMonth() === now.getMonth() && time.getDate() + 7 >  now.getDay() ){
+      outputPublishTime = getDayName(time.getDay());
+    }
+    if(time.getFullYear() !== now.getFullYear() || time.getMonth() !== now.getMonth() || time.getDate() + 7 <=  now.getDay()){
+      outputPublishTime = `${time.getDate()}.${getFullTimeDigits(time.getMonth())}.${time.getFullYear().toString().substr(-2, 2)}`;
+    }
+    if( time.getFullYear() === now.getFullYear() && time.getMonth() === now.getMonth() && time.getDate() === now.getDate()){
+      outputPublishTime = `${time.getHours()}:${getFullTimeDigits(time.getMinutes())}`
+    }
+    return outputPublishTime
+} 
 
 class DashBoard extends React.Component {
 
@@ -77,7 +95,8 @@ class DashBoard extends React.Component {
       typePage: '',
       id: ''
     },
-    language: []
+    language: [],
+    translator: ''
   }
 
   componentWillMount() {
@@ -93,8 +112,8 @@ class DashBoard extends React.Component {
     }
     this.doAtDidMount.forEach(func => func());
 
-    let { location: { state: { page: {typePage, id: pageTypeId} }  = {page : {typePage : '', id :  ''}}  }} = this.props ; // holly shit
-    this.setState({page:{typePage, id: pageTypeId}});
+    let { location: { state: { page: {typePage, id: pageTypeId}, translator }  = {page : {typePage : '', id :  ''}, translator: ''}  }} = this.props ; // holly shit
+    this.setState({page:{typePage, id: pageTypeId}, translator});
 
     let ids = Store.getIds('topic');
     if(ids && ids.length > 0){ // get from cache 
@@ -106,8 +125,6 @@ class DashBoard extends React.Component {
 
     this.store = new Store('topic');
 
-
-    
     let languageStoredIds = Store.getIds('language');
     if(languageStoredIds && languageStoredIds.length) {
       let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
@@ -146,14 +163,70 @@ class DashBoard extends React.Component {
           index: idx
         }
       }),
-      historyTabs : data.list.filter(o => o.status === "2").map((item, idx) => {
-        return {
-          ...item,
-          avatar: avatar, 
-          index: idx
-        }
-      })
+      historyTabs : this.convertToAproppriateObjectHistoryTab(data.list)
     })
+  }
+
+  convertToAproppriateObjectHistoryTab(data){
+    let passedTransletors = [], output = [];
+
+    data.filter(o => o.status === "2").map((item, idx, historyTabsArray) => {
+        if(passedTransletors.includes(item.translator_id) ) return
+        passedTransletors.push(item.translator_id);
+        let oneUserItems = historyTabsArray.filter(o => o.translator_id === item.translator_id);
+        let translator = item.translator;
+        let oneUserItemsSorted = quickSort(oneUserItems,null,null,'translated_at',(val1, val2, pos, item) => {
+          if (item){ // if its object
+            if(!(item in val1))
+              throw new Error('Item not in the Object, check Object for Comporator');
+
+            val1 = val1[item];
+            val2 = val2[item];
+          }
+
+          if(typeof val1 === 'number' &&  typeof val2 === 'number'){
+          if(pos)
+              return val1 > val2
+          else 
+              return val1 < val2
+          }
+
+          if(typeof val1 === 'string' &&  typeof val2 === 'string'){
+            let l1 = val1.length, l2 = val2.length, i = 0;
+
+            while(i < Math.min(l1, l2)){
+              if(val1.charCodeAt(i) === val2.charCodeAt(i)){
+                i++;
+                if( i === Math.min(l1, l2) ){
+                  if (pos)
+                    return l1 > l2
+                  else 
+                    return l1 < l2
+                  }
+                continue;
+              }
+              if (pos)
+                return val1.charCodeAt(i) > val2.charCodeAt(i)
+              else 
+                return val1.charCodeAt(i) < val2.charCodeAt(i)
+            }
+          }
+
+          if(val1 instanceof Date &&  val2 instanceof Date){
+
+            val1 = val1.getTime();
+            val2 = val2.getTime();
+
+            if(pos)
+              return val1 > val2
+            else 
+              return val1 < val2
+          }
+        }); // null for omit
+        oneUserItemsSorted = oneUserItemsSorted.reverse();
+        output.push({'translator': translator, messages: oneUserItemsSorted});
+      })
+    return output;
   }
 
   updateLanguageHandler({list}){
@@ -192,11 +265,11 @@ class DashBoard extends React.Component {
   }
 
   getLangPropInObj({id,slug}){
-    return this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : undefined
+    return this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : 0
   }
 
   render() {
-    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language } = this.state;
+    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator } = this.state;
  
     return (
       <div className="f f-col outer dashboard-user">
@@ -220,8 +293,11 @@ class DashBoard extends React.Component {
                   <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
                     <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__searchtab-details">
-                      <div className="dashboard-user__searchtab-title"> Поиск переводчика </div>
-                      <div className="dashboard-user__searchtab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
+                      <div className="dashboard-user__searchtab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
+                      > 
+                      {tab.translator? `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`: 'Поиск переводчика'} 
+                      </div>
+                      <div className="dashboard-user__searchtab-content" title={`${tab.source_messages.length > 0 &&tab.source_messages[0].content}`}> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__searchtab-info">
                     </div>
@@ -232,23 +308,12 @@ class DashBoard extends React.Component {
               {/* INWORK TAB */}
               { workingTabs.map(tab => {
                 let publishTime = new Date(tab.created_at);
-                let now = new Date();
-                let outputPublishTime = ''; 
-               
-                if(publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() + 7 >  now.getDay() ){
-                  outputPublishTime = getDayName(publishTime.getDay());
-                }
-                if(publishTime.getFullYear() !== now.getFullYear() || publishTime.getMonth() !== now.getMonth() || publishTime.getDate() + 7 <=  now.getDay()){
-                  outputPublishTime = `${publishTime.getDate()}.${getFullTimeDigits(publishTime.getMonth())}.${publishTime.getFullYear().toString().substr(-2, 2)}`;
-                }
-                if( publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() === now.getDate()){
-                  outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
-                }
+                let outputPublishTime = getTabTime(publishTime);
                 return (
                   <Link  to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
                     <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-                      <div className="dashboard-user__tab-title">{ tab.id }</div>
+                      <div className="dashboard-user__tab-title">{ tab.translator.first_name + ' ' + tab.translator.last_name}</div>
                       <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__tab-info">
@@ -274,34 +339,28 @@ class DashBoard extends React.Component {
               })}
               
               {/* History TAB */}
-              {this.state.historyTabs.map(tab => {
-                let publishTime = new Date(tab.started_at);
-                let now = new Date();
-                let outputPublishTime = ''; 
-                if( publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() === now.getDate()){
-                  outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
-                }
-                if(publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() + 7 >  now.getDay()){
-                  outputPublishTime = getDayName(publishTime.getDay());
-                }
-                if(publishTime.getFullYear() !== now.getFullYear() || publishTime.getMonth() !== now.getMonth() || publishTime.getDate() + 7 <=  now.getDay()){
-                  outputPublishTime = `${publishTime.getDate()}.${getFullTimeDigits(publishTime.getMonth())}.${publishTime.getFullYear().toString().substr(-2, 2)}`;
-                }
+              {this.state.historyTabs.map((historyFromOneUser, index) => {
+                let tab = historyFromOneUser.messages[ historyFromOneUser.messages.length -1 ];
+                let translator = historyFromOneUser.translator;
+                let finishTime = new Date(tab.translated_at);
+                let outputPublishTime = getTabTime(finishTime);
                 let start = tab['updated_at'];
                 let duration = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
                 return (
-                  <Link to={{pathname:`/dashboard/history/${tab.id}`, state: {mainScreen: true}, page:{typePage: 'history', id: tab.id}}}  className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
-                    <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                  <Link to={{pathname:`/dashboard/history/${translator.id}`, state: {mainScreen: true, page:{typePage: 'history', id: translator.id}}}}  className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={index}>
+                    <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={translator.image || avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-                      <div className="dashboard-user__tab-title"> {tab.id} </div>
+                      <div className="dashboard-user__tab-title"> {translator.first_name + ' ' +
+                     translator.last_name} </div>
                       <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__tab-info">
                       <div className="dashboard-user__tab-info__time">
                         <Timer start={start} duration={duration} />
-                        <time>{`${outputPublishTime}`}</time></div>
-                        <LangLabel from={tab.from} to={tab.to} selected={tab.id === pageTypeId} />
-                      <div className="dashboard-user__tab-info__money">{tab.price}₴</div>
+                        <time>{`${outputPublishTime}`}</time>
+                      </div>
+                      <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId} />
+                      <div className="dashboard-user__tab-info__money">{(tab.price/100)}₴</div>
                     </div>
                   </Link>
                 )
@@ -318,12 +377,13 @@ class DashBoard extends React.Component {
                 </div>
               :''}
               <Switch>
-                <RoutePassProps path="/dashboard/create" component={Create} store={this.store}/>
+                <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language}/>
                 <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
-                 data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} />
+                 data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}/>
                  <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
-                 data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} />
-                <RoutePassProps path="/dashboard/user/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}  store={this.store}/>
+                 data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}  />
+                <RoutePassProps path="/dashboard/history/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId} data={Array.isArray(historyTabs)? historyTabs.find(o=> o.translator.id == pageTypeId):null}
+                languages={language} store={this.store}/>
               </Switch>
             </div>
           </div>
@@ -346,6 +406,34 @@ class HistoryList extends React.Component {
   
   constructor(props) {
     super(props); 
+    this.id = this.props.id;
+    this.getLangPropInObj = this.getLangPropInObj.bind(this)
+
+  }
+  state={
+    currentData: this.props.data.messages,
+    translator: this.props.data.translator,
+    languages: this.props.languages
+  }
+
+  componentDidMount(){
+    let _self = this, newData = [];
+    Promise.all(this.state.currentData.map(item => {
+      return TxRest.getData(`topic/${item.id}`).then( data => {
+        if(data.message) return // TODO handle error message
+          newData.push(data);
+      })
+    })).then( _ => {
+    _self.setState({currentData: newData});
+    })
+  }
+
+  componentWillReceiveProps({languages, data}){
+    this.setState({languages, currentData: data.messages, translator: data.translator});
+  }
+
+  getLangPropInObj({id,slug}){
+    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -370,117 +458,124 @@ class HistoryList extends React.Component {
       var successful = document.execCommand('copy');
       textAreaSelector.disabled = true;
     } catch (err) {
-      console.log('Ха ха, бери и копируй руками');
+      console.log('Ха ха - бери, и копируй руками');
     }
   }
 
   render() {
-    let _self = this;
-    let { currentDate } = this.props
-    let publishTime = new Date(currentDate.publishTime);
-    return (
+    let { currentData } = this.state || {currentData: []},
+      _self = this; 
+    
+    const renderCollection = renderItem => (
       <div className={'f f-col f-align-1-1 dashboard-user__history'}>
-        <div className={'data__delimiter'}>{publishTime.getDate()} {getMonthName(publishTime.getMonth())}, {publishTime.getFullYear()} </div>
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
-          <div className={'dashboard-user__history-post__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
-          <div className={'dashboard-user__history-post__content'}>
-            <div className={'dashboard-user__history-post__content__text'}>
-              {currentDate.content}
-            </div>
-            <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
-              <LangLabel from={currentDate.from} to={currentDate.to} />
-              <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentDate.duration)} hint={'Длительность перевода'} />
-              <Indicator
-                className={'f f-align-2-2'}
-                icon={
-                  <Timer
-                    start={currentDate.startWorkingTime}
-                    duration={currentDate.duration}
-                    isBig={true} />
-                }
-                value={humanReadableTime(currentDate.duration - (new Date - new Date(currentDate.startWorkingTime)) / 1000)} // sec
-                hint={'Оставшееся время'} />
-              <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentDate.letterNumber} hint={'Количество символов'} />
-              <Indicator className={'f f-align-2-2'} icon={icon_cost} value={(currentDate.cost/100).toFixed(2)} hint={'Стоимость'} />
-
-            </div>
-          </div>
-          <div className={'dashboard-user__history-post__constols'}>
-          </div>
-          <div className={'dashboard-user__history-post__date'}>
-            {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-          </div>
-        </div>
-
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
-          <div className={'dashboard-user__history-reply__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
-          <div className={'dashboard-user__history-reply__content'}>
-            <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
-                    if(node == null ) return
-                    ref = node;
-                    if( !(_self.props.isTablet && isTablet) ){ // when has changed
-                      start = 50;
-                      isTablet = _self.props.isTablet;
-                    }
-                    start = Math.max(ref.scrollHeight, start);
-                    ref.style.height = start + 'px';
-                  }})()}  className={'dashboard-user__history-reply__content__text'} disabled  value={currentDate.content} />
-          </div>
-          <div className={'dashboard-user__history-reply__constols'}>
-            <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy}>
-              <img src={copy} alt="copy" />
-              <span>Копировать</span>
-
-            </button>
-          </div>
-          <div className={'dashboard-user__history-reply__date'}>
-            {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-          </div>
-        </div>
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
-          <div className={'dashboard-user__history-reply__avatar'}>
-            <img src={currentDate.avatar} alt={currentDate.nickname} />
-          </div>
-          <div className={'dashboard-user__history-reply__content'}>
-              <textarea ref={ (() => {let start = 20, ref, isTablet = _self.props.isTablet ; return (node) => {
-                    if(node == null ) return
-                    ref = node;
-                    if( !(_self.props.isTablet && isTablet) ){ // when has changed
-                      start = 20;
-                      isTablet = _self.props.isTablet;
-                    }
-                    start = Math.max(ref.scrollHeight, start);
-                    ref.style.height = start + 'px';
-                  }})()}
-                className={'dashboard-user__history-reply__content__text'} disabled value={currentDate.content} />
-          </div>
-          <div className={'dashboard-user__history-reply__constols'}>
-            <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy} >
-              <img src={copy} alt="copy" />
-              <span>Копировать</span>
-              <input type="hidden" value={currentDate.content} />
-            </button>
-          </div>
-          <div className={'dashboard-user__history-reply__date'}>
-            {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-          </div>
-        </div>
-
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-create'}>
-          <div className={'dashboard-user__history-reply__avatar'}></div>
-          <Link to={{pathname:'/dashboard/create',state:{mainScreen:true}}} className="f f-align-1-2 dashboard-user__history-create__content" >
-            <div className="dashboard-user__history-create__content__plus"></div>
-            <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
-          </Link>
-          <div className={'dashboard-user__history-reply__constols'}></div>
-          <div className={'dashboard-user__history-post__date'}></div>
-        </div>
-
+       {currentData.map((item, idx) => renderItem(item, idx))}
       </div>
+    )
+
+    return ( renderCollection((currentData, idx) => {
+      if(!currentData || !currentData.source_messages.length )
+          return <div/>
+      let created_at = new Date(currentData.created_at);
+      let translated_at = new Date(currentData.translated_at);
+      let started_at = new Date(currentData.started_at);
+    
+      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'});
+      let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
+      let duration =  (translated_at - started_at)/1000 ; //sec
+
+      return (
+        <div key={idx}>
+          <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
+            <div className={'dashboard-user__history-post__avatar'}>
+              <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
+            </div>
+            <div className={'dashboard-user__history-post__content'}>
+              <div className={'dashboard-user__history-post__content__text'}>
+                {currentData.source_messages.length > 0 &&  currentData.source_messages[currentData.source_messages.length-1].content}
+              </div>
+              <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
+                {currentData.source_language_id && currentData.translate_language_id &&  
+                    <LangLabel 
+                      from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
+                      to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
+                      />
+                } 
+                {currentData.source_messages.length > 0 &&
+                    <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(durationShouldBe)} hint={'Длительность перевода'} /> }
+
+                {currentData.translated_at && currentData.started_at &&
+                <Indicator
+                  className={'f f-align-2-2'}
+                  icon={
+                    <Timer
+                      start={started_at}
+                      duration={duration}
+                      isBig={true}
+                      finish={finishShouldBe}
+                    />
+                  }
+                  value={humanReadableTime((duration))} // sec
+                  hint={'Оставшееся время'} />
+                }
+                {currentData.source_messages.length > 0 &&
+                <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
+                {currentData.source_messages.length > 0 &&
+                <Indicator className={'f f-align-2-2'} icon={icon_cost} value={`${(currentData.price/100).toFixed(2)}₴`} hint={'Стоимость'} />}
+              </div>
+            </div>
+            <div className={'dashboard-user__history-post__constols'}>
+            </div>
+            {started_at && <div className={'dashboard-user__history-post__date'}>
+              {started_at.getHours()}:{getFullTimeDigits(started_at.getMinutes())}
+            </div>}
+          </div>
+
+
+          <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>
+
+
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
+            <div className={'dashboard-user__history-reply__avatar'}>
+              <img src={currentData.translator.image || avatar} alt={currentData.translator.first_name} />
+            </div>
+            <div className={'dashboard-user__history-reply__content'}>
+              <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
+                      if(node == null ) return
+                      ref = node;
+                      if( !(_self.props.isTablet && isTablet) ){ // when has changed
+                        start = 50;
+                        isTablet = _self.props.isTablet;
+                      }
+                      start = Math.max(ref.scrollHeight, start);
+                      ref.style.height = start + 'px';
+                    }})()}  className={'dashboard-user__history-reply__content__text'} disabled  value={currentData.translate_messages.length > 0 && currentData.translate_messages[currentData.translate_messages.length-1].content} />
+            </div>
+            <div className={'dashboard-user__history-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy}>
+                <img src={copy} alt="copy" />
+                <span>Копировать</span>
+
+              </button>
+            </div>
+            <div className={'dashboard-user__history-reply__date'}>
+              {translated_at.getHours()}:{getFullTimeDigits(translated_at.getMinutes())}
+            </div>
+          </div>
+
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-create'}>
+            <div className={'dashboard-user__history-reply__avatar'}></div>
+            <Link to={{pathname:'/dashboard/create',state:{mainScreen:true, translator:currentData.translator,  page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__history-create__content" >
+              <div className="dashboard-user__history-create__content__plus"></div>
+              <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
+            </Link>
+            <div className={'dashboard-user__history-reply__constols'}></div>
+            <div className={'dashboard-user__history-post__date'}></div>
+          </div>
+
+        </div>
+      )
+    })
     )
   }
 }
@@ -490,25 +585,14 @@ class Pending extends React.Component {
     super(p);
     this.store = this.props.store;
     this.id = this.props.id;
-    this.languageStore = null;
-    this.updateLanguageHandler = this.updateLanguageHandler.bind(this);
   }
 
   state= {
     currentData: this.props.data,
-    language: []
+    languages:  this.props.languages
   }
 
-  componentWillMount(){
-    this.languageStore = new Store('language');
-    let languageStoredIds = Store.getIds('language');
-    if(languageStoredIds.length) {
-      let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
-      this.updateLanguageHandler({list : langsFromStore});
-    }
-  }
-
-  async componentDidMount(){
+  componentDidMount(){
     let _self = this; 
     TxRest.getData(`topic/${this.id}`).then((data, err) => {
         if(err) return;
@@ -516,25 +600,15 @@ class Pending extends React.Component {
         _self.setState({ currentData: item});
         _self.store && _self.store.itemUpdated(item, item.index);
     })
-
-    if(!this.state.language){
-      this.languageStore.start(); //this will updates not on every click 
-    }
-    this.languageStore.addListener('update', this.updateLanguageHandler);
   }
 
-  componentWillReceiveProps(newProps){
-    this.store = newProps.store;
-  }
-
-  updateLanguageHandler({list}){
-      this.setState({language: list})
+  componentWillReceiveProps({store, languages}){
+    this.store = store;
+    this.setState({languages: languages})
   }
 
   componentWillUnmount(){
-    this.languageStore.removeListener('update', this.updateLanguageHandler);
-    this.languageStore.stop();
-    this.languageStore = null;
+
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -547,7 +621,7 @@ class Pending extends React.Component {
   }
 
   getLangPropInObj({id,slug}){
-    return this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : undefined
+    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
   }
 
   render() {
@@ -560,7 +634,7 @@ class Pending extends React.Component {
       created_at = new Date(currentData.created_at);
     }
     if(currentData.source_messages.length > 0){
-      currentData.duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
+      var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
     }
     return (
         <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
@@ -581,22 +655,22 @@ class Pending extends React.Component {
                     />
                   }
                 {currentData.source_messages.length > 0 &&
-                  <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(currentData.duration)} hint={'Длительность перевода'} /> }
-                {currentData.source_messages.length > 0 && currentData.translator_id &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(duration)} hint={'Длительность перевода'} /> }
+                {currentData.updated_at &&  currentData.status === '1' &&
                   <Batch
                     flushCount={0}
                     flushInterval={150}
                     count={1}
                     debug={false}
                     render={()=> {
-                      let value = ~~Math.abs(currentData.duration - (new Date - new Date(currentData.updated_at)) / 1000);
+                      let value = ~~Math.abs(duration - (new Date - new Date(currentData.updated_at)) / 1000);
                       //console.log(value)
                       return(<Indicator
                         className={'f f-align-2-2'}
                         icon={
                           <Timer
                             start={currentData.updated_at}
-                            duration={currentData.duration}
+                            duration={duration}
                             isBig={true} />}
                         value={humanReadableTime(value)}
                         hint={'Оставшееся время'} />)
@@ -633,9 +707,9 @@ class Create extends React.Component {
     this.callTranslatorSearchNenu = this.callTranslatorSearchNenu.bind(this);
     this.makeSearchMenuTranslatorUnnisible = this.makeSearchMenuTranslatorUnnisible.bind(this)
     this.onSubmit = this.onSubmit.bind(this);
-    this.languageStore = null;
     this.updateHandler = this.updateHandler.bind(this);
     this.getIdLang = this.getIdLang.bind(this);
+    this.disabled = false;
   }
 
 
@@ -649,7 +723,8 @@ class Create extends React.Component {
     isBlocking: false,
     translatorMessage: '',
     letterPrice: 1,
-    letterTime: 1
+    letterTime: 1,
+    isEnoughMoney: true
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -662,21 +737,21 @@ class Create extends React.Component {
   }
 
   componentDidMount(){
-    this.languageStore = new Store('language');
-    let languageStoredIds = Store.getIds('language');
-    if(languageStoredIds.length) { 
-      let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
-      this.updateHandler({list : langsFromStore});
-    }else{
-      this.languageStore.start(); //this will updates not on every click 
-    }
-    this.languageStore.addListener('update', this.updateHandler);
+    if(this.props.languages) this.updateHandler(this.props.languages);
+    if(this.props.translator)
+      this.setState({valueTranslator:{
+              label: this.props.translator.id,
+              value: this.props.translator.first_name + ' ' + this.props.translator.last_name,
+              image: this.props.translator.image
+            }})
+  }
+
+  componentWillReceiveProps({languages}){
+    if(this.props.languages) this.updateHandler(this.props.languages);
   }
 
   componentWillUnmount(){
-    this.languageStore.removeListener('update', this.updateHandler);
-    this.languageStore.stop();
-    this.languageStore = null;
+
   }
 
   getIdLang(value){
@@ -699,8 +774,8 @@ class Create extends React.Component {
     }})
   }
 
-  updateHandler(data){
-    let optionsLang =  this.convertToAproppriateObject(data.list);
+  updateHandler(list){
+    let optionsLang =  this.convertToAproppriateObject(list);
     let toLangObj = this.getAttrByValue(optionsLang, this.state.valueLangTo);
     this.setState({
       optionsLang,
@@ -712,25 +787,31 @@ class Create extends React.Component {
 
   onSubmit(e){
     e.preventDefault();
-    let {create:{to, from, message}} = formSerialize(e.target, { hash: true, empty: true });
+    
+    let {create:{to, from, message, translator}} = formSerialize(e.target, { hash: true, empty: true });
     if(message.length === 0) return
+
     let data = {
       "source_language_id": this.getIdLang(from),
       "translate_language_id": this.getIdLang(to),
        message
     }
-    TxRest.putData('topic', data).then((data, err) => {
-      if(err) return
-      this.setState({ translatorMessage: '', isBlocking: false }, ()=>{
-        this.props.store.stop();
-        this.props.store.start();
-      })
+    if(translator)
+      Object.assign(data,  {translator_id: this.state.valueTranslator['label']});
+      TxRest.putData('topic', data).then((data, err) => {
+        if(err) return
+        Auth.update(data.user);
+        this.setState({ translatorMessage: '', isBlocking:  false }, ()=>{
+          this.props.store.stop(); // TODO: improve this hack
+          this.props.store.start();
+        })
     })
   } 
  
   currentNumberOfChar({target: {value}}) {
     let currentNumberOfChar = value.replace(/\s/g,'').length;
-    this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value })
+    let isEnoughMoney = Auth.user.balance  > currentNumberOfChar * this.state.letterPrice ;
+    this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value, isEnoughMoney })
   }
 
   updateValueLangFrom(valueLangFrom) {
@@ -747,7 +828,8 @@ class Create extends React.Component {
   }
 
   updateValueTranslator(valueTranslator) {
-    if (Object.prototype.toString.call(valueTranslator) === "[object Array]") {
+
+    if (Array.isArray(valueTranslator)) {
       valueTranslator = undefined
     }
 
@@ -757,12 +839,12 @@ class Create extends React.Component {
 
   optionTranslatorField(v) {
     if (!(v.login || v.value)) return <div><img style={{ width: '30px' }} src={avatar} /> <span>Переводчик</span></div>;
-    let customInput = <div> <img style={{ width: '30px' }} src={avatar} /><span style={{ marginLeft: '10px' }}>{v.login || v.value}</span></div>
+    let customInput = <div> <img style={{ width: '30px' }} src={v.image || avatar} /><span style={{ marginLeft: '10px' }}>{v.login || v.value}</span></div>
     return customInput;
   }
 
   valueTranslatorField(v) {
-
+      return null;
   }
 
   callTranslatorSearchNenu() {
@@ -779,14 +861,16 @@ class Create extends React.Component {
   }
 
   getUsers(input) {
-    if (!input) {
-      return Promise.resolve({ options: [] });
-    }
 
-    return fetch(`https://api.github.com/search/users?q=${input}`)
-      .then((response) => response.json())
-      .then((json) => {
-        return { options: json.items };
+    return TxRest.getData('translator')
+      .then((data) => {
+        return { options: data.map(item => {
+          return {
+            label: item.id,
+            value: item.first_name + ' ' + item.last_name,
+            image: item.image
+          }
+        }) };
       });
   }
 
@@ -817,8 +901,16 @@ class Create extends React.Component {
 
   render() {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
-      valueTranslator, isSearchMenuTranslatorVisible, isBlocking, translatorMessage, letterTime, letterPrice } = this.state;
-
+           valueTranslator, isSearchMenuTranslatorVisible, isBlocking, 
+           translatorMessage, letterTime, letterPrice, isEnoughMoney } = this.state;
+    if(!isEnoughMoney){
+      document.getElementById('submit').setAttribute('disabled','true')
+      this.disabled = true;
+    }
+    if(isEnoughMoney && this.disabled){
+       document.getElementById('submit').removeAttribute('disabled');
+      this.disabled = false;
+    }
     return (
       <div ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
       <form onSubmit={this.onSubmit} className={'f f-col dashboard-user__create-forms'}>
@@ -868,7 +960,6 @@ class Create extends React.Component {
                   ref={(n) => this.createTranslatorMenu = n}
                   name="create[translator]"
                   autofocus
-                  
                   disabled={false}
                   value={valueTranslator}
                   onChange={this.updateValueTranslator}
@@ -905,9 +996,9 @@ class Create extends React.Component {
 
             <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * letterTime)} hint={'Длительность перевода'} />
             <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
-            <Indicator className={'f f-align-2-2 '} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100).toFixed(2)}₴`} hint={'Стоимость перевода'} />
+            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100).toFixed(2)}₴`} hint={'Стоимость перевода'} />
 
-          <input type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini '} />
+          <input id="submit" type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
              
           </div>
       </form>

@@ -22,6 +22,19 @@ const  Auth = {
   role: null,
   user: null,
   token: null,
+  listeners: {},
+  update(user){
+    this.role = user.role;
+    this.user = user;
+    window.localStorage.setItem('user', JSON.stringify(this.user));
+    Object.values(this.listeners).map(func => func(Auth));
+  },
+  addListener(name, cb){
+    this.listeners[name] = cb;
+  },
+  removeListener(name){
+    delete this.listeners[name];
+  },
   authorize(cb, data) {
     return new Promise((resolve, reject) => {
       this.isAuthenticated = true;
