@@ -16,6 +16,8 @@ import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
 import Auth from './store/AuthStore.js';
+import {TxRest} from './services/Api.js';
+
 
 
 
@@ -62,9 +64,16 @@ const Landing = (props) => <Lazy {...props} load={() => import('./Landing')}/>
 class App extends React.Component {
   
    componentWillMount() {
-    Auth.init();
     //Auth.refreshToken();
-    Store.loadSession()
+    Auth.init();
+    TxRest.initSocket();
+    if(!Auth.isAuthenticated){
+      if( Auth.loadSession){
+        Store.loadSession()
+      }else{
+        Store.clearSession()
+      }
+    }
     if (typeof window === 'undefined') return
     window.addEventListener('beforeunload', this.handleBeforeUnload)
   }
@@ -75,7 +84,6 @@ class App extends React.Component {
   }
 
   handleBeforeUnload() {
-    //Auth.refreshToken();
     Store.saveSession();
   }
 
@@ -87,7 +95,7 @@ class App extends React.Component {
                       transitionEnterTimeout={300}
                       transitionLeaveTimeout={300}
                     >
-                      <ToDashBoard exact path="/" auth={Auth} key={getUniqueKey()}/>
+                      <ToDashBoard exact path="/"  key={getUniqueKey()}/>
                       <PrivateRoute path="/dashboard" component={DashBoard} location={location} role={['user','dev']} key={getUniqueKey()}/>
                       <PrivateRoute path="/translator" component={Translator} location={location} role={['translator','dev']} key={getUniqueKey()}/>
                       <PrivateRoute path="/admin" component={Admin} location={location} role={['controller','admin','dev']} key={getUniqueKey()}/>
@@ -123,7 +131,7 @@ const PrivateRoute =  ({ component: Component, ...rest }) => (
 )
 
 
-const ToDashBoard = ({ component: Component,auth: Auth, ...rest }) => (
+const ToDashBoard = ({ component: Component, ...rest }) => (
   <Route exact {...rest} render={props => {
     if(!Auth.isAuthenticated) return  <Landing {...props}/>
     switch (Auth.role) {

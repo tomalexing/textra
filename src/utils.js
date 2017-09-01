@@ -1,9 +1,14 @@
 // @flow
 import React from 'react';
+import {withRouter} from 'react-router-dom'
 const util = {};
 
-
 export class Lazy extends React.Component {
+  constructor(p){
+    super(p);
+    this._isMounted = false;
+  }
+
   state = {
     // short for "module" but that's a keyword in js, so "mod"
     mod: null
@@ -13,7 +18,15 @@ export class Lazy extends React.Component {
     this.load(this.props)
   }
 
- componentWillReceiveProps(nextProps) {
+  componentDidMount(){
+    this._isMounted = true;
+  }
+
+  componentWillUnmount(){
+    this._isMounted = false;
+  }
+
+  componentWillReceiveProps(nextProps) {
     if (nextProps.load !== this.props.load) {
       this.load(nextProps)
     }
@@ -21,6 +34,7 @@ export class Lazy extends React.Component {
 
   load(props) {
     props.load().then((mod) => {
+      if(this._isMounted)
       this.setState({
         // handle both es imports and cjs
         mod: mod.default ? mod.default : mod
@@ -232,6 +246,20 @@ if (typeof fn === 'function') {
 }
 };
 
+class ScrollToDownClass extends React.Component {
+  componentDidUpdate(prevProps) {
+
+      let el = this.props.children.props.getElement();
+      el[0].scrollTo(0, el[0].clientHeight)
+    
+  }
+
+  render() {
+    return this.props.children
+  }
+}
+export const ScrollToDown = withRouter(ScrollToDownClass)
+
 
 util.listener = listener
 util.delegate = delegate
@@ -248,4 +276,5 @@ util.getDayName = getDayName
 util.getMonthName = getMonthName
 util.quickSort = quickSort
 util.call = call
+util.ScrollToDown = ScrollToDown
 export default util 

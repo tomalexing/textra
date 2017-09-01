@@ -1,4 +1,5 @@
 import { TxRest } from './../services/Api.js';
+import Store from './Store.js'
 
 const ROLES = (num) => {
   switch(num){
@@ -10,6 +11,16 @@ const ROLES = (num) => {
   }
 };
 
+const SOCKETPATH = (num) => {
+  switch(num){
+  case('0') : return('')
+  case('1') : return('')
+  case('2') : return('/subscribe/pending-topic')
+  case('3') : return ('/subscribe/topic')
+  default   : return('')
+  }
+};
+
 const STATUS = {
   ACTIVE: '0',
   INACTIVE: '1',
@@ -18,15 +29,20 @@ const STATUS = {
 
 
 const  Auth = {
-  isAuthenticated: true,
+  isAuthenticated: false,
   role: null,
   user: null,
   token: null,
+  socketPath: null,
+  alreadyInitSocket: false,
   listeners: {},
+  loadSession: false,
   update(user){
-    this.role = user.role;
-    this.user = user;
-    window.localStorage.setItem('user', JSON.stringify(this.user));
+    if(user){
+      this.role = ROLES(user.role);
+      this.user = user;
+      window.localStorage.setItem('user', JSON.stringify(this.user));
+    }
     Object.values(this.listeners).map(func => func(Auth));
   },
   addListener(name, cb){
@@ -39,32 +55,49 @@ const  Auth = {
     return new Promise((resolve, reject) => {
       this.isAuthenticated = true;
       this.role = ROLES(data.user.role);
+      this.socketPath = SOCKETPATH(data.user.role)
       this.user = data.user;
       this.token = data.token;
-      if(this.isAuthenticated!= null && this.role!= null){
-          if(typeof window === 'undefined') return reject();
-          window.localStorage.setItem('isLoggedIn', JSON.stringify(this.isAuthenticated));
-          window.localStorage.setItem('user', JSON.stringify(this.user));
-          window.localStorage.setItem('token', JSON.stringify(this.token));
-      }
-      if (typeof cb === 'function') cb();
-      resolve();
-    })
-  },
-  authenticate(cb, data){
-    return new Promise((resolve, reject) => {
-      this.isAuthenticated = true;
-      debugger;
-      this.role = ROLES(data.user.role);
-
-      this.user = data.user;
-      this.token = data.token;
+      this.loadSession = window.localStorage.getItem('user') === JSON.stringify(this.user);
       if(this.isAuthenticated!= null && this.role!= null){
           if(typeof window === 'undefined') return reject();
           window.localStorage.setItem('isLoggedIn', JSON.stringify(this.isAuthenticated));
           window.localStorage.setItem('user', JSON.stringify(this.user));
           window.localStorage.setItem('token', this.token);
       }
+
+      if(this.loadSession){
+        Store.loadSession()
+      }else{
+        Store.clearSession()
+      }
+
+      if (typeof cb === 'function') cb();
+      resolve();
+    })
+  },
+  authenticate(cb, data){
+    return new Promise((resolve, reject) => {
+      console.log(this)
+      this.isAuthenticated = true;
+      this.role = ROLES(data.user.role);
+      this.socketPath = SOCKETPATH(data.user.role);
+      this.user = data.user;
+      this.token = data.token;
+      this.loadSession = window.localStorage.getItem('user') === JSON.stringify(this.user);
+      if(this.isAuthenticated != null && this.role != null){
+          if(typeof window === 'undefined') return reject();
+          window.localStorage.setItem('isLoggedIn', JSON.stringify(this.isAuthenticated));
+          window.localStorage.setItem('user', JSON.stringify(this.user));
+          window.localStorage.setItem('token', this.token);
+      }
+
+      if(this.loadSession){
+        Store.loadSession()
+      }else{
+        Store.clearSession()
+      }
+
       if (typeof cb === 'function') cb();
       resolve();
     })
@@ -75,7 +108,7 @@ const  Auth = {
     this.user = JSON.parse(window.localStorage.getItem('user'));
     this.token = window.localStorage.getItem('token');
     this.role = this.user ? ROLES(this.user.role) : undefined;
-
+    this.socketPath = this.user ? SOCKETPATH(this.user.role) : undefined; 
   },
   refreshToken(){
     let self = this;
@@ -93,7 +126,7 @@ const  Auth = {
       this.role = undefined;
       if(typeof window === 'undefined') return  reject();
       window.localStorage.removeItem('isLoggedIn');
-      window.localStorage.removeItem('user');
+      //window.localStorage.removeItem('user');
       window.localStorage.removeItem('token');
       if (typeof cb === 'function') cb();
       resolve();

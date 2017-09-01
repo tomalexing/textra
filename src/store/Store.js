@@ -1,5 +1,6 @@
 import {EventEmitter} from 'events';
 import {TxRest}  from './../services/Api.js';
+import AuthStore from './AuthStore.js'
 // Cache objects shared among Users instances, also accessible via static
 // functions on the StoryStore constructor.
 
@@ -40,6 +41,8 @@ function parseJSON(json, defaultValue) {
   return (json ? JSON.parse(json) : defaultValue)
 }
 
+let isSocketOn = false; 
+
 export default class Store extends EventEmitter {
 
 
@@ -64,9 +67,16 @@ export default class Store extends EventEmitter {
     if (typeof window === 'undefined') return
     idCache = parseJSON(window.sessionStorage.idCache, {})
     itemCache = parseJSON(window.sessionStorage.itemCache, {})
-
   }
 
+  static clearSession(){
+    if (typeof window === 'undefined') return
+    window.sessionStorage.clear(idCache);
+    window.sessionStorage.clear(itemCache);
+    idCache = {};
+    itemCache = {};
+    showLists = {};
+  }
   /**
    * Serialise caches to sessionStorage as JSON.
    */
@@ -93,6 +103,7 @@ export default class Store extends EventEmitter {
     // Pre-bind event handlers per instance
     this.onStorage = this.onStorage.bind(this)
     this.onStoriesUpdated = this.onStoriesUpdated.bind(this)
+    this.startSocket = this.startSocket.bind(this)
   }
 
   getState() {
@@ -103,7 +114,11 @@ export default class Store extends EventEmitter {
   }
 
   itemUpdated(item, index) {
-    showLists[this.type][index] = item
+    if(index  === -1){
+      showLists[this.type].unshift(item);
+    }else{
+      showLists[this.type][index] = item
+    }
     itemCache[this.type + item.id] = item
   }
 
@@ -121,7 +136,8 @@ export default class Store extends EventEmitter {
    * Handle 
    */
   onStoriesUpdated(data) {
-    if(data.length === 0) {
+    
+    if(Array.isArray(data) && data.length === 0) {
       idCache[this.type]= [];
       return
     }
@@ -133,21 +149,41 @@ export default class Store extends EventEmitter {
       },[]);
       idCache[this.type]= ids;
     }else{
-      
+      if(this.type !== 'topic'){
+        console.log('An error in the Store')
+      }
+      if(idCache[this.type].indexOf(this.type + data.id) === -1 ) 
+        idCache[this.type].unshift(this.type + data.id);
+
+      itemCache[this.type + data.id] = Object.assign({}, itemCache[this.type + data.id],  data);
     }
 
     populateList(this.type)
     this.emit('update', this.getState())
   }
 
+  startSocket(){
+    if(this.type === "topic" || this.type === "pending-topic" ){
+      !isSocketOn && window.io.socket.on('topic', this.onStoriesUpdated);
+      isSocketOn = true;
+    }
+  }
+  
   start() {
     if (typeof window === 'undefined') return
     TxRest.getData(this.type, this.onStoriesUpdated) 
     window.addEventListener('storage', this.onStorage)
+    if(AuthStore.alreadyInitSocket){
+      this.startSocket();
+    }else{
+      AuthStore.addListener('AuthStore.alreadyInitSocket', this.startSocket)
+    }
   }
 
   stop() {
     if (typeof window === 'undefined') return
     window.removeEventListener('storage', this.onStorage)
+    AuthStore.removeListener('AuthStore.alreadyInitSocket')
+    window.io && window.io.socket.off(this.type, this.onStoriesUpdated);
   }
 }

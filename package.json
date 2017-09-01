@@ -16,6 +16,7 @@
     "react-batch": "github:tj/react-batch",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.1.1",
+    "react-router-restore-scroll": "^0.0.1",
     "react-rte": "^0.11.0",
     "react-select": "^1.0.0-rc.5",
     "react-select-plus": "^1.0.0-rc.5",

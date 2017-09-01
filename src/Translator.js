@@ -57,6 +57,8 @@ import deepEqual from 'deep-equal';
 import Store from './store/Store.js';
 import {TxRest} from './services/Api.js';
 
+
+
 const Routes = {
   root: {
     path: "/translator",
@@ -171,8 +173,6 @@ class Translator extends React.Component {
     this.languageStore.start();
     this.languageStore.addListener('update', this.updateLanguageHandler);
 
-
-
   }
 
   updateLanguageHandler({list}){
@@ -216,253 +216,8 @@ class Translator extends React.Component {
 
   render() {
     let { location: { pathname ,state : {page: {typePage, id} } = { page: {typePage:'', id:''}}} } = this.props;
-    let activeTabA = pathname.split("/");
-    let activeTab =
-      (/reply/.test(pathname) && pathname.split("/")[activeTabA.length - 1]) ||
-      false;
-    let activeFeed = /feed/.test(pathname);
-    let activeHistory =
-      (/history/.test(pathname) &&
-        pathname.split("/")[activeTabA.length - 1]) ||
-      false;
 
-    let Feed = {
-      wqefeq: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wqerq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      wqtdsq: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wqegsfgs: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      wasdffeq: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wasgfasrq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: true
-      },
-      wagsas: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      gasfrq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: false
-      },
-      iytlk: {
-        uuid: "wqefeq",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date(new Date() - 1000000).toISOString(),
-        duration: 1341,
-        letterNumber: 213,
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33",
-        isPersonal: false
-      },
-      wryhrjrrq: {
-        uuid: "wqerq",
-        nickname: "alex_alexexe",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        publishTime: new Date().toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 431241,
-        letterNumber: 123,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33",
-        isPersonal: false
-      }
-    };
-    // Feed = {
 
-    // }
-
-    const inProgress = {
-      wqefeq: {
-        uuid: "alex",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        contentFull: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        opened: false,
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 24441,
-        letterNumber: 213,
-        startTime: "12:32",
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33"
-      },
-      wqerq: {
-        uuid: "alex_alex",
-        nickname: "alex_alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        contentFull: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date(new Date() - 100000).toISOString(),
-        duration: 634,
-        startTime: "12:32",
-        letterNumber: 213,
-        opened: false,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33"
-      }
-    };
-
-    const HistoryObject = {
-      wqefeq: {
-        uuid: "alex",
-        nickname: "alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        contentFull: "Создать запрос на перевод Создать запросна переводСоздать запроснапереводСоздать запросна d",
-        opened: false,
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date().toISOString(),
-        duration: 24441,
-        letterNumber: 213,
-        startTime: "12:32",
-        from: "RUS",
-        to: "ENG",
-        cost: "$0.33"
-      },
-      wqerq: {
-        uuid: "alex_alex",
-        nickname: "alex_alex",
-        avatar: avatar,
-        title: "Создать запрос на перевод",
-        content: "Создать запрос на перевод",
-        contentFull: "Создать запрос на перевод Создатьзапросна переводСоздать запроснапереводСоздать запросна d",
-        publishTime: new Date(new Date() - 100000).toISOString(),
-        startWorkingTime: new Date(new Date() - 100000).toISOString(),
-        duration: 634,
-        startTime: "12:32",
-        letterNumber: 213,
-        opened: false,
-        from: "ENG",
-        to: "CHN",
-        cost: "$11.33"
-      }
-    };
-
-    const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
-
-    let currentDate = activeTab
-      ? find(inProgress, activeTab)
-      : activeHistory
-          ? HistoryObject
-          : activeFeed ? Feed : {};
 
     let {page, languages, isTablet, sidebar, secondScreen, mainScreen } = this.state;
 
@@ -590,7 +345,7 @@ class Translator extends React.Component {
                 ref={n => (this.mainScreen = n)}
                 style={{
                   display: `${!isTablet ? "flex" : mainScreen ? "flex" : "none"}`,
-                  background: `${activeFeed ? "#f5f5f5": "#fff"}`
+                  background: `${typePage === 'feed' ? "#f5f5f5": "#fff"}`
                 }}
                 className={`f outer-main__expanded`}
                 ref={n => (this.toggleElem = n)}
@@ -639,7 +394,6 @@ class Translator extends React.Component {
                     <RoutePassProps
                       path={`${Routes["history"].path}${Routes["history"].param}`}
                       component={HistoryList}
-                      currentDate={currentDate}
                       _self={this}
                       isTablet={isTablet}
                       page={page}
@@ -862,7 +616,7 @@ class SideList extends React.Component{
   }
 
   getLangPropInObj({id,slug}){
-    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : undefined
+    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
   }
 
   render(){
@@ -921,7 +675,7 @@ class SideList extends React.Component{
             outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
           }
 
-          let duration = tab.source_messages[0].letters_count * this.getLangPropInObj({id: tab.translate_language_id, slug:'letter_time'});
+          let duration =    tab.source_messages.length > 0 ? tab.source_messages[0].letters_count * this.getLangPropInObj({id: tab.translate_language_id, slug:'letter_time'}) : 0;
           return (
             <Link
               to={{pathname: `${Routes[route].path}/${tab.id}`, state: {page:{typePage:route, id: tab.id}}}}
@@ -1046,11 +800,12 @@ class FeedList extends React.Component {
     this.feedStore.start();
     this.feedStore.addListener('update', this.feedUpdateHandler);
 
-    this.setState({languages:this.props.languages})
+    this.setState({languages: this.props.languages})
   }
 
   feedUpdateHandler(data){
     console.log(data)
+
     if(!this._isMounted || !data) return;
 
     let indexedList = data.list.map((item, idx) => {
@@ -1081,7 +836,7 @@ class FeedList extends React.Component {
   }
 
   getLangPropInObj({id,slug}){
-    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : undefined
+    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
   }
 
   confirm(id, index) {
@@ -1101,7 +856,7 @@ class FeedList extends React.Component {
     let _self = this;
     if(currentData.length > 0){
       currentData.map(message => {
-          message.duration = message.source_messages[0].letters_count * this.getLangPropInObj({id: message.translate_language_id, slug:'letter_time'})
+          message.duration = message.source_messages.length>0 ? message.source_messages[0].letters_count * this.getLangPropInObj({id: message.translate_language_id, slug:'letter_time'}) : 0
       })
     }
     let equalsType = false;
@@ -1151,7 +906,7 @@ class FeedList extends React.Component {
             {!isTablet && <div className="f f-align-1-2 translator-feed__topline"><span>Запросы</span></div>}
           {filteredFeed.map((feedData, index) => {
             feedData.publishTime = new Date(feedData.created_at);
-            feedData.duration = feedData.source_messages[0].letters_count * _self.getLangPropInObj({id: feedData.translate_language_id, slug:'letter_time'})
+            feedData.duration = feedData.source_messages.length>0 ? feedData.source_messages[0].letters_count * _self.getLangPropInObj({id: feedData.translate_language_id, slug:'letter_time'}) : 0
             return renderItem(feedData, index);
           })}
         </div>
@@ -1169,7 +924,7 @@ class FeedList extends React.Component {
             </div>
         </div>
       : RenderCollection((feed, index) => (
-          <div key={index} className={"f f-align-1-33 translator-feed u-mx-3 u-my-2"}>
+          <div key={index} className={"f f-align-1-33 translator-feed can__get__more u-mx-3 u-my-2"}>
             <div className={"translator-feed__avatar"}>
               <img src={avatar} alt={feed.user.first_name} />
               {currentData.isTablet &&
@@ -1215,7 +970,7 @@ class FeedList extends React.Component {
                   </div>}
               </div>
               <div className={"translator-feed__content__text"}>
-                {feed.source_messages[0].content}
+                {feed.source_messages.length > 0 ? feed.source_messages[0].content : ''}
               </div>
               <div className={"f f-align-1-2 f-gap-4 translator-feed__content__bottombar"}>
                 {feed.source_language_id && feed.translate_language_id &&  
@@ -1233,7 +988,7 @@ class FeedList extends React.Component {
                 <Indicator
                   className={"f f-align-2-2"}
                   icon={icon_letternum}
-                  value={feed.source_messages[0].letters_count}
+                  value={feed.source_messages.length>0 ? feed.source_messages[0].letters_count: 0}
                   hint={"Количество символов"}
                 />
                 <Indicator
@@ -1270,9 +1025,10 @@ class Reply extends React.Component {
     this._isMounted = false; 
     this.startPos = 20;
     this.timesItWasEnlarge = 0;
-    this.updateList = this.updateList.bind(this)
+    this.updateHandler = this.updateHandler.bind(this)
     this.getLangPropInObj = this.getLangPropInObj.bind(this)
-    this.sendTranslate = this.sendTranslate.bind(this)
+    this.sendTranslaton = this.sendTranslaton.bind(this)
+    this.inWorkStore = null;
   }
 
   state = {
@@ -1285,18 +1041,24 @@ class Reply extends React.Component {
 
   componentDidMount(){
     this._isMounted = true;
-    this.inWorkStore = new Store('in-work-topic');
-    this.inWorkStore.start();
-    this.inWorkStore.addListener('update', this.updateList);
-    let _self = this; 
+    let ids = Store.getIds('in-work-topic');
+    
+    if(ids.indexOf(this.props.id)){
+      this.setState({curentData: Store.getItem('in-work-topic' + this.props.id) })
+    }else{
+      this.inWorkStore = new Store('in-work-topic');
+      this.inWorkStore.start();
+      this.inWorkStore.addListener('update',this.updateHandler);
+    }
+    let _self = this;
     this.props.registerRefreshComponent('reply', ( currentData )=>{
          _self.setState({currentData: currentData[0]})
     })
   }
 
-  updateList({list}){
+  updateHandler({list}){
     if(!this._isMounted) return
-    this.setState({currentDate: list})
+    this.setState({currentData: list.filter(o => o.id === this.props.id)})
   }
 
   componentWillReceiveProps({languages}){
@@ -1305,16 +1067,19 @@ class Reply extends React.Component {
 
 
   componentWillUnmount(){
-    this.inWorkStore.stop();
-    this.inWorkStore.removeListener('update', this.updateList)
-    this.inWorkStore = null;
+    if(this.inWorkStore){
+      this.inWorkStore.stop();
+      this.inWorkStore.removeListener('update', this.updateList)
+      this.inWorkStore = null;
+    }
     this._isMounted = false;
     this.timesItWasEnlarge = 0;
 
   }
 
   getLangPropInObj({id,slug}){
-    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : undefined
+    if(id && slug)
+    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
   }
 
 
@@ -1341,12 +1106,12 @@ class Reply extends React.Component {
     return false
   }
 
-  sendTranslate(e){
+  sendTranslaton(e){
     e.preventDefault();
-    let {translateMessage} = this.state;
-    if(! translateMessage.length) return;
+    let {translateMessage, currentData} = this.state;
+    if(!translateMessage.length || !currentData.source_messages.length) return;
     let _self = this;
-    TxRest.putData(`translate-message/${this.props.page.id}`,{
+    TxRest.putData(`translate-message/${currentData.source_messages[0].id}`,{
 	      "message": translateMessage
     }).then(data =>{
       if(data.id){
@@ -1369,14 +1134,13 @@ class Reply extends React.Component {
     if(!currentData)
         return <div/>
 
+    console.log(currentData)
 
     let _self = this, started_at = null;
     if(currentData.started_at){
       started_at = new Date(currentData.started_at);
     }
-    if(currentData.source_messages && currentData.source_messages.length > 0){
-      currentData.duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
-    }
+    currentData.duration = currentData.source_messages && currentData.source_messages.length > 0 ?  currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'}) : 0
     const RenderCollection = renderItem => {
       return (
         <div>
@@ -1384,7 +1148,7 @@ class Reply extends React.Component {
                 this={this.props._self}
                 isTablet={isTablet}
                 Title={{
-                    title:  currentData.user.first_name + ' ' + currentData.user.last_name,  // we get [0] because the very first item in thread can be only from user
+                    title: 'dfa',//currentData[0].first_name + ' ' + currentData.user.last_name,  // we get [0] because the very first item in thread can be only from user
                     shownOnDesktop: false
                 }}
                 Left={{
@@ -1423,13 +1187,13 @@ class Reply extends React.Component {
             : RenderCollection((currentData, index, publishTime) => (
             <div className={"f f-col f-align-1-1 translator-replypost"}>
                 {started_at &&  <div className={"data__delimiter"}>
-                {started_at.getDate()} {getMonthName(started_at.getMonth())}, {started_at.getFullYear()}
+                {started_at && started_at.getDate()} {started_at && getMonthName(started_at.getMonth())}, {started_at.getFullYear()}
                 </div>}
 
                 <div className={"f f-align-1-1 translator-post "}>
                 <div className={"translator-post__content"}>
                     <div className={"translator-post__content__text"}>
-                       {currentData.source_messages.length > 0 && currentData.source_messages[0].content}
+                       {currentData.source_messages && currentData.source_messages.length > 0 && currentData.source_messages[0].content}
                     </div>
                     <div className={"f f-align-1-2 f-gap-4 translator-post__content__bottombar"}>
                     <LangLabel 
@@ -1442,7 +1206,7 @@ class Reply extends React.Component {
                         value={humanReadableTime(currentData.duration)}
                         hint={"Длительность перевода"}
                     />
-                    {currentData.source_messages.length > 0 && currentData.translator_id &&
+                    {currentData.source_messages && currentData.source_messages.length > 0 && currentData.translator_id &&
                       <Batch
                         flushCount={0}
                         flushInterval={150}
@@ -1465,20 +1229,20 @@ class Reply extends React.Component {
                     <Indicator
                         className={"f f-align-2-2"}
                         icon={icon_letternum}
-                        value={currentData.source_messages[0].letters_count}
+                        value={currentData.source_messages && currentData.source_messages.length > 0 ? currentData.source_messages[0].letters_count : 0}
                         hint={"Количество символов"}
                     />
                     <Indicator
                         className={"f f-align-2-2"}
                         icon={icon_cost}
-                        value={`${Number(currentData.price/100).toFixed(2)}₴`}
+                        value={`${Number.isNaN(currentData.price) ? 0 : (currentData.price/100).toFixed(2)}₴`}
                         hint={"Стоимость"}
                     />
 
                     </div>
                 </div>
                 <div className={"translator-post__date"}>
-                    {started_at.getHours()}:{getFullTimeDigits(started_at.getMinutes())}
+                    {started_at && started_at.getHours()}:{ started_at && getFullTimeDigits(started_at.getMinutes())}
                 </div>
                 </div>
                 <div className={"f f-align-2-3 translator-reply"}>
@@ -1492,7 +1256,7 @@ class Reply extends React.Component {
                     onChange={this.currentNumberOfChar.bind(this)}
                     />
                 <div className={"translator-reply__sent u-ml-3 u-mt-3"}>
-                    <button className={"btn btn-mini btn-primiry"} onClick={this.sendTranslate}>Отправить</button>
+                    <button className={"btn btn-mini btn-primiry"} onClick={this.sendTranslaton}>Отправить</button>
                 </div>
                 </div>
             </div>)
@@ -1512,8 +1276,13 @@ class HistoryList extends React.Component {
     return false
   }
 
+  state = {
+    currentData: []
+  }
+
   render() {
-    let { currentDate, isTablet, _self,  } = this.props;
+    let { isTablet, _self,  } = this.props;
+    let {currentData } = this.state;
     const RenderCollection = renderItem => {
       return (
         <div>
@@ -1521,7 +1290,7 @@ class HistoryList extends React.Component {
                 this={_self}
                 isTablet={isTablet}
                 Title={{
-                    title:  currentDate[Object.keys(currentDate)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
+                    title:  currentData[Object.keys(currentData)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
                     shownOnDesktop: false
                 }}
                 Left={{
@@ -1539,14 +1308,14 @@ class HistoryList extends React.Component {
                 }
                 }}
             />
-          {Object.values(currentDate).map((data, index) => {
+          {Object.values(currentData).map((data, index) => {
             let publishTime = new Date(data.publishTime);
             return renderItem(data, index, publishTime);
           })}
         </div>
       );
     };
-    return (Object.entries(currentDate).length === 0
+    return (Object.entries(currentData).length === 0
             ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
                 <div className={"translator-feed__avatar"}>
                     <img src={avatar} />
@@ -1555,7 +1324,7 @@ class HistoryList extends React.Component {
                     <span>История отсутствуют</span>
                 </div>
               </div>
-            : RenderCollection((currentDate, index, publishTime) => (
+            : RenderCollection((currentData, index, publishTime) => (
                 <div key={index} className={"f f-col f-align-1-1 translator-history"}>
                     <div className={"data__delimiter"}>
                     {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())}
@@ -1564,49 +1333,49 @@ class HistoryList extends React.Component {
                     </div>
                     <div className={"f f-align-1-1 f-gap-2 translator-history-post "}>
                     <div className={"translator-history-post__avatar"}>
-                        <img src={currentDate.avatar} alt={currentDate.nickname} />
+                        <img src={currentData.avatar} alt={currentData.nickname} />
                     </div>
                     <div className={"translator-history-post__content"}>
                         <div className={"translator-history-post__content__text"}>
-                        {currentDate.content}
+                        {currentData.content}
                         </div>
                         <div
                         className={
                             "f f-align-1-2 f-gap-4 translator-history-post__content__bottombar"
                         }
                         >
-                        <LangLabel from={currentDate.from} to={currentDate.to} />
+                        <LangLabel from={currentData.from} to={currentData.to} />
                         <Indicator
                             className={"f f-align-2-2"}
                             icon={icon_dur}
-                            value={humanReadableTime(currentDate.duration)}
+                            value={humanReadableTime(currentData.duration)}
                             hint={"Длительность перевода"}
                         />
                         <Indicator
                             className={"f f-align-2-2"}
                             icon={
                             <Timer
-                                start={currentDate.startWorkingTime}
-                                duration={currentDate.duration}
+                                start={currentData.startWorkingTime}
+                                duration={currentData.duration}
                                 isBig={true}
                             />
                             }
                             value={humanReadableTime(
-                            currentDate.duration -
-                                (new Date() - new Date(currentDate.startWorkingTime)) / 1000
+                            currentData.duration -
+                                (new Date() - new Date(currentData.startWorkingTime)) / 1000
                             )}
                             hint={"Оставшееся время"}
                         />
                         <Indicator
                             className={"f f-align-2-2"}
                             icon={icon_letternum}
-                            value={currentDate.letterNumber}
+                            value={currentData.letterNumber}
                             hint={"Количество символов"}
                         />
                         <Indicator
                             className={"f f-align-2-2"}
                             icon={icon_cost}
-                            value={currentDate.cost}
+                            value={currentData.cost}
                             hint={"Стоимость"}
                         />
 
@@ -1620,13 +1389,13 @@ class HistoryList extends React.Component {
 
                     <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
                     <div className={"translator-history-reply__avatar"}>
-                        <img src={currentDate.avatar} alt={currentDate.nickname} />
+                        <img src={currentData.avatar} alt={currentData.nickname} />
                     </div>
                     <div className={"translator-history-reply__content"}>
                         <textarea
                         className={"translator-history-reply__content__text"}
                         disabled
-                        value={currentDate.content}
+                        value={currentData.content}
                         />
                     </div>
                     <div className={"translator-history-reply__constols"}>
@@ -1645,13 +1414,13 @@ class HistoryList extends React.Component {
                     </div>
                     <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
                     <div className={"translator-history-reply__avatar"}>
-                        <img src={currentDate.avatar} alt={currentDate.nickname} />
+                        <img src={currentData.avatar} alt={currentData.nickname} />
                     </div>
                     <div className={"translator-history-reply__content"}>
                         <textarea
                         className={"translator-history-reply__content__text"}
                         disabled
-                        value={currentDate.content}
+                        value={currentData.content}
                         />
                     </div>
                     <div className={"translator-history-reply__constols"}>
@@ -1661,7 +1430,7 @@ class HistoryList extends React.Component {
                         >
                         <img src={copy} alt="copy" />
                         <span>Копировать</span>
-                        <input type="hidden" value={currentDate.content} />
+                        <input type="hidden" value={currentData.content} />
                         </button>
                     </div>
                     <div className={"translator-history-post__date"}>

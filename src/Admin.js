@@ -433,7 +433,7 @@ class SideList extends React.PureComponent{
             }).bind(this))
             this.setState(this.historyStore.getState())
         }).bind(this));
-    }else{
+    }else{  
       
         this.setState(this.historyStore.getState())
         Promise.all(data.ids.map(id => {
@@ -493,7 +493,7 @@ class SideList extends React.PureComponent{
                   <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.duration)}</data></div>
                   <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.letterNumber}</data></div>
                   <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
-                </div>  
+                </div>
               </div>
             </div>
     )}
@@ -531,12 +531,12 @@ class SideList extends React.PureComponent{
             key={index}
           >
             <figure className="f f-align-2-2 admin-tab-avatar">
-              {" "}<img src={avatar} alt="Textra" />{" "}
+              <img src={avatar} alt="Textra" />
             </figure>
             <div className="f f-col f-align-1-1 admin-tab-details">
               <div className="admin-tab-title">{tab.title} </div>
               <div className="admin-tab-content">
-                {" "}{tab.content}
+                {tab.content}
               </div>
             </div>
             <div className="f f-col f-align-2-3 admin-tab-info">
@@ -610,7 +610,7 @@ class Users extends React.Component {
   componentDidMount(){
     this._isMounted = true;
     let {page: {pageType, id}} = this.props;
-    this.store = new Store(pageType);
+    this.store = new Store('user');
     this.store.start();
     this.store.addListener('update', this.updateHandler);
   }
