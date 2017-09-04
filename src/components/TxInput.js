@@ -152,7 +152,7 @@ const messages = {
 };
 
 const validationRules = {
-    email: (s) => EMAIL_RE.test( s )|| messages.email,
+    email: (s) => EMAIL_RE.test( s ) || messages.email,
     minLength: (s, len = 6) => escapeRegex(s).length >= len || messages.minLength.replace('{n}', len),
     maxLength: (s, len = 100) => escapeRegex(s).length <= len || messages.maxLength.replace('{n}', len),
     required: (s) => !! s.length || messages.required,

@@ -31,8 +31,8 @@ var showList = Object.create(null);
      /**
      * Get an massage by userId and type from the cache.
      */
-    static getMassage(type, id) {
-        return  messagesByUserIdCache[type] && messagesByUserIdCache[type][id] || null
+    static getMessages(type, id) {
+        return  messagesByUserIdCache[type] && messagesByUserIdCache[type][id] || []
     } 
       
     /**
@@ -98,15 +98,15 @@ var showList = Object.create(null);
      * Handlers
      */
     onGetMessages(data){
-        messagesByUserIdCache[this.type][this.userId] = data.value;
+        messagesByUserIdCache[this.type][this.userId] = data;
         populateMessages(this.type, this.userId);
         this.emit('updateMessage', this.getState())
     }
 
     async start() {
       if (typeof window === 'undefined') return
-      let date = await TxRest.getDataByID(this.type, this.userId);
-      this.onGetMessages(date);
+      let data = await TxRest.getData(this.type + '/' + this.userId);
+      this.onGetMessages(data);
       window.addEventListener('storage', this.onStorage)
     }
   

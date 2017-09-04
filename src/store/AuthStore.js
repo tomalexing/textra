@@ -67,9 +67,10 @@ const  Auth = {
       }
 
       if(this.loadSession){
-        Store.loadSession()
+        Store.loadSession();
       }else{
-        Store.clearSession()
+        Store.clearSession();
+        TxRest.reInitilizeSocket();
       }
 
       if (typeof cb === 'function') cb();
@@ -93,9 +94,10 @@ const  Auth = {
       }
 
       if(this.loadSession){
-        Store.loadSession()
+        Store.loadSession();
       }else{
-        Store.clearSession()
+        Store.clearSession();
+        TxRest.reInitilizeSocket();
       }
 
       if (typeof cb === 'function') cb();

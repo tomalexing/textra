@@ -37,7 +37,8 @@ import {
     getFullTimeDigits,
     getDayName,
     quickSort,
-    ScrollToDown
+    ScrollToDown,
+    withGracefulUnmount
 } from './utils';
 import formSerialize from 'form-serialize';
 import Select from 'react-select';
@@ -52,6 +53,7 @@ import StatefulEditor from './components/StatefulEditor';
 import deepEqual from 'deep-equal';
 
 import Store from './store/Store.js';
+import MessageStore from './store/MessageStore.js';
 import {TxRest} from './services/Api.js';
 
 const getTabTime = (time) => {
@@ -68,7 +70,7 @@ const getTabTime = (time) => {
       outputPublishTime = `${time.getHours()}:${getFullTimeDigits(time.getMinutes())}`
     }
     return outputPublishTime
-} 
+}
 
 class DashBoard extends React.Component {
 
@@ -80,8 +82,12 @@ class DashBoard extends React.Component {
     this._isMounted = false;
     this.updateHandler = this.updateHandler.bind(this);
     this.updateLanguageHandler = this.updateLanguageHandler.bind(this);
+    this.updateTranslatorHandler = this.updateTranslatorHandler.bind(this);
     this.getLangPropInObj = this.getLangPropInObj.bind(this);
     this.store = null;
+    this.languageStore = null;
+    this.translatorStore = null;
+
   }
 
   state = {
@@ -96,12 +102,16 @@ class DashBoard extends React.Component {
       id: ''
     },
     language: [],
-    translator: ''
+    translator: {},
+    translators: []
   }
 
   componentWillMount() {
-    
-  }
+    console.log('mount')
+    let { location: { state: { page: {typePage, id: pageTypeId}, mainScreen,  translator }  = {page : {typePage : '', id :  ''}, translator: ''}  }} = this.props ; // holly shit
+
+    this.setState({page:{typePage, id: pageTypeId}, translator, mainScreen});
+  } 
 
   componentDidMount(){
     this._isMounted = true;
@@ -112,17 +122,14 @@ class DashBoard extends React.Component {
         if (this.state.isTablet !== isTablet &&  this._isMounted ) this.setState({ isTablet })
       }, 200, false), false)
     );
+ 
     if(window.innerWidth <= 768 &&  this._isMounted) {
       this.setState({ isTablet: true })
     }
+
     this.doAtDidMount.forEach(func => func());
     
-    let { location: { state: { page: {typePage, id: pageTypeId}, translator }  = {page : {typePage : '', id :  ''}, translator: ''}  }} = this.props ; // holly shit
-    
-    this.setState({page:{typePage, id: pageTypeId}, translator});
-
-
-
+    this.store = new Store('topic');
     let ids = Store.getIds('topic');
     if(ids && ids.length > 0){ // get from cache 
       let listItems = ids.map(id => {
@@ -130,53 +137,65 @@ class DashBoard extends React.Component {
       })
       this.updateHandler({from: 'cache', list: listItems})
     }
-    this.store = new Store('topic');
     this.store.start();
     this.store.addListener('update', this.updateHandler);
 
 
 
 
+    this.languageStore = new Store('language');
     let languageStoredIds = Store.getIds('language');
     if(languageStoredIds && languageStoredIds.length) {
       let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
       this.updateLanguageHandler({list : langsFromStore});
     }
-
-    this.languageStore = new Store('language');
     this.languageStore.start();
     this.languageStore.addListener('update', this.updateLanguageHandler);
 
 
-    // this.historyStore = new UserStore('historyrooms', this.userId);
-    // this.historyStore.start();
-    // this.historyStore.addListener('updateRooms', this.updateHandler);
-
+    this.translatorStore = new Store('translator');
+    let translatorStoredIds = Store.getIds('translator');
+    if(translatorStoredIds && translatorStoredIds.length) {
+      let translatorListFromStore = translatorStoredIds.map(id => Store.getItem(id));
+      this.updateTranslatorHandler({list : translatorListFromStore});
+    }
+    this.translatorStore.start();
+    this.translatorStore.addListener('update', this.updateTranslatorHandler);
 
   }
 
+  updateTranslatorHandler({list}){
+    if(!this._isMounted) return
+    this.setState({translators: list})
+  }
+  
   updateHandler(data){
     if(!this._isMounted) return
     let _self = this;
-    this.setState(
-    {
+
+    this.setState({
       pendingTabs : data.list.filter(o => o.status === "0").map((item, idx) => {
-        return {
-          ...item,
-          avatar: avatar, 
-          index: idx
-        }
+          return {
+            ...item,
+            avatar: avatar, 
+            index: idx
+          }
       }),
       workingTabs : data.list.filter(o => o.status === "1").map((item, idx) => {
-        return {
-          ...item,
-          avatar: avatar, 
-          index: idx
-        }
+          return {
+            ...item,
+            avatar: avatar, 
+            index: idx
+          }
+      }),
+      historyTabs : data.list.filter(o => o.status === "2").map((item, idx) => {
+          return {
+            ...item,
+            avatar: avatar, 
+            index: idx
+          }
       })
-    });
-    
-    this.setState({historyTabs : this.convertToAproppriateObjectHistoryTab(data.list)})
+    })
   }
 
   convertToAproppriateObjectHistoryTab(data){
@@ -247,7 +266,7 @@ class DashBoard extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-
+      console.log('Unmount')
     this.store.stop();
     this.store.removeListener('update', this.updateHandler);
 
@@ -257,9 +276,6 @@ class DashBoard extends React.Component {
     this.languageStore = null;
     this.store = null;
     Store.saveSession();
-  }
-
-  componentWillUnmount() {
     this.listeners.forEach(removeEventListener => removeEventListener())
   }
 
@@ -282,8 +298,8 @@ class DashBoard extends React.Component {
   }
 
   render() {
-    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator } = this.state;
- 
+    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator, translators } = this.state;
+    
     return (
       <div className="f f-col outer dashboard-user">
         <Header />
@@ -302,8 +318,10 @@ class DashBoard extends React.Component {
 
               {/* PENDINGS TABs */} 
               { pendingTabs.map(tab => {
+                
+
                 return (
-                  <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
+                  <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index} >
                     <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__searchtab-details">
                       <div className="dashboard-user__searchtab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
@@ -324,7 +342,7 @@ class DashBoard extends React.Component {
                 let outputPublishTime = getTabTime(publishTime);
                 let translator = tab.translator; 
                 return (
-                  <Link  to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
+                  <Link key={getUniqueKey()} to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
                     <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                       <div className="dashboard-user__tab-title">{ translator.first_name + ' ' + translator.last_name}</div>
@@ -354,10 +372,9 @@ class DashBoard extends React.Component {
               
               {/* History TABs */}
               {this.state.historyTabs.map((historyFromOneUser, index) => {
-                let tab = historyFromOneUser.messages[ 0 ];
-                
-                //let translator = tab.user;
+                let tab = historyFromOneUser;
                 let translator = historyFromOneUser.translator; 
+                
                 let finishTime = new Date(tab.translated_at);
                 let outputPublishTime = getTabTime(finishTime);
                 let start = new Date(tab['started_at']);
@@ -365,7 +382,7 @@ class DashBoard extends React.Component {
                 let finishShouldBe = new Date(+start + durationShouldBe*1000);
                 let duration = (finishTime - start)/1000;
                 return (
-                  <Link to={{pathname:`/dashboard/history/${translator.id}`, state: {mainScreen: true, page:{typePage: 'history', id: translator.id}}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${translator.id === pageTypeId ? 'selected' : ''}`} key={index}>
+                  <Link to={{pathname:`/dashboard/history/${translator.id}`, state: {mainScreen: true,  translator, page:{typePage: 'history', id: translator.id}}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${translator.id === pageTypeId ? 'selected' : ''}`} key={index} >
                     <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={translator.image || avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                       <div className="dashboard-user__tab-title"> {translator.first_name + ' ' +
@@ -394,13 +411,13 @@ class DashBoard extends React.Component {
                 </div>
               :''}
               <Switch>
-                <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language} store={this.store} />
+                <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language} store={this.store} translators={translators}/>
                 <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}/>
                  <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}  />
-                <RoutePassProps path="/dashboard/history/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId} data={Array.isArray(historyTabs)? historyTabs.find(o=> o.translator.id == pageTypeId):null}
-                languages={language} store={this.store}/>
+                <RoutePassProps path="/dashboard/history/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}
+                languages={language} store={this.store} translator={translator}/>
               </Switch>
             </div>
           </div>
@@ -426,33 +443,51 @@ class HistoryList extends React.Component {
     this.id = this.props.id;
     this.getLangPropInObj = this.getLangPropInObj.bind(this)
     this._isMounted = false;
+    this.historyRoot = null;
+    this.messageStore =null;
+    this.updateHandler = this.updateHandler.bind(this);    
   }
   state={
-    currentData: this.props.data ? this.props.data.messages: [],
-    translator: this.props.data ? this.props.data.translator: {},
+    currentData: [],
+    translator: this.props.translator ? this.props.translator: {},
     languages: this.props.languages
+  }
+
+
+  componentWillMount(){
+    this.messageStore = new MessageStore('translated-topic/user', this.id);
+    if(this.id)
+    this.setState({currentData: MessageStore.getMessages('translated-topic/user', this.id) })
   }
 
   componentDidMount(){
     this._isMounted = true;
-
+    let {typePage ,historyId} = this.props;
+    this.messageStore.start();
+    this.messageStore.addListener('updateMessage', this.updateHandler)
   }
 
-  componentWillReceiveProps({languages, data}){
+  updateHandler({list}){
+    this.setState({currentData : list})
+  }
+
+  componentWillReceiveProps({languages, id, translator}){
     let _self = this;
     if(!_self._isMounted) return 
-      console.log(data)
-    this.setState({languages, currentData: data ? data.messages : [], translator: data ? data.translator : {}});
-    if(data)
-    Promise.all(data.messages.map(item => {
-      return (TxRest.getData(`topic/${item.id}`).then( data => {
-        if(data.message) return Promise.resolve(); // TODO handle error message
-        return Promise.resolve(data);
-      }))
-      })).then( data => {
-        if(!_self._isMounted) return 
-          _self.setState({currentData: data});
-      })
+    if(id)
+      this.setState({currentData: MessageStore.getMessages('translated-topic/user', id)})
+
+    this.setState({languages, translator});
+    // if(data)
+    // Promise.all(data.messages.map(item => {
+    //   return (TxRest.getData(`topic/${item.id}`).then( data => {
+    //     if(data.message) return Promise.resolve(); // TODO handle error message
+    //     return Promise.resolve(data);
+    //   }))
+    //   })).then( data => {
+    //     if(!_self._isMounted) return 
+    //       _self.setState({currentData: data});
+    //   })
   }
 
   getLangPropInObj({id,slug}){
@@ -488,11 +523,13 @@ class HistoryList extends React.Component {
   render() {
     let { currentData, translator } = this.state || {currentData: []},
       _self = this; 
-        console.log(currentData)
-
+        console.log(this.historyRoot)
+    if (!currentData.length)
+      return(<div/>)
+    currentData = currentData.reverse();
+    console.log(currentData);
     const renderCollection = renderItem => (
-        <ScrollToDown >
-      <div getElement={ () => {return document.getElementsByClassName('dashboard-user__history')}} className={'f f-col dashboard-user__history'}>
+      <ScrollToDown  className={'f f-col dashboard-user__history'} >
         
         {/* ALl merged history */}
 
@@ -509,7 +546,6 @@ class HistoryList extends React.Component {
           <div className={'dashboard-user__history-post__date'}></div>
         </div>
 
-      </div>
       </ScrollToDown>
     )
 
@@ -578,7 +614,7 @@ class HistoryList extends React.Component {
 
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
             <div className={'dashboard-user__history-reply__avatar'}>
-              <img src={currentData.translator.image || avatar} alt={currentData.translator.first_name} />
+              <img src={translator.image || avatar} alt={translator.first_name} />
             </div>
             <div className={'dashboard-user__history-reply__content'}>
               <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
@@ -677,7 +713,7 @@ class Pending extends React.Component {
         return <div/> 
     
     if(currentData.status === '2'){
-       return <Redirect to={{pathname:`/dashboard/history/${currentData.translator_id}`,state:{page:{typePage:'history', id: currentData.translator_id}}}} />
+       return <Redirect to={{pathname:`/dashboard/history/${currentData.translator_id}`,state:{page:{typePage:'history', id: currentData.translator_id},translator: currentData.translator}}} />
     }
     
     if(currentData.created_at){
@@ -760,8 +796,10 @@ class Create extends React.Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.updateHandler = this.updateHandler.bind(this);
     this.getIdLang = this.getIdLang.bind(this);
+    this.getTranslators = this.getTranslators.bind(this);
     this.disabled = false;
     this.store = props.store;
+    this._isMounted = false;
   }
 
 
@@ -779,11 +817,13 @@ class Create extends React.Component {
     isEnoughMoney: true,
     blockSubmit: false,
     redirectToPending: false,
-    newId: ''
+    newId: '',
+    translators: this.props.translators,
+    translatorsOpt: []
   }
 
   shouldComponentUpdate(nextProps, nextState){
-
+    if(!this._isMounted) return
     if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
       return true
     }
@@ -792,6 +832,7 @@ class Create extends React.Component {
   }
 
   componentDidMount(){
+    this._isMounted = true
     if(this.props.languages) this.updateHandler(this.props.languages);
     if(this.props.location.state.translator)
       this.setState({valueTranslator:{
@@ -799,9 +840,12 @@ class Create extends React.Component {
               value: this.props.location.state.translator.first_name + ' ' + this.props.location.state.translator.last_name,
               image: this.props.location.state.translator.image
             }})
+    this.getTranslators();
   }
 
-  componentWillReceiveProps({languages, store, translator}){
+  componentWillReceiveProps(newProps){
+    if(!this._isMounted) return
+      let {languages, store, translator, translators} = newProps;
     if(languages) this.updateHandler(languages);
     if(store) this.store = store;
     if(translator)
@@ -810,13 +854,19 @@ class Create extends React.Component {
               value: translator.first_name + ' ' + translator.last_name,
               image: translator.image
             }})
+    if(translators){
+        this.setState({translators})
+    }
+    this.getTranslators();
+
   }
 
   componentWillUnmount(){
-
+    this._isMounted = false;
   }
 
   getIdLang(value){
+    if(!this._isMounted) return
     return this.state.optionsLang.filter(o => o.value === value)[0]['id']
   }
   
@@ -837,6 +887,8 @@ class Create extends React.Component {
   }
 
   updateHandler(list){
+    if(!this._isMounted) return
+
     let optionsLang =  this.convertToAproppriateObject(list);
     let toLangObj = this.getAttrByValue(optionsLang, this.state.valueLangTo);
     
@@ -850,8 +902,10 @@ class Create extends React.Component {
   }
 
   onSubmit(e){
+    if(!this._isMounted) return
+    if(this.state.blockSubmit) return
     e.preventDefault();
-    this.setState({blockSubmit : true})
+    this.state.blockSubmit = true;
     let {create:{to, from, message, translator}} = formSerialize(e.target, { hash: true, empty: true });
     if(message.length === 0) return
 
@@ -867,7 +921,7 @@ class Create extends React.Component {
     TxRest.putData('topic', data).then((data, err) => {
         //if(data.message) 
           // TODO hande error criating message
-
+        if(!this._isMounted) return
         if(!data.message && !data.err) {
           Auth.update(data.user);
 
@@ -883,16 +937,21 @@ class Create extends React.Component {
   } 
  
   currentNumberOfChar({target: {value}}) {
+    if(!this._isMounted) return
+
     let currentNumberOfChar = value.replace(/\s/g,'').length;
     let isEnoughMoney = Auth.user.balance  > currentNumberOfChar * this.state.letterPrice ;
     this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value, isEnoughMoney })
   }
 
   updateValueLangFrom(valueLangFrom) {
+    if(!this._isMounted) return
     this.setState({ valueLangFrom });
   }
 
   updateValueLangTo(valueLangTo) {
+    if(!this._isMounted) return
+
     let toLangObj = this.getAttrByValue(this.state.optionsLang, valueLangTo);
     this.setState({
       valueLangTo,
@@ -902,7 +961,7 @@ class Create extends React.Component {
   }
 
   updateValueTranslator(valueTranslator) {
-
+    if(!this._isMounted) return
     if (Array.isArray(valueTranslator)) {
       valueTranslator = undefined
     }
@@ -922,6 +981,7 @@ class Create extends React.Component {
   }
 
   callTranslatorSearchNenu() {
+    if(!this._isMounted) return
     this.setState({
       isSearchMenuTranslatorVisible: true
     })
@@ -929,23 +989,23 @@ class Create extends React.Component {
   }
 
   makeSearchMenuTranslatorUnnisible() {
+    if(!this._isMounted) return
     this.setState({
       isSearchMenuTranslatorVisible: false
     })
   }
 
-  getUsers(input) {
-
-    return TxRest.getData('translator')
-      .then((data) => {
-        return { options: data.map(item => {
+  getTranslators() {
+    let {translators}  = this.state;
+    if(!translators.length) return 
+    return this.setState({ translatorsOpt: translators.map(item => {
           return {
             label: item.id,
             value: item.first_name + ' ' + item.last_name,
             image: item.image
           }
-        }) };
-      });
+        })
+      })
   }
 
   arrowElementTranslator() {
@@ -960,6 +1020,8 @@ class Create extends React.Component {
   }
 
   swapLang(e) {
+    if(!this._isMounted) return
+
     e.preventDefault();
     let to = this.state.valueLangTo,
       from = this.state.valueLangFrom,
@@ -977,10 +1039,10 @@ class Create extends React.Component {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
            valueTranslator, isSearchMenuTranslatorVisible, isBlocking, 
            translatorMessage, letterTime, letterPrice, isEnoughMoney, 
-           blockSubmit, redirectToPending, newId} = this.state;
+           blockSubmit, redirectToPending, newId, translatorsOpt} = this.state;
 
     if( redirectToPending ){
-     return <Redirect to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
+     return <Redirect push={true} to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
     }
     if(!isEnoughMoney || blockSubmit){
       document.getElementById('submit').setAttribute('disabled','true')
@@ -1035,7 +1097,7 @@ class Create extends React.Component {
                 <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({ isOpen: isSearchMenuTranslatorVisible })}</span>
               </div>
               <div className={`dashboard-user__create-topbar__chooser-menu ${isSearchMenuTranslatorVisible ? 'show-chooser-menu' : ''}`}>
-                <Select.Async
+                <Select
                   ref={(n) => this.createTranslatorMenu = n}
                   name="create[translator]"
                   autofocus
@@ -1053,7 +1115,7 @@ class Create extends React.Component {
                   valueRenderer={this.valueTranslatorField}
                   optionRenderer={this.optionTranslatorField}
                   arrowRenderer={this.arrowElementTranslator}
-                  loadOptions={this.getUsers}
+                  options={translatorsOpt}
                   onBlur={this.makeSearchMenuTranslatorUnnisible}
                   onValueClick={this.makeSearchMenuTranslatorUnnisible}
 
@@ -1091,7 +1153,7 @@ class Create extends React.Component {
 
 
 
-export default withRouter(DashBoard);
+export default withGracefulUnmount(withRouter(DashBoard));
 
 
    // const Users = {

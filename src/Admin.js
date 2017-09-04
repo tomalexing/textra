@@ -707,7 +707,7 @@ class Users extends React.Component {
               return val1.charCodeAt(i) > val2.charCodeAt(i)
             else 
               return val1.charCodeAt(i) < val2.charCodeAt(i)
-          }
+          } 
         }
 
         if(val1 instanceof Date &&  val2 instanceof Date){

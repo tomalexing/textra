@@ -1,14 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { debounce, listener} from './../utils';
+import { debounce, listener,call} from './../utils';
 import formSerialize from 'form-serialize';
-
-const call = (fn, ...args) => {
-if (typeof fn === 'function') {
-    return fn(...args);
-}
-};
-
+import './../polyfill.js';
 export default class TxForm extends React.Component{
     constructor(props){
         super(props);
@@ -164,7 +158,7 @@ export default class TxForm extends React.Component{
         return(
              <form onSubmit={this._submitHandler.bind(this)} ref={(n) => this.element = n} className="registform-regist__inputs ">
                 {  !!mounted && 
-                    Object.values(children).map((child, i) =>(
+                    Object.keys(children).map(e => children[e]).map((child, i) =>(
                         React.cloneElement(child, {key: i, ...child.props, errorElementOuter: this.errorField, getChildInstance: this._getChildInstance})
                     ))
                 }

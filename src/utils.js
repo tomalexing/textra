@@ -44,7 +44,10 @@ export class Lazy extends React.Component {
 
   render() {
     let {load , ...rest} = this.props;
-    return  React.createElement('div', null, this.state.mod && React.createElement(this.state.mod, rest, null))
+    return  React.createElement(
+            'div', 
+            null, 
+            this.state.mod && React.createElement(this.state.mod, rest, null))
   }
 }
 
@@ -249,17 +252,63 @@ if (typeof fn === 'function') {
 class ScrollToDownClass extends React.Component {
   componentDidUpdate(prevProps) {
 
-      let el = this.props.children.props.getElement();
-      el[0].scrollTo(0, el[0].clientHeight)
+      let el = document.getElementsByClassName(this.props.className.split(' ').filter(o => o.startsWith('dashboard')));
+      el && el.length > 0 && el[0].scrollTo(0, el[0].clientHeight + 1000)
     
   }
 
   render() {
-    return this.props.children
+    return React.createElement('div', {className:this.props.className},this.props.children);
   }
 }
 export const ScrollToDown = withRouter(ScrollToDownClass)
 
+export  function withGracefulUnmount(WrappedComponent) {
+
+    return class extends React.Component {
+
+        constructor(props){
+            super(props);
+            this.state = { mounted: false };
+            this.componentGracefulUnmount = this.componentGracefulUnmount.bind(this)
+        }
+
+
+        componentGracefulUnmount(){
+            this.setState({mounted: false});
+
+            window.removeEventListener('beforeunload', this.componentGracefulUnmount);
+        }
+
+        componentWillMount(){
+            this.setState({mounted: true})
+        }
+
+        componentDidMount(){
+            // make sure the componentWillUnmount of the wrapped instance is executed even if React
+            // does not have the time to unmount properly. we achieve that by
+            // * hooking on beforeunload for normal page browsing
+            // * hooking on turbolinks:before-render for turbolinks page browsing
+            window.addEventListener('beforeunload', this.componentGracefulUnmount);
+        }
+
+        componentWillUnmount(){
+            this.componentGracefulUnmount()
+        }
+
+        render(){
+
+            let { mounted }  = this.state;
+
+            if (mounted) {
+                return <WrappedComponent {...this.props} />
+            } else {
+                return null // force the unmount
+            }
+        }
+    }
+
+}
 
 util.listener = listener
 util.delegate = delegate
@@ -276,5 +325,5 @@ util.getDayName = getDayName
 util.getMonthName = getMonthName
 util.quickSort = quickSort
 util.call = call
-util.ScrollToDown = ScrollToDown
+util.withGracefulUnmount = withGracefulUnmount
 export default util 

@@ -17,8 +17,9 @@ import  { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
 import Auth from './store/AuthStore.js';
 import {TxRest} from './services/Api.js';
+import './polyfill';
 
-
+//import DashBoard from './Dashboard.js';
 
 
 injectTapEventPlugin();

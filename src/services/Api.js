@@ -45,8 +45,10 @@ export const TxRest = (() => {
     
     function reInitilizeSocket(){
           if(AuthStore.alreadyInitSocket){
-              debugger;
-              window.io.socket.disconnect()
+              if(window.io.socket.isConnected()) {
+                window.io.socket.disconnect()
+                return; // we will back here in when event fire 
+              }
               window.io.sails.url = socketHost + port;
               window.io.sails.environment = process.env.NODE_ENV;
               window.io.sails.useCORSRouteToGetCookie = false
@@ -54,7 +56,7 @@ export const TxRest = (() => {
                  Authorization: `Bearer ${AuthStore.token}`
               }
               window.io.socket.get(AuthStore.socketPath);
-              window.io.socket.reconnect()
+              !window.io.socket.isConnected() && window.io.socket.reconnect()
           }
     }
 
@@ -174,6 +176,7 @@ export const TxRest = (() => {
       getData,
       getDataByID,
       putData,
-      initSocket
+      initSocket,
+      reInitilizeSocket
     }
 })()

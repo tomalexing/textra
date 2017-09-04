@@ -40,9 +40,9 @@ class SignUp extends React.Component {
           this.errorFieldIn.innerHTML = errors; // new Error from Server
         }else{
           if(this.errorFieldIn) this.errorFieldIn.innerHTML = ''; // clean UP
-          let self = this;
+          let _self = this;
           Auth.authorize(() => {
-            self.setState({ redirectToReferrer: true })
+            _self.setState({ redirectToReferrer: true })
           }, data)
         }
   }

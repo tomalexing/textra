@@ -16,7 +16,7 @@ import icon_posts from "./assets/icon-posts.svg";
 import icon_history from "./assets/icon-history.svg";
 
 import "./polyfill";
-import { Auth } from "./index";
+import  Auth from './store/AuthStore.js';
 import {
   BrowserRouter as Router,
   Route,
@@ -40,7 +40,8 @@ import {
   getMonthName,
   getFullTimeDigits,
   getDayName,
-  call
+  call,
+  ScrollToDown
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -55,6 +56,7 @@ import Indicator from "./components/Indicator";
 import deepEqual from 'deep-equal';
 
 import Store from './store/Store.js';
+import MessageStore from './store/MessageStore.js';
 import {TxRest} from './services/Api.js';
 
 
@@ -81,7 +83,6 @@ const Routes = {
     exact: false,
     param: "/:id"
   },
-
   reply: {
     path: "/translator/reply",
     exact: false,
@@ -139,7 +140,9 @@ class Translator extends React.Component {
     // Responsive end
 
     let { location: {state : {page: {typePage, id} } = { page: {typePage:'feed', id:''}}} } = this.props;
-
+    if(typePage === 'history'){
+      this.setState({mainScreen: false, secondScreen: true})
+    }
     this.setState({page:{typePage, id}});
   }
   
@@ -215,7 +218,7 @@ class Translator extends React.Component {
   }
 
   render() {
-    let { location: { pathname ,state : {page: {typePage, id} } = { page: {typePage:'', id:''}}} } = this.props;
+    let { location: { pathname ,state : {page: {typePage, id}, historyUser } = { page: {typePage:'', id:'', historyUser: ''}}} } = this.props;
 
 
 
@@ -280,7 +283,7 @@ class Translator extends React.Component {
                   to={{
                     pathname: Routes["history"].path,
                     state: { mainScreen: false,
-                             secondScreen:true,
+                             secondScreen: true,
                              page:{ typePage:"history"} }
                   }}
                 >
@@ -309,6 +312,9 @@ class Translator extends React.Component {
                   title="История"
                   isTablet={isTablet}
                   this={this}
+                  registerRefreshComponent = {this.registerRefreshComponent}
+                  languages={languages}
+                  page={page}
                 />
               </div>
             )}
@@ -398,6 +404,7 @@ class Translator extends React.Component {
                       isTablet={isTablet}
                       page={page}
                       languages={languages}
+                      historyUser={historyUser}
                     />
                     <RoutePassProps
                       path={`${Routes["reply"].path}${Routes["reply"].param}`}
@@ -406,6 +413,7 @@ class Translator extends React.Component {
                       isTablet={this.state.isTablet}
                       registerRefreshComponent={this.registerRefreshComponent}
                       page={page}
+                      refresh = {this.refresh}
                       languages={languages}
                     />
                   </Switch>
@@ -570,36 +578,52 @@ class SideList extends React.Component{
 
   constructor(props){
     super(props);
-    this.updateList = this.updateList.bind(this)
+    this.updateTranslatedList = this.updateTranslatedList.bind(this)
+    this.updateWorkingList = this.updateWorkingList.bind(this)
     this.getLangPropInObj = this.getLangPropInObj.bind(this)
     this.sendDataToReply = false;
     this._isMounted = false;
   }
 
   state = {
-    inwork: [],
+    list: [],
     languages: []
   }
 
   componentDidMount(){
     this._isMounted = true;
-    if(this.props.page.id){
-        this.sendDataToReply = true;
+    if(this.props.page.typePage === 'history'){
+
+      this.translatedStore = new Store('translated-topic');
+      this.translatedStore.start();
+      this.translatedStore.addListener('update', this.updateTranslatedList);
+
+    }else{
+
+      if(this.props.page.id){
+          this.sendDataToReply = true;
+      }
+      this.inWorkStore = new Store('in-work-topic');
+      this.inWorkStore.start();
+      this.inWorkStore.addListener('update', this.updateWorkingList);
+      let _self = this;
+      this.props.registerRefreshComponent('inwork', ()=>{
+          _self.inWorkStore.stop();
+          _self.inWorkStore.start();
+      })
+      
     }
-    this.inWorkStore = new Store('in-work-topic');
-    this.inWorkStore.start();
-    this.inWorkStore.addListener('update', this.updateList);
-    let _self = this;
-    this.props.registerRefreshComponent('inwork', ()=>{
-         _self.inWorkStore.stop();
-         _self.inWorkStore.start();
-    })
-  
   }
 
-  updateList(data){
+  updateTranslatedList(data){
     if(!this._isMounted) return
-    this.setState({inwork: data.list})
+    this.setState({list: data.list})
+  }
+
+  updateWorkingList(data){
+    if(!this._isMounted) return
+
+    this.setState({list: data.list})
     if(this.sendDataToReply)
       this.props.refresh('reply', data.list.filter(o => o.id === this.props.page.id))
   }
@@ -610,8 +634,10 @@ class SideList extends React.Component{
 
   componentWillUnmount(){
     this._isMounted = false;
-    this.inWorkStore.stop();
-    this.inWorkStore.removeListener('update', this.updateList)
+    this.inWorkStore && this.inWorkStore.stop();
+    this.translatedStore && this.translatedStore.stop();
+    this.inWorkStore && this.inWorkStore.removeListener('update', this.updateWorkingList)
+    this.translatedStore && this.translatedStore.removeListener('update', this.updateTranslatedList)
     this.inWorkStore = null;
   }
 
@@ -624,7 +650,7 @@ class SideList extends React.Component{
       List,
       uuidOfActiveTab: activeTab,
       route,
-      title = "В работе",
+      title = this.props.title,
       isTablet,
       this: _rootSelf,
       Left = {
@@ -638,8 +664,8 @@ class SideList extends React.Component{
       page
     } = this.props;
 
-    let {inwork} = this.state;
-
+    let {list} = this.state;
+    let {typePage} = this.props.page;
     return (
       <div className="f sidebar">
           <BreadCrumbs
@@ -652,15 +678,7 @@ class SideList extends React.Component{
             Left={Left}
             Right={Right}
           />
-        {/*<Batch
-                  flushCount={10}
-                  flushInterval={150}
-                  count={this.state.items.length}
-                  render={this.list}
-                  debug
-              />*/}
-
-        {inwork.map((tab, index) => {
+        {list.map((tab, index) => {
           let publishTime = new Date(tab.started_at);
           let now = new Date();
           let outputPublishTime = ''; 
@@ -674,11 +692,11 @@ class SideList extends React.Component{
           if( publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() === now.getDate()){
             outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
           }
-
-          let duration =    tab.source_messages.length > 0 ? tab.source_messages[0].letters_count * this.getLangPropInObj({id: tab.translate_language_id, slug:'letter_time'}) : 0;
+                            //     inwork has sourcemessage
+          let duration =    tab.source_messages.length > 0 ? tab.source_messages[0].letters_count * this.getLangPropInObj({id: tab.translate_language_id, slug:'letter_time'}) : (new Date(tab.translated_at) - new Date(tab.started_at)) / 1000 ;
           return (
             <Link
-              to={{pathname: `${Routes[route].path}/${tab.id}`, state: {page:{typePage:route, id: tab.id}}}}
+              to={{pathname: `${Routes[route].path}/${typePage === 'history' ? tab.user_id : tab.id}`, state: {page:{typePage:route, id: typePage ===  'history' ? tab.user_id : tab.id}, historyUser: typePage ===  'history' ? tab.user : '', secondScreen: false, mainScreen: true}}}
               className={`f f-align-1-2 translator-tab ${tab.id === page.id ? "selected" : ""}`}
               key={index}
             >
@@ -686,7 +704,7 @@ class SideList extends React.Component{
               <div className="f f-col f-align-1-1 translator-tab-details">
                 <div className="translator-tab-title">{tab.user.first_name + ' ' + tab.user.last_name} </div>
                 <div className="translator-tab-content">
-                  {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}
+                  {tab.source_messages.length > 0 ?   tab.source_messages[tab.source_messages.length-1].content : tab.translate_messages[tab.translate_messages.length-1].content}
                 </div>
               </div>
               <div className="f f-col f-align-2-3 translator-tab-info">
@@ -704,6 +722,7 @@ class SideList extends React.Component{
                 <div className="translator-tab-info__duration">
                   {humanReadableTime(duration)}
                 </div>
+              
               </div>
             </Link>
           );
@@ -788,6 +807,7 @@ class FeedList extends React.Component {
   }
 
   componentDidMount(){
+    console.log('mount')
     this._isMounted = true;
     let ids = Store.getIds('pending-topic');
     if(ids && ids.length > 0){ // get from cache 
@@ -820,6 +840,7 @@ class FeedList extends React.Component {
   }
 
   componentWillUnmount(){
+    console.log('Unmount')
     this.feedStore.stop();
     this.feedStore.removeListener('update', this.feedUpdateHandler);
     this.feedPros = null;
@@ -844,7 +865,8 @@ class FeedList extends React.Component {
     return function(e){
         TxRest.getDataByID(`join-topic/${id}`,{}).then(data => {
            if(data.message) return  // TODO: handle error
-          _self.setState({currentData: _self.state.currentData.splice(index,1)})
+          _self.state.currentData.splice(index,1);
+          _self.forceUpdate();
           _self.props.refresh('inwork');
         })
     }
@@ -854,29 +876,24 @@ class FeedList extends React.Component {
     let { location: { pathname }, isTablet, _self: parentThis, page: {typePage, id} } = this.props;
     let { currentData } = this.state;
     let _self = this;
-    if(currentData.length > 0){
-      currentData.map(message => {
-          message.duration = message.source_messages.length>0 ? message.source_messages[0].letters_count * this.getLangPropInObj({id: message.translate_language_id, slug:'letter_time'}) : 0
-      })
-    }
     let equalsType = false;
     if (typePage == 'personal') equalsType = typeof Number;
-
+    
     let query = {
-      perPage: 5,
+      perPage: 50,
       page: 1,
       fielteredField: {
         field1: {
           name: "translator_id",
-          equals: null, 
+          equals: null , 
           equalsType,
           diactivate: !(typePage === 'personal') && !(typePage === 'common')// is active
         }
       },
-      fielteredFieldRule: "some" // some || every
+      fielteredFieldRule: "every" // some || every
     };
     let FeedQuery = new Query(currentData, query),
-    filteredFeed = FeedQuery.filter();
+    filteredFeed = currentData; //FeedQuery.filter();
 
     const RenderCollection = renderItem => {
       return (
@@ -1115,6 +1132,7 @@ class Reply extends React.Component {
 	      "message": translateMessage
     }).then(data =>{
       if(data.id){
+        _self.props.refresh('inwork');
         _self.setState({translateMessage:'', redirectToFeed: true})
       }else{
         console.log(data) // TODO: handle error
@@ -1267,181 +1285,352 @@ class Reply extends React.Component {
 
 class HistoryList extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.id = this.props.page.id;
+    this.getLangPropInObj = this.getLangPropInObj.bind(this)
+    this._isMounted = false;
+    this.messageStore =null;
+    this.updateHandler = this.updateHandler.bind(this);    
+  }
+
+  state={
+    currentData: [],
+    translator: this.props.translator ? this.props.translator: {},
+    languages: this.props.languages
+  }
+
+  componentWillMount(){
+    this.messageStore = new MessageStore('translated-topic/user', this.id);
+    if(this.id)
+    this.setState({currentData: MessageStore.getMessages('translated-topic/user', this.id) })
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+    this.messageStore.start();
+    this.messageStore.addListener('updateMessage', this.updateHandler)
+  }
+
+  updateHandler({list}){
+    this.setState({currentData : list})
+  }
+
+  componentWillReceiveProps({languages, id, translator}){
+    let _self = this;
+    if(!_self._isMounted) return 
+    if(id)
+      this.setState({currentData: MessageStore.getMessages('translated-topic/user', id)})
+
+    this.setState({languages, translator});
+  }
+
+  getLangPropInObj({id,slug}){
+    if(!this._isMounted) return 
+    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  }
+
   shouldComponentUpdate(nextProps, nextState){
 
     if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
       return true
     }
-    console.log('not rerender')
     return false
   }
 
-  state = {
-    currentData: []
+  copy(e) {
+    let textAreaSelector = null;
+    try {
+      Array.from(e.currentTarget.closest('.dashboard-user__history-reply').children).forEach((value, index) => {  // hard coded selector I should make up better
+        if (value.querySelector('textarea')) {
+          textAreaSelector = value.querySelector('textarea');
+          textAreaSelector.disabled = false;
+          textAreaSelector.select();
+        }
+      })
+      var successful = document.execCommand('copy');
+      textAreaSelector.disabled = true;
+    } catch (err) {
+      console.log('Ха ха - бери, и копируй руками');
+    }
   }
 
   render() {
-    let { isTablet, _self,  } = this.props;
-    let {currentData } = this.state;
-    const RenderCollection = renderItem => {
-      return (
-        <div>
-            <BreadCrumbs
-                this={_self}
-                isTablet={isTablet}
-                Title={{
-                    title:  currentData[Object.keys(currentData)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
-                    shownOnDesktop: false
+    let {isTablet, historyUser, _self} = this.props;
+    let { currentData, translator } = this.state || {currentData: []};
+    if (!currentData.length)
+      return(<div/>)
+    currentData = currentData.reverse();
+   
+    const renderCollection = renderItem => (
+      <ScrollToDown  className={'f f-col dashboard-user__history'} >
+        <BreadCrumbs
+            this={_self}
+            isTablet={isTablet}
+            Title={{
+                title:  currentData[Object.keys(currentData)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
+                shownOnDesktop: false
+            }}
+            Left={{
+                leftBtn: true,
+                leftBtnName: "Меню",
+                newLeftBtnState: { mainScreen: true, sidebar: true }
                 }}
-                Left={{
-                    leftBtn: true,
-                    leftBtnName: "Меню",
-                    newLeftBtnState: { mainScreen: true, sidebar: true }
-                    }}
-                Right={{
-                rightBtn: true,
-                rightBtnName: "История",
-                newRightBtnState: {
-                    mainScreen: false,
-                    secondScreen: true,
-                    sidebar: false
-                }
-                }}
-            />
-          {Object.values(currentData).map((data, index) => {
-            let publishTime = new Date(data.publishTime);
-            return renderItem(data, index, publishTime);
-          })}
+            Right={{
+            rightBtn: true,
+            rightBtnName: "История",
+            newRightBtnState: {
+                mainScreen: false,
+                secondScreen: true,
+                sidebar: false
+            }
+            }}
+        />
+        {/* ALl merged history */}
+
+        {currentData.map((item, idx) => renderItem(item, idx))}
+        
+        {/* Create new history  with certain translator*/}
+        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-create'}>
+          <div className={'dashboard-user__history-reply__avatar'}></div>
+          <Link to={{pathname:'/dashboard/create',state:{mainScreen:true, translator: translator,  page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__history-create__content" >
+            <div className="dashboard-user__history-create__content__plus"></div>
+            <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
+          </Link>
+          <div className={'dashboard-user__history-reply__constols'}></div>
+          <div className={'dashboard-user__history-post__date'}></div>
         </div>
-      );
-    };
-    return (Object.entries(currentData).length === 0
-            ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
-                <div className={"translator-feed__avatar"}>
-                    <img src={avatar} />
-                </div>
-                <div className={"f f-align-2-2 translator-feed__placeholder"}>
-                    <span>История отсутствуют</span>
-                </div>
+
+      </ScrollToDown>
+    )
+
+    return ( renderCollection((currentData, idx) => {
+      if(!currentData || !currentData.source_messages.length )
+          return <div key={idx} />
+      let created_at = new Date(currentData.created_at);
+      let translated_at = new Date(currentData.translated_at);
+      let started_at = new Date(currentData.started_at);
+    
+      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'});
+      let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
+      let duration =  (translated_at - started_at)/1000 ; //sec
+
+      return (
+        <div key={idx}>
+          <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
+            <div className={'dashboard-user__history-post__avatar'}>
+              <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
+            </div>
+            <div className={'dashboard-user__history-post__content'}>
+              <div className={'dashboard-user__history-post__content__text'}>
+                {currentData.source_messages.length > 0 &&  currentData.source_messages[currentData.source_messages.length-1].content}
               </div>
-            : RenderCollection((currentData, index, publishTime) => (
-                <div key={index} className={"f f-col f-align-1-1 translator-history"}>
-                    <div className={"data__delimiter"}>
-                    {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())}
-                    ,
-                    {" "}{publishTime.getFullYear()}{" "}
-                    </div>
-                    <div className={"f f-align-1-1 f-gap-2 translator-history-post "}>
-                    <div className={"translator-history-post__avatar"}>
-                        <img src={currentData.avatar} alt={currentData.nickname} />
-                    </div>
-                    <div className={"translator-history-post__content"}>
-                        <div className={"translator-history-post__content__text"}>
-                        {currentData.content}
-                        </div>
-                        <div
-                        className={
-                            "f f-align-1-2 f-gap-4 translator-history-post__content__bottombar"
-                        }
-                        >
-                        <LangLabel from={currentData.from} to={currentData.to} />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={icon_dur}
-                            value={humanReadableTime(currentData.duration)}
-                            hint={"Длительность перевода"}
-                        />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={
-                            <Timer
-                                start={currentData.startWorkingTime}
-                                duration={currentData.duration}
-                                isBig={true}
-                            />
-                            }
-                            value={humanReadableTime(
-                            currentData.duration -
-                                (new Date() - new Date(currentData.startWorkingTime)) / 1000
-                            )}
-                            hint={"Оставшееся время"}
-                        />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={icon_letternum}
-                            value={currentData.letterNumber}
-                            hint={"Количество символов"}
-                        />
-                        <Indicator
-                            className={"f f-align-2-2"}
-                            icon={icon_cost}
-                            value={currentData.cost}
-                            hint={"Стоимость"}
-                        />
+              <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
+                {currentData.source_language_id && currentData.translate_language_id &&  
+                    <LangLabel 
+                      from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
+                      to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
+                      />
+                } 
+                {currentData.source_messages.length > 0 &&
+                    <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(durationShouldBe)} hint={'Длительность перевода'} /> }
 
-                        </div>
-                    </div>
-                    <div className={"translator-history-post__constols"} />
-                    <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-                    </div>
-                    </div>
+                {currentData.translated_at && currentData.started_at &&
+                <Indicator
+                  className={'f f-align-2-2'}
+                  icon={
+                    <Timer
+                      start={started_at}
+                      duration={duration}
+                      isBig={true}
+                      finish={finishShouldBe}
+                    />
+                  }
+                  value={humanReadableTime((duration))} // sec
+                  hint={'Оставшееся время'} />
+                }
+                {currentData.source_messages.length > 0 &&
+                <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
+                {currentData.source_messages.length > 0 &&
+                <Indicator className={'f f-align-2-2'} icon={icon_cost} value={`${(currentData.price/100).toFixed(2)}₴`} hint={'Стоимость'} />}
+              </div>
+            </div>
+            <div className={'dashboard-user__history-post__constols'}>
+            </div>
+            {started_at && <div className={'dashboard-user__history-post__date'}>
+              {started_at.getHours()}:{getFullTimeDigits(started_at.getMinutes())}
+            </div>}
+          </div>
 
-                    <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
-                    <div className={"translator-history-reply__avatar"}>
-                        <img src={currentData.avatar} alt={currentData.nickname} />
-                    </div>
-                    <div className={"translator-history-reply__content"}>
-                        <textarea
-                        className={"translator-history-reply__content__text"}
-                        disabled
-                        value={currentData.content}
-                        />
-                    </div>
-                    <div className={"translator-history-reply__constols"}>
-                        <button
-                        className={"btn btn-primiry btn-mini f f-align-2-2"}
-                        onClick={this.copy}
-                        >
-                        <img src={copy} alt="copy" />
-                        <span>Копировать</span>
 
-                        </button>
-                    </div>
-                    <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-                    </div>
-                    </div>
-                    <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
-                    <div className={"translator-history-reply__avatar"}>
-                        <img src={currentData.avatar} alt={currentData.nickname} />
-                    </div>
-                    <div className={"translator-history-reply__content"}>
-                        <textarea
-                        className={"translator-history-reply__content__text"}
-                        disabled
-                        value={currentData.content}
-                        />
-                    </div>
-                    <div className={"translator-history-reply__constols"}>
-                        <button
-                        className={"btn btn-primiry btn-mini f f-align-2-2"}
-                        onClick={this.copy}
-                        >
-                        <img src={copy} alt="copy" />
-                        <span>Копировать</span>
-                        <input type="hidden" value={currentData.content} />
-                        </button>
-                    </div>
-                    <div className={"translator-history-post__date"}>
-                        {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-                    </div>
-                    </div>
+          <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>
 
-                </div>
-                ))
-    );
+
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
+            <div className={'dashboard-user__history-reply__avatar'}>
+              <img src={historyUser.image || avatar} alt={historyUser.first_name} />
+            </div>
+            <div className={'dashboard-user__history-reply__content'}>
+              <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
+                      if(node == null) return
+                      ref = node;
+                      if( !(_self.props.isTablet && isTablet) ){ // when has changed
+                        start = 50;
+                        isTablet = _self.props.isTablet;
+                      }
+                      start = Math.max(ref.scrollHeight, start);
+                      ref.style.height = start + 'px';
+                    }})()}  className={'dashboard-user__history-reply__content__text'} disabled  value={currentData.translate_messages.length > 0 && currentData.translate_messages[currentData.translate_messages.length-1].content} />
+            </div>
+            <div className={'dashboard-user__history-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy}>
+                <img src={copy} alt="copy" />
+                <span>Копировать</span>
+
+              </button>
+            </div>
+            <div className={'dashboard-user__history-reply__date'}>
+              {translated_at.getHours()}:{getFullTimeDigits(translated_at.getMinutes())}
+            </div>
+          </div>
+        </div>
+      )
+    })
+    )
   }
+  // render() {
+  //   let { isTablet, _self,  } = this.props;
+  //   let {currentData } = this.state;
+  //   debugger;
+  //   const RenderCollection = renderItem => {
+  //     return (
+  //       <div>
+  //           <BreadCrumbs
+  //               this={_self}
+  //               isTablet={isTablet}
+  //               Title={{
+  //                   title:  currentData[Object.keys(currentData)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
+  //                   shownOnDesktop: false
+  //               }}
+  //               Left={{
+  //                   leftBtn: true,
+  //                   leftBtnName: "Меню",
+  //                   newLeftBtnState: { mainScreen: true, sidebar: true }
+  //                   }}
+  //               Right={{
+  //               rightBtn: true,
+  //               rightBtnName: "История",
+  //               newRightBtnState: {
+  //                   mainScreen: false,
+  //                   secondScreen: true,
+  //                   sidebar: false
+  //               }
+  //               }}
+  //           />
+  //         {Object.values(currentData).map((data, index) => {
+  //           let publishTime = new Date(data.publishTime);
+  //           return renderItem(data, index, publishTime);
+  //         })}
+  //       </div>
+  //     );
+  //   };
+  //   return (Object.entries(currentData).length === 0
+  //           ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
+  //               <div className={"translator-feed__avatar"}>
+  //                   <img src={avatar} />
+  //               </div>
+  //               <div className={"f f-align-2-2 translator-feed__placeholder"}>
+  //                   <span>История отсутствуют</span>
+  //               </div>
+  //             </div>
+  //           : RenderCollection((currentData, index, publishTime) => (
+  //               <div key={index} className={"f f-col f-align-1-1 translator-history"}>
+  //                   <div className={"data__delimiter"}>
+  //                   {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())}
+  //                   ,
+  //                   {" "}{publishTime.getFullYear()}{" "}
+  //                   </div>
+  //                   <div className={"f f-align-1-1 f-gap-2 translator-history-post "}>
+  //                   <div className={"translator-history-post__avatar"}>
+  //                       <img src={currentData.avatar} alt={currentData.nickname} />
+  //                   </div>
+  //                   <div className={"translator-history-post__content"}>
+  //                       <div className={"translator-history-post__content__text"}>
+  //                       {currentData.content}
+  //                       </div>
+  //                       <div className={"f f-align-1-2 f-gap-4 translator-history-post__content__bottombar"}>
+  //                       <LangLabel from={currentData.from} to={currentData.to} />
+  //                       <Indicator
+  //                           className={"f f-align-2-2"}
+  //                           icon={icon_dur}
+  //                           value={humanReadableTime(currentData.duration)}
+  //                           hint={"Длительность перевода"}
+  //                       />
+  //                       <Indicator
+  //                           className={"f f-align-2-2"}
+  //                           icon={
+  //                           <Timer
+  //                               start={currentData.startWorkingTime}
+  //                               duration={currentData.duration}
+  //                               isBig={true}
+  //                           />
+  //                           }
+  //                           value={humanReadableTime(
+  //                           currentData.duration -
+  //                               (new Date() - new Date(currentData.startWorkingTime)) / 1000
+  //                           )}
+  //                           hint={"Оставшееся время"}
+  //                       />
+  //                       <Indicator
+  //                           className={"f f-align-2-2"}
+  //                           icon={icon_letternum}
+  //                           value={currentData.letterNumber}
+  //                           hint={"Количество символов"}
+  //                       />
+  //                       <Indicator
+  //                           className={"f f-align-2-2"}
+  //                           icon={icon_cost}
+  //                           value={currentData.cost}
+  //                           hint={"Стоимость"}
+  //                       />
+
+  //                       </div>
+  //                   </div>
+  //                   <div className={"translator-history-post__constols"} />
+  //                   <div className={"translator-history-post__date"}>
+  //                       {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
+  //                   </div>
+  //                   </div>
+
+  //                   <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
+  //                   <div className={"translator-history-reply__avatar"}>
+  //                       <img src={currentData.avatar} alt={currentData.nickname} />
+  //                   </div>
+  //                   <div className={"translator-history-reply__content"}>
+  //                       <textarea
+  //                       className={"translator-history-reply__content__text"}
+  //                       disabled
+  //                       value={currentData.content}
+  //                       />
+  //                   </div>
+  //                   <div className={"translator-history-reply__constols"}>
+  //                       <button
+  //                       className={"btn btn-primiry btn-mini f f-align-2-2"}
+  //                       onClick={this.copy}
+  //                       >
+  //                       <img src={copy} alt="copy" />
+  //                       <span>Копировать</span>
+
+  //                       </button>
+  //                   </div>
+  //                   </div>
+                    
+
+  //               </div>
+  //               ))
+  //   );
+  // }
 }
 
 export default withRouter(Translator);
