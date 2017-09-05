@@ -376,6 +376,7 @@ class Translator extends React.Component {
                       languages={languages}
                       personal
                       refresh = {this.refresh}
+                      registerRefreshComponent={this.registerRefreshComponent}
                     />
                     <RoutePassProps
                       exact
@@ -387,6 +388,7 @@ class Translator extends React.Component {
                       languages={languages}
                       common
                       refresh = {this.refresh}
+                      registerRefreshComponent={this.registerRefreshComponent}
                     />
                     <RoutePassProps
                       path={Routes["personal"].path}
@@ -396,6 +398,7 @@ class Translator extends React.Component {
                       languages={languages}
                       isTablet={isTablet}
                       refresh = {this.refresh}
+                      registerRefreshComponent={this.registerRefreshComponent}
                     />
                     <RoutePassProps
                       path={`${Routes["history"].path}${Routes["history"].param}`}
@@ -447,6 +450,7 @@ class Translator extends React.Component {
                   registerRefreshComponent = {this.registerRefreshComponent}
                   languages={languages}
                   page={page}
+                  refresh = {this.refresh}
                 />
               </div>
             )}
@@ -599,7 +603,7 @@ class SideList extends React.Component{
       this.translatedStore.addListener('update', this.updateTranslatedList);
 
     }else{
-
+        // code for inwork sidebar 
       if(this.props.page.id){
           this.sendDataToReply = true;
       }
@@ -622,6 +626,13 @@ class SideList extends React.Component{
 
   updateWorkingList(data){
     if(!this._isMounted) return
+
+    // use for block get more than 3 works at one time
+    if(data.list.length === 3){
+      this.props.refresh('feedExcess', true);
+    }else{
+      this.props.refresh('feedExcess', false);
+    }
 
     this.setState({list: data.list})
     if(this.sendDataToReply)
@@ -803,7 +814,8 @@ class FeedList extends React.Component {
 
   state = {
     currentData: [],
-    languages: []
+    languages: [],
+    isfeedExcess: false
   }
 
   componentDidMount(){
@@ -821,6 +833,9 @@ class FeedList extends React.Component {
     this.feedStore.addListener('update', this.feedUpdateHandler);
 
     this.setState({languages: this.props.languages})
+
+    let _self = this; 
+    this.props.registerRefreshComponent('feedExcess', isfeedExcess => _self.setState({isfeedExcess}))
   }
 
   feedUpdateHandler(data){
@@ -874,7 +889,7 @@ class FeedList extends React.Component {
 
   render() {
     let { location: { pathname }, isTablet, _self: parentThis, page: {typePage, id} } = this.props;
-    let { currentData } = this.state;
+    let { currentData, isfeedExcess } = this.state;
     let _self = this;
     let equalsType = false;
     if (typePage == 'personal') equalsType = typeof Number;
@@ -941,7 +956,7 @@ class FeedList extends React.Component {
             </div>
         </div>
       : RenderCollection((feed, index) => (
-          <div key={index} className={"f f-align-1-33 translator-feed can__get__more u-mx-3 u-my-2"}>
+          <div key={index} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'can__get__more'} u-mx-3 u-my-2`}>
             <div className={"translator-feed__avatar"}>
               <img src={avatar} alt={feed.user.first_name} />
               {currentData.isTablet &&
