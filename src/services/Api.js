@@ -7,6 +7,7 @@ export const TxRest = (() => {
     const port = ':8080';
 
     function initSocket(){
+
           if(!AuthStore.isAuthenticated || AuthStore.alreadyInitSocket) return
 
           let _self = this;
@@ -23,6 +24,7 @@ export const TxRest = (() => {
           
           })(document, 'script', 'sails-io', () => {
               console.log(process.env.NODE_ENV)
+              
               window.io.sails.url = socketHost + port;
               window.io.sails.environment = process.env.NODE_ENV;
               window.io.sails.useCORSRouteToGetCookie = false;
@@ -57,6 +59,8 @@ export const TxRest = (() => {
               }
               window.io.socket.get(AuthStore.socketPath);
               !window.io.socket.isConnected() && window.io.socket.reconnect()
+          }{
+            this.initSocket();
           }
     }
 

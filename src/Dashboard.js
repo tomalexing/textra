@@ -56,6 +56,7 @@ import Store from './store/Store.js';
 import MessageStore from './store/MessageStore.js';
 import {TxRest} from './services/Api.js';
 
+
 const getTabTime = (time) => {
     let now = new Date();
     let outputPublishTime = ''; 
@@ -114,6 +115,7 @@ class DashBoard extends React.Component {
   } 
 
   componentDidMount(){
+    
     this._isMounted = true;
 
     this.listeners.push(
@@ -306,7 +308,7 @@ class DashBoard extends React.Component {
         
         <div className="f h100">
           <div className="f f-align-2-2 outer-left"  style={{display:`${!isTablet?'flex':mainScreen?'none':'flex'}`}}>
-            <ScrollRestortion scrollId={`sidebarUserDb`}  className={'f sidebar scrollRestortionArea'} >
+            <ScrollRestortion scrollId={`sidebarUserDb`}  className={'f sidebar'} >
               {/* CREATE TAB */}
               <Link to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__create-tab" >
                 <div className="dashboard-user__create-tab-plus">
@@ -529,7 +531,7 @@ class HistoryList extends React.Component {
     currentData = currentData.reverse();
     console.log(currentData);
     const renderCollection = renderItem => (
-      <ScrollRestortion scrollId={`history${this.props.id}`}  className={'f f-col dashboard-user__history scrollRestortionArea'} >
+      <ScrollRestortion scrollId={`history${this.props.id}`}  className={'f f-col dashboard-user__history'} >
         
         {/* ALl merged history */}
 

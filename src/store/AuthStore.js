@@ -51,7 +51,7 @@ const  Auth = {
   removeListener(name){
     delete this.listeners[name];
   },
-  authorize(cb, data) {
+    authorize(cb, data) {
     return new Promise((resolve, reject) => {
       this.isAuthenticated = true;
       this.role = ROLES(data.user.role);
@@ -79,7 +79,6 @@ const  Auth = {
   },
   authenticate(cb, data){
     return new Promise((resolve, reject) => {
-      console.log(this)
       this.isAuthenticated = true;
       this.role = ROLES(data.user.role);
       this.socketPath = SOCKETPATH(data.user.role);
@@ -119,7 +118,6 @@ const  Auth = {
       TxRest.getData('refreshToken').then(data => {
         self.token = data.token;
         window.localStorage.setItem('token', self.token);
-        
       })
   },
   signout(cb) {
@@ -130,6 +128,7 @@ const  Auth = {
       window.localStorage.removeItem('isLoggedIn');
       //window.localStorage.removeItem('user');
       window.localStorage.removeItem('token');
+      this.alreadyInitSocket = false;
       if (typeof cb === 'function') cb();
       resolve();
     })
