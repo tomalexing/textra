@@ -249,19 +249,41 @@ if (typeof fn === 'function') {
 }
 };
 
-class ScrollToDownClass extends React.Component {
-  componentDidUpdate(prevProps) {
+export class ScrollRestortion extends React.Component {
 
-      let el = document.getElementsByClassName(this.props.className.split(' ').filter(o => o.startsWith('dashboard')));
-      el && el.length > 0 && el[0].scrollTo(0, el[0].clientHeight + 1000)
+  componentDidMount(){
+    this.scrollId =  this.props.scrollId;
+    if(this.scrollId){
+      let el = this.refs[this.scrollId];
+      if(el){
+        this.notListen = listener(el, "scroll", debounce((e) => {
+          console.log(e.target.scrollTop);
+          if(typeof window !== "undefined"){
+            window.sessionStorage.setItem(`ScrollRestortion${this.scrollId}`, e.target.scrollTop)
+          }
+        }, 500), false);
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+      if(typeof window !== "undefined" && this.scrollId){
+        var scrollPos = window.sessionStorage.getItem(`ScrollRestortion${this.scrollId}`);
+        let el = this.refs[this.scrollId];
+        el && el.scrollTo(0, scrollPos || el.scrollHeight)
+      }
     
   }
 
+  componentWillUnmount(){
+   this.scrollId && this.notListen();
+  }
+
   render() {
-    return React.createElement('div', {className:this.props.className},this.props.children);
+    let {scrollId, ...domProps} = this.props;
+    return React.createElement('div', {...domProps, ref: `${scrollId}`},this.props.children);
   }
 }
-export const ScrollToDown = withRouter(ScrollToDownClass)
 
 export  function withGracefulUnmount(WrappedComponent) {
 
@@ -326,4 +348,5 @@ util.getMonthName = getMonthName
 util.quickSort = quickSort
 util.call = call
 util.withGracefulUnmount = withGracefulUnmount
+util.ScrollRestortion = ScrollRestortion
 export default util 

@@ -37,7 +37,7 @@ import {
     getFullTimeDigits,
     getDayName,
     quickSort,
-    ScrollToDown,
+    ScrollRestortion,
     withGracefulUnmount
 } from './utils';
 import formSerialize from 'form-serialize';
@@ -306,7 +306,7 @@ class DashBoard extends React.Component {
         
         <div className="f h100">
           <div className="f f-align-2-2 outer-left"  style={{display:`${!isTablet?'flex':mainScreen?'none':'flex'}`}}>
-            <div className="f sidebar" >
+            <ScrollRestortion scrollId={`sidebarUserDb`}  className={'f sidebar scrollRestortionArea'} >
               {/* CREATE TAB */}
               <Link to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__create-tab" >
                 <div className="dashboard-user__create-tab-plus">
@@ -400,7 +400,7 @@ class DashBoard extends React.Component {
                   </Link>
                 )
               })}
-            </div>
+            </ScrollRestortion>
           </div>
           <div className="f outer-right" ref={n => this.toggleElem = n}  style={{display:`${!isTablet?'flex':mainScreen?'flex':'none'}`}}>
             <div className="main f f-col f-align-2-2">
@@ -529,7 +529,7 @@ class HistoryList extends React.Component {
     currentData = currentData.reverse();
     console.log(currentData);
     const renderCollection = renderItem => (
-      <ScrollToDown  className={'f f-col dashboard-user__history'} >
+      <ScrollRestortion scrollId={`history${this.props.id}`}  className={'f f-col dashboard-user__history scrollRestortionArea'} >
         
         {/* ALl merged history */}
 
@@ -546,7 +546,7 @@ class HistoryList extends React.Component {
           <div className={'dashboard-user__history-post__date'}></div>
         </div>
 
-      </ScrollToDown>
+      </ScrollRestortion>
     )
 
     return ( renderCollection((currentData, idx) => {
@@ -902,9 +902,9 @@ class Create extends React.Component {
   }
 
   onSubmit(e){
+    e.preventDefault();
     if(!this._isMounted) return
     if(this.state.blockSubmit) return
-    e.preventDefault();
     this.state.blockSubmit = true;
     let {create:{to, from, message, translator}} = formSerialize(e.target, { hash: true, empty: true });
     if(message.length === 0) return

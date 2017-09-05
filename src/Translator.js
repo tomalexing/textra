@@ -41,7 +41,7 @@ import {
   getFullTimeDigits,
   getDayName,
   call,
-  ScrollToDown
+  ScrollRestortion
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -667,7 +667,7 @@ class SideList extends React.Component{
     let {list} = this.state;
     let {typePage} = this.props.page;
     return (
-      <div className="f sidebar">
+      <ScrollRestortion scrollId={`sidebarTranslatorDb`}  className={'f sidebar'} >
           <BreadCrumbs
             this={_rootSelf}
             isTablet={isTablet}
@@ -704,7 +704,7 @@ class SideList extends React.Component{
               <div className="f f-col f-align-1-1 translator-tab-details">
                 <div className="translator-tab-title">{tab.user.first_name + ' ' + tab.user.last_name} </div>
                 <div className="translator-tab-content">
-                  {tab.source_messages.length > 0 ?   tab.source_messages[tab.source_messages.length-1].content : tab.translate_messages[tab.translate_messages.length-1].content}
+                  {tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1].content : tab.translate_messages.length > 0 ? tab.translate_messages[tab.translate_messages.length-1].content : ''}
                 </div>
               </div>
               <div className="f f-col f-align-2-3 translator-tab-info">
@@ -727,7 +727,7 @@ class SideList extends React.Component{
             </Link>
           );
         })}
-      </div>
+      </ScrollRestortion>
     );
   };
 }
@@ -1363,7 +1363,7 @@ class HistoryList extends React.Component {
     currentData = currentData.reverse();
    
     const renderCollection = renderItem => (
-      <ScrollToDown  className={'f f-col dashboard-user__history'} >
+     <ScrollRestortion scrollId={`history${this.id}`}  className={'f f-col dashboard-user__history'} >
         <BreadCrumbs
             this={_self}
             isTablet={isTablet}
@@ -1401,7 +1401,7 @@ class HistoryList extends React.Component {
           <div className={'dashboard-user__history-post__date'}></div>
         </div>
 
-      </ScrollToDown>
+      </ScrollRestortion>
     )
 
     return ( renderCollection((currentData, idx) => {
