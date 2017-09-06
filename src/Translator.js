@@ -720,8 +720,30 @@ class SideList extends React.Component{
               </div>
               <div className="f f-col f-align-2-3 translator-tab-info">
                 <div className="translator-tab-info__time">
-                  <time
-                  >{outputPublishTime}</time>
+                  <Batch
+                    flushCount={0}
+                    flushInterval={200} 
+                    count={1}
+                    debug={false}
+                    render={(()=> {
+                       if(this.props.page.typePage !== 'history'){
+                        let start = tab['created_at'];
+                        let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+
+                        return <Timer start={start} duration={duration} />
+
+                      }else{
+                        let created_at = new Date(tab.created_at);
+                        let translated_at = new Date(tab.translated_at);
+                        let started_at = new Date(tab.started_at);
+                        let durationShouldBe = tab.translate_messages.length > 0 ? tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+                        let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
+                        let duration =  (translated_at - started_at)/1000 ; //sec
+                        return <Timer start={started_at} duration={duration} finish={finishShouldBe}/>
+                      }
+                      //console.log(value)
+                    }).bind(this)}/>
+                  <time>{outputPublishTime}</time>
                 </div>
                 {tab.source_language_id && tab.translate_language_id &&  
                   <LangLabel 
@@ -1306,7 +1328,8 @@ class HistoryList extends React.Component {
     this.getLangPropInObj = this.getLangPropInObj.bind(this)
     this._isMounted = false;
     this.messageStore =null;
-    this.updateHandler = this.updateHandler.bind(this);    
+    this.updateHandler = this.updateHandler.bind(this);
+    this.lastCreatedDate = null;
   }
 
   state={
@@ -1376,7 +1399,7 @@ class HistoryList extends React.Component {
     if (!currentData.length)
       return(<div/>)
     currentData = currentData.reverse();
-   
+    this.lastCreatedDate = null;
     const renderCollection = renderItem => (
      <ScrollRestortion scrollId={`history${this.id}`}  className={'f f-col dashboard-user__history'} >
         <BreadCrumbs
@@ -1405,16 +1428,6 @@ class HistoryList extends React.Component {
 
         {currentData.map((item, idx) => renderItem(item, idx))}
         
-        {/* Create new history  with certain translator*/}
-        <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-create'}>
-          <div className={'dashboard-user__history-reply__avatar'}></div>
-          <Link to={{pathname:'/dashboard/create',state:{mainScreen:true, translator: translator,  page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__history-create__content" >
-            <div className="dashboard-user__history-create__content__plus"></div>
-            <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
-          </Link>
-          <div className={'dashboard-user__history-reply__constols'}></div>
-          <div className={'dashboard-user__history-post__date'}></div>
-        </div>
 
       </ScrollRestortion>
     )
@@ -1430,9 +1443,14 @@ class HistoryList extends React.Component {
       let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
       let duration =  (translated_at - started_at)/1000 ; //sec
 
+
+      let showHeaderDate = this.lastCreatedDate !== null ? this.lastCreatedDate === created_at : true
+      this.lastCreatedDate = created_at;
+
+
       return (
         <div key={idx}>
-          <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>
+          { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()}</div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
               <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
@@ -1478,9 +1496,7 @@ class HistoryList extends React.Component {
             </div>}
           </div>
 
-
-          <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>
-
+          {/* RESPONSE */}
 
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
             <div className={'dashboard-user__history-reply__avatar'}>

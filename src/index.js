@@ -27,6 +27,7 @@ injectTapEventPlugin();
 if (navigator.userAgent.indexOf('Safari') != -1 &&  navigator.userAgent.indexOf('Chrome') == -1) {
     addClass(document.body, "safari");
 }
+  console.log(navigator.userAgent);
 
 // ====================================
 // ========= Lazy loadin ==============

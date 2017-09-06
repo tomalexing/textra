@@ -38,7 +38,8 @@ import {
     getDayName,
     quickSort,
     ScrollRestortion,
-    withGracefulUnmount
+    withGracefulUnmount,
+    getTabTime
 } from './utils';
 import formSerialize from 'form-serialize';
 import Select from 'react-select';
@@ -56,22 +57,6 @@ import Store from './store/Store.js';
 import MessageStore from './store/MessageStore.js';
 import {TxRest} from './services/Api.js';
 
-
-const getTabTime = (time) => {
-    let now = new Date();
-    let outputPublishTime = ''; 
-    
-    if(time.getFullYear() === now.getFullYear() && time.getMonth() === now.getMonth() && time.getDate() + 7 >  now.getDay() ){
-      outputPublishTime = getDayName(time.getDay());
-    }
-    if(time.getFullYear() !== now.getFullYear() || time.getMonth() !== now.getMonth() || time.getDate() + 7 <=  now.getDay()){
-      outputPublishTime = `${time.getDate()}.${getFullTimeDigits(time.getMonth())}.${time.getFullYear().toString().substr(-2, 2)}`;
-    }
-    if( time.getFullYear() === now.getFullYear() && time.getMonth() === now.getMonth() && time.getDate() === now.getDate()){
-      outputPublishTime = `${time.getHours()}:${getFullTimeDigits(time.getMinutes())}`
-    }
-    return outputPublishTime
-}
 
 class DashBoard extends React.Component {
 
@@ -285,6 +270,20 @@ class DashBoard extends React.Component {
       const { mainScreen } = this.props.location.state || { mainScreen: false }
       if(!this._isMounted)
       this.setState({mainScreen});
+
+      let languageStoredIds = Store.getIds('language');
+      if(languageStoredIds && languageStoredIds.length) {
+        let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
+        this.updateLanguageHandler({list : langsFromStore});
+      }
+
+
+      let translatorStoredIds = Store.getIds('translator');
+      if(translatorStoredIds && translatorStoredIds.length) {
+        let translatorListFromStore = translatorStoredIds.map(id => Store.getItem(id));
+        this.updateTranslatorHandler({list : translatorListFromStore});
+      }
+
   }
   
   shouldComponentUpdate(nextProps, nextState){
@@ -448,6 +447,8 @@ class HistoryList extends React.Component {
     this.historyRoot = null;
     this.messageStore =null;
     this.updateHandler = this.updateHandler.bind(this);    
+    this.lastCreatedDate = null;
+
   }
   state={
     currentData: [],
@@ -522,10 +523,18 @@ class HistoryList extends React.Component {
     }
   }
 
+  componentWillUnmount(){
+    this._isMounted = false;
+    this.messageStore.stop();
+    this.messageStore.removeListener('updateMessage', this.updateHandler)
+    this.messageStore = null;
+  }
+
   render() {
     let { currentData, translator } = this.state || {currentData: []},
       _self = this; 
-        console.log(this.historyRoot)
+
+    this.lastCreatedDate = null;
     if (!currentData.length)
       return(<div/>)
     currentData = currentData.reverse();
@@ -562,9 +571,12 @@ class HistoryList extends React.Component {
       let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
       let duration =  (translated_at - started_at)/1000 ; //sec
 
+      let showHeaderDate = this.lastCreatedDate !== null ? this.lastCreatedDate === created_at : true
+      this.lastCreatedDate = created_at;
+
       return (
         <div key={idx}>
-          <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>
+          { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
               <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
@@ -611,7 +623,7 @@ class HistoryList extends React.Component {
           </div>
 
 
-          <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>
+           {/* RESPONSE */}
 
 
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
@@ -722,7 +734,7 @@ class Pending extends React.Component {
       created_at = new Date(currentData.created_at);
     }
     
-    if(currentData.source_messages.length > 0){
+    if(currentData.source_messages && currentData.source_messages.length > 0){
       var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
     }
     return (
@@ -859,7 +871,7 @@ class Create extends React.Component {
     if(translators){
         this.setState({translators})
     }
-    this.getTranslators();
+    this.getTranslators(translators);
 
   }
 
@@ -997,8 +1009,8 @@ class Create extends React.Component {
     })
   }
 
-  getTranslators() {
-    let {translators}  = this.state;
+  getTranslators(receivedLater) {
+    let {translators}  = !!receivedLater ? {translators:receivedLater} : this.props;
     if(!translators.length) return 
     return this.setState({ translatorsOpt: translators.map(item => {
           return {

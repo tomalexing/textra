@@ -179,7 +179,7 @@ export default class Store extends EventEmitter {
     if (typeof window === 'undefined') return
     TxRest.getData(this.type, this.onStoriesUpdated) 
     window.addEventListener('storage', this.onStorage)
-    if(AuthStore.alreadyInitSocket){
+    if(AuthStore.alreadyInitSocket && window.io){
       this.startSocket();
     }else{
       AuthStore.addListener('AuthStore.alreadyInitSocket', this.startSocket)

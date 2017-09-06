@@ -154,11 +154,7 @@ class Login extends React.Component {
               <div className="f f-col registform">
                 <h3 className="h1 u-mb-5 u-text-center" >Войти</h3>
                 <p className="u-mb-4"> Нужен акакаунт? {(
-                  this.state.isTablet ? (
-                      <button className="btn btn-flat" onClick={debounce(this.switchPanel.bind(this),500,false)} > Создать аккаунт</button>
-                    ):(
-                      <Link to="/signup" className="btn btn-flat"> Создать аккаунт</Link>
-                    )
+                    <Link to="/signup" className="btn btn-flat"> Создать аккаунт</Link>
                 )}</p>
                 <div className="f f-gap-2 registform-regist__social"> 
                   {/* <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button> */}
@@ -203,14 +199,14 @@ class Login extends React.Component {
           </div>
         </div>
         <div className="f outer-right" ref={n => this.toggleElem = n}>
-          <Link to={'/signup'}className="main f f-col f-fill f-align-2-2 u-text-undecor"  style={bgPic}>
+          <Link to={'/signup'} className="main f f-col f-fill f-align-2-2 u-text-undecor"  style={bgPic}>
             <div className="main-toregister">
                   <div className="main-regist__mini" >
-                    <h1 className="h3 u-mb-1" >
+                    <h1 className="h3 u-mb-2" >
                         Нет аккаунта? <br/>
                         Присоединяйтесь к нам!
                     </h1>
-                    <p className="u-mb-2">После регистрации у вас будет возможность получать быстрые переводы </p>
+                    <p className="h4 u-mb-2">После регистрации у вас будет возможность получать быстрые переводы </p>
                     <button  className="btn btn-primiry btn-block btn-normal">Зарегистрироваться</button>
                   </div>
             </div>

@@ -266,13 +266,12 @@ export class ScrollRestortion extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps){
       if(typeof window !== "undefined" && this.scrollId){
         var scrollPos = window.sessionStorage.getItem(`ScrollRestortion${this.scrollId}`);
         let el = this.refs[this.scrollId];
-        el && el.scrollTo(0, scrollPos || el.scrollHeight)
+        if( el ) el.scrollTop =  scrollPos || 0
       }
-    
   }
 
   componentWillUnmount(){
@@ -332,6 +331,22 @@ export  function withGracefulUnmount(WrappedComponent) {
 
 }
 
+export const getTabTime = (time) => {
+    let now = new Date();
+    let outputPublishTime = ''; 
+    
+    if(time.getFullYear() === now.getFullYear() && time.getMonth() === now.getMonth() && time.getDate() + 7 >  now.getDay() ){
+      outputPublishTime = getDayName(time.getDay());
+    }
+    if(time.getFullYear() !== now.getFullYear() || time.getMonth() !== now.getMonth() || time.getDate() + 7 <=  now.getDay()){
+      outputPublishTime = `${time.getDate()}.${getFullTimeDigits(time.getMonth())}.${time.getFullYear().toString().substr(-2, 2)}`;
+    }
+    if( time.getFullYear() === now.getFullYear() && time.getMonth() === now.getMonth() && time.getDate() === now.getDate()){
+      outputPublishTime = `${time.getHours()}:${getFullTimeDigits(time.getMinutes())}`
+    }
+    return outputPublishTime
+}
+
 util.listener = listener
 util.delegate = delegate
 util.removeClass = removeClass
@@ -349,4 +364,5 @@ util.quickSort = quickSort
 util.call = call
 util.withGracefulUnmount = withGracefulUnmount
 util.ScrollRestortion = ScrollRestortion
+util.getTabTime = getTabTime
 export default util 

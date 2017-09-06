@@ -22,6 +22,11 @@ body {
   color: #414141;
   font-style: normal; }
 
+.h4 {
+  font-size: 12px;
+  color: #414141;
+  font-style: normal; }
+
 p {
   font-size: 14px;
   color: #414141;
@@ -69,7 +74,7 @@ button {
 .btn-normal {
   height: 34px;
   line-height: 34px;
-  font-size: 16px; }
+  font-size: 14px; }
 
 .btn-mini {
   height: 22px;
@@ -747,7 +752,7 @@ input[type='submit']:focus {
         position: relative;
         z-index: 102;
         text-align: center;
-        margin: 30px 0; }
+        margin: 20px 0; }
         .signup-layout.outer .main-regist__form .registform-delimiter:before, .signup-layout.outer .main-regist__form .registform-delimiter:after {
           position: absolute;
           top: 50%;
@@ -802,6 +807,8 @@ input[type='submit']:focus {
       .safari .login-layout.outer .outer-left .sidebar .sidebar-regist__logo {
         /* autoprefixer: off */
         -webkit-flex-basis: auto; }
+    .login-layout.outer .outer-left .sidebar .registform-regist__social {
+      min-height: 34px; }
     .login-layout.outer .outer-left .sidebar .registform {
       flex-basis: 73%;
       padding: 28px;
@@ -2094,7 +2101,8 @@ input[type='submit']:focus {
       font-weight: 400;
       letter-spacing: -0.06px;
       line-height: 20px;
-      font-size: 14px; }
+      font-size: 14px;
+      white-space: pre-line; }
     .translator-post__content__bottombar {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
@@ -3091,6 +3099,8 @@ input[type='submit']:focus {
   .main__header .header-logo {
     max-width: 164px;
     flex: 1 1 auto; }
+    .main__header .header-logo img {
+      vertical-align: middle; }
     @media only screen and (max-width: 768px) {
       .main__header .header-logo {
         display: none; } }
@@ -3099,10 +3109,10 @@ input[type='submit']:focus {
       @media only screen and (max-width: 768px) {
         .main__header .header-logo__mobile {
           display: block;
-          img-width: 57px;
+          img-width: 37px;
           img-vertical-align: middle; } }
   .main__header .header-menu {
-    flex: 0 1 auto; }
+    flex: 1 1 auto; }
     @media only screen and (max-width: 768px) {
       .main__header .header-menu {
         display: none; } }
@@ -3205,7 +3215,8 @@ input[type='submit']:focus {
           white-space: nowrap;
           padding: 10px; }
   .main__header .header-account {
-    margin-left: auto; }
+    margin-left: auto;
+    justify-self: flex-end; }
     .main__header .header-account .header-details {
       margin-right: 7px; }
     .main__header .header-account .header-email {

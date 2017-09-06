@@ -116,7 +116,7 @@ class Header extends React.Component{
                  <div className="f f-align-2-2 header-logo__mobile">
                   <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
                 </div>
-                <ul className="f f-align-2-2 header-menu">
+                <ul className="f f-align-1-2 header-menu">
                   <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>
                   <NavLink to={'/about'}>О нас</NavLink>
                   <NavLink to={'/help'}>Поддержка</NavLink>

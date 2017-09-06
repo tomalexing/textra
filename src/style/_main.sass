@@ -59,6 +59,8 @@
   .header-logo
     max-width: 164px
     flex: 1 1 auto
+    img
+      vertical-align: middle
     +r(768)
       display: none
     &__mobile
@@ -66,10 +68,10 @@
       +r(768)
         display: block
         img: 
-          width: 57px
+          width: 37px
           vertical-align: middle
   .header-menu
-    flex: 0 1 auto
+    flex: 1 1 auto
     +r(768)
       display: none
     li
@@ -144,8 +146,9 @@
           padding: 10px
   .header-account
     margin-left: auto
+    justify-self: flex-end
     .header-details
-        margin-right: 7px
+      margin-right: 7px
     .header-email
       height: 16px
       color: $text-dark

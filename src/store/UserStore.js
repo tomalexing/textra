@@ -25,11 +25,10 @@ var showLists = {}
  * Populate the story list for the given story type from the cache.
  */
 function populateList(type, id) {
-  var ids = idCacheByUserId[type][id];
+  var ids = idCacheByUserId[type];
   var storyList = showLists[type][id];
-  var icby = itemCacheByUserId[id];
   for (var i = 0, l = ids.length; i < l; i++) {
-    storyList[i] = icby && icby[ids[i]] || null
+    storyList[i] = itemCacheByUserId[ids[i]] || null
   }
 }
 
@@ -72,11 +71,7 @@ export default class Store extends EventEmitter {
     
     // Ensure cache objects for this type are initialised
     if (!(type in idCacheByUserId)) {
-      idCacheByUserId[type] = Object.create(null);
-    }
-
-    if (!(id in idCacheByUserId[type])) {
-      idCacheByUserId[type][id] = [];
+      idCacheByUserId[type] = [];
     }
 
     if (!(id in itemCacheByUserId)) {
@@ -98,7 +93,7 @@ export default class Store extends EventEmitter {
 
   getState() {
     return {
-      ids: idCacheByUserId[this.type][this.id],
+      ids: idCacheByUserId[this.type],
       list: showLists[this.type][this.id]
     }
   }
@@ -122,14 +117,16 @@ export default class Store extends EventEmitter {
    * Handle 
    */
   onStoriesUpdated(data) {
-    idCacheByUserId[this.type][this.id] = data.value;
+    idCacheByUserId[this.type].unshift(data.id);
+    itemCacheByUserId[this.id] = data
+
     populateList(this.type, this.id)
     this.emit('updateRooms', this.getState())
   }
 
   start() {
     if (typeof window === 'undefined') return
-    TxRest.getDataByID(this.type, this.id , this.onStoriesUpdated) 
+    TxRest.getData(this.type + '/' + this.id , this.onStoriesUpdated) 
     window.addEventListener('storage', this.onStorage)
   }
 

@@ -40,7 +40,8 @@ import {
   getMonthName,
   getFullTimeDigits,
   dump,
-  quickSort
+  quickSort,
+  getTabTime
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -104,6 +105,11 @@ const Roles = [
     icon: { name: 'circle', color: 'red', size: 'small' },
   },
   {
+    text: 'Администратор',
+    value: 'd', // consroller
+    icon: { name: 'circle', color: 'black', size: 'small' },
+  },
+  {
     text: 'Переводчик',
     value: 't', // translator
     icon: { name: 'circle', color: 'blue', size: 'small' },
@@ -125,6 +131,33 @@ const Roles = [
   }, 
 ];
 
+
+const ROLES = (num) => {
+  switch(num){
+  case('0') : return('d')
+  case('1') : return('c')
+  case('2') : return('t')
+  case('3') : return ('u')
+  default   : return('user')
+  }
+};
+
+const GETINITIALROLE = (num) => {
+  switch(num){
+  case('d') : return('0')
+  case('c') : return('1')
+  case('t') : return('2')
+  case('u') : return ('3')
+  default   : return('3')
+  }
+};
+    // u - user
+    // c - controller
+    // t - translater
+    // p - possibility
+    // a - appeal
+    // o - other
+
 const findIcon = (objs, id, prop = 'icon') => Object.values(objs).find(o => o.value == id)[prop];
 
 
@@ -143,9 +176,8 @@ class Admin extends React.Component {
     this.doAtDidMount = [];
     this.store = null;
     this._isMounted = false;
-    this.list = this.list.bind(this);
     this.renders = 0;
-
+    this.updateLanguageHandler = this.updateLanguageHandler.bind(this);
     this.boundRef = this.boundRef.bind(this);
   }
 
@@ -198,6 +230,16 @@ class Admin extends React.Component {
         false
       )
     );
+
+    
+    this.languageStore = new Store('language');
+    let languageStoredIds = Store.getIds('language');
+    if(languageStoredIds && languageStoredIds.length) {
+      let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
+      this.updateLanguageHandler({list : langsFromStore});
+    }
+    this.languageStore.start();
+    this.languageStore.addListener('update', this.updateLanguageHandler);
   }
   
   componentWillReceiveProps(nextProps){
@@ -211,7 +253,6 @@ class Admin extends React.Component {
         historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
       }
     })
-
   }
 
   componentWillReceiveProps(props) {
@@ -237,6 +278,9 @@ class Admin extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.languageStore.stop();
+    this.languageStore.removeListener('update', this.updateLanguageHandler);
+    this.languageStore = null;
     this.listeners.forEach(removeEventListener => removeEventListener());
   }
 
@@ -249,20 +293,9 @@ class Admin extends React.Component {
     return false
   }
 
- 
-
-  list() {
-    const { items } = this.state;
-
-    return (
-      <div>
-        <p>Count: {items.length}</p>
-        <p>Renders: {this.renders++}</p>
-        <ul>
-          {items.map((v, i) => <li key={i}>{v}</li>)}
-        </ul>
-      </div>
-    );
+  updateLanguageHandler({list}){
+    if(!this._isMounted) return
+    this.setState({language: list})
   }
 
   boundRef = place => (n => (this[place] = n)).bind(this);
@@ -275,13 +308,7 @@ class Admin extends React.Component {
     let {usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
     let currentDate, user, allUsers = false;
 
-    switch(pageType){
-    case('user'):
-      user = Store.getItem(this.state.page.id)
-      break;
-    }
-
-    let { sidebar, secondScreen, mainScreen } = this.state;
+    let { sidebar, secondScreen, mainScreen, language } = this.state;
 
     return (
       <div className="f f-col outer admin">
@@ -324,9 +351,9 @@ class Admin extends React.Component {
             render={() => (
               <div ref={n => (this.secondScreen = n)} className="f f-align-2-2 f-col outer-left__expanded">
                 <SideList
-                  user={user}
                   route={`${Routes["user"].path}/${id}`}
                   page={this.state.page}
+                  language={language}
                 />
               </div>
             )}
@@ -399,19 +426,29 @@ class SideList extends React.PureComponent{
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted =  false;
     this.historyStore = null;
+    this.languageStore = null;
   }
   
   state = {
-    list: null,
-    ids: null
+    user: null,
+    pendingTabs: [],
+    workingTabs: [],
+    historyTabs: [],
+    language: this.props.language
   }
 
   componentDidMount(){
     this._isMounted = true;
-    this.historyStore = new UserStore('historyrooms', this.userId);
+    this.historyStore = new UserStore('user', this.userId);
     this.historyStore.start();
     this.historyStore.addListener('updateRooms', this.updateHandler);
 
+  }
+
+  componentWillReceiveProps({language}){
+    if(!this._isMounted) return
+    if(language)
+      this.setState({language})
   }
 
   componentWillUnmount() {
@@ -423,33 +460,57 @@ class SideList extends React.PureComponent{
 
   async updateHandler(data){
     if(!this._isMounted) return
-    if(data.list[0] === null){ // not cached
-       Promise.all(data.ids.map(id => {
-            return TxRest.getDataByID('historyroom', id);
-        })).then((data => {
-            data.map(((item, index) => {
-              if(!this._isMounted) return
-              this.historyStore.itemUpdated(item.value, this.userId, index)
-            }).bind(this))
-            this.setState(this.historyStore.getState())
-        }).bind(this));
-    }else{  
-      
-        this.setState(this.historyStore.getState())
-        Promise.all(data.ids.map(id => {
-            if(!this._isMounted) return
-            return TxRest.getDataByID('historyroom', id);
-        })).then((data => {
-              if(!this._isMounted) return
-              this.setState(this.historyStore.getState())
-        }).bind(this))
-    }
+    let rooms;
+    let user = data.list.map(item => {
+      rooms = item.topics;
+      return {
+        nickname: item.first_name + ' ' + item.last_name, 
+        uuid: item.id,
+        email: item.email, 
+        type: ROLES(item.role), 
+        registrationTime: item.created_at,
+        role: item.role,
+        totalTime: item.total_time,
+        amountLetters: item.total_letters,
+        balance: item.balance,
+        earnBalance: item.earn_balance,
+        status: item.status
+    }})[0];
+    
+    this.setState({
+      pendingTabs : rooms.filter(o => o.status === "0").map((item, idx) => {
+          return {
+            ...item,
+            avatar: avatar, 
+            index: idx
+          }
+      }),
+      workingTabs : rooms.filter(o => o.status === "1").map((item, idx) => {
+          return {
+            ...item,
+            avatar: avatar, 
+            index: idx
+          }
+      }),
+      historyTabs : rooms.filter(o => o.status === "2").map((item, idx) => {
+          return {
+            ...item,
+            avatar: avatar, 
+            index: idx
+          }
+      })
+    })
+    this.setState({user});
   } 
- 
-  render(){
-    let {user, page: {pageType, id, historyId}} = this.props;
 
-    let {list} = this.state;
+  getLangPropInObj({id,slug}){
+    return this.state.language && this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : 0
+  }
+
+  render(){
+    let {page: {pageType, id, historyId}} = this.props;
+
+    let {user, pendingTabs, workingTabs, historyTabs} = this.state;
     let route = `/admin/${pageType}/${id}`;
     let activeTab = historyId;
     if(!user){
@@ -458,7 +519,7 @@ class SideList extends React.PureComponent{
               <div className="admin-user-details">
                   <div className="admin-user-details__topArea">
                     <figure className="f f-align-2-2 admin-user-details__avatar">
-                      <img src={avatar} alt="Textra" />
+                      <img src={user && user.image || avatar} alt="Textra" />
                     </figure>
                     <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
                       <div className="admin-user-details__personalInfo__title">Загрузка</div>
@@ -470,35 +531,7 @@ class SideList extends React.PureComponent{
           </div>
     )}
 
-    if(user && !list){
-      let registrationTime = new Date(user.registrationTime);
-      return(<div className="f sidebar">
-                <div className="admin-user-details">
-                <div className="admin-user-details__topArea">
-                  <figure className="f f-align-2-2 admin-user-details__avatar">
-                    <img src={avatar} alt="Textra" />
-                  </figure>
-                  <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
-                    <div className="admin-user-details__personalInfo__title">{user.title} </div>
-                    <div className="admin-user-details__personalInfo__email">{user.email}</div>
-                    <div className={`admin-user-details__personalInfo__type admin-user-details__personalInfo__type${String.prototype.toUpperCase.call(user.type)}`}>
-                      {findIcon(Roles, user.type, 'text')}
-                    </div>
-                  </div>
-                </div>
-                <div className="admin-user-details__delimiter"></div>
-                <div className="admin-user-details__serviceInfo">
-                  <div className="f f-align-13-2 admin-user-details__serviceInfo__regData"><span>Дата регистрации:</span>
-                      <data>{registrationTime.getDay()}.{registrationTime.getMonth()}.{registrationTime.getFullYear()}</data></div>
-                  <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.duration)}</data></div>
-                  <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.letterNumber}</data></div>
-                  <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
-                </div>
-              </div>
-            </div>
-    )}
     let registrationTime = new Date(user.registrationTime);
-
     return(<div className="f sidebar">
         <div className="admin-user-details">
             <div className="admin-user-details__topArea">
@@ -506,7 +539,7 @@ class SideList extends React.PureComponent{
                 <img src={avatar} alt="Textra" />
               </figure>
               <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
-                <div className="admin-user-details__personalInfo__title">{user.title} </div>
+                <div className="admin-user-details__personalInfo__title">{user.nickname} </div>
                 <div className="admin-user-details__personalInfo__email">{user.email}</div>
                 <div className={`admin-user-details__personalInfo__type admin-user-details__personalInfo__type${String.prototype.toUpperCase.call(user.type)}`}>
                   {findIcon(Roles, user.type, 'text')}
@@ -516,13 +549,13 @@ class SideList extends React.PureComponent{
             <div className="admin-user-details__delimiter"></div>
             <div className="admin-user-details__serviceInfo">
               <div className="f f-align-13-2 admin-user-details__serviceInfo__regData"><span>Дата регистрации:</span>
-                  <data>{registrationTime.getDay()}.{registrationTime.getMonth()}.{registrationTime.getFullYear()}</data></div>
-              <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.duration)}</data></div>
-              <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.letterNumber}</data></div>
-              <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.cost}</data></div>
+                  <data>{registrationTime.getDate()}.{registrationTime.getMonth()}.{registrationTime.getFullYear()}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.totalTime)}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.amountLetters}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.role === "3" ?  user.balance : user.earnBalance}</data></div>
             </div>  
         </div>
-      {Object.values(list).map((tab, index) => {
+       {/* {list.map((tab, index) => {
         let publishTime = new Date(tab.publishTime);
         return (
           <Link
@@ -554,7 +587,90 @@ class SideList extends React.PureComponent{
             </div>
           </Link>
         );
-      })}
+      })} */}
+     {/* PENDINGS TABs */} 
+    { pendingTabs.map(tab => {
+      
+      return (
+        <Link  to={{pathname: `${route}/history/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.uuid}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} key={tab.index} >
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+          <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+            <div className="dashboard-user__tab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
+            > 
+            {tab.translator? `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`: 'Поиск переводчика'} 
+            </div>
+            <div className="dashboard-user__tab-content" title={`${tab.source_messages.length > 0 &&tab.source_messages[0].content}`}> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
+          </div>
+          <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+          </div>
+        </Link>
+      )
+    })}
+
+    {/* INWORK TABs */}
+    { workingTabs.map(tab => {
+      let publishTime = new Date(tab.created_at);
+      let outputPublishTime = getTabTime(publishTime);
+      let user = tab.user; 
+      return (
+        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} key={tab.index}>
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+          <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+            <div className="dashboard-user__tab-title">{ user.first_name + ' ' + user.last_name}</div>
+            <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
+          </div>
+          <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+              <div className="dashboard-user__tab-info__time">
+              <Batch
+                flushCount={0}
+                flushInterval={200} 
+                count={1}
+                debug={false}
+                render={(()=> {
+                  let start = tab['updated_at'];
+                  let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+                  //console.log(value)
+                  return <Timer start={start} duration={duration} />
+                }).bind(this)}/>
+              <time>{`${outputPublishTime}`}</time>
+              </div>
+              <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
+            <div className="dashboard-user__tab-info__money">{(tab.price/100).toFixed(2)}₴</div>
+          </div>
+        </Link>
+      )
+    })}
+    
+    {/* History TABs */}
+    {this.state.historyTabs.map((historyFromOneUser, index) => {
+      let tab = historyFromOneUser;
+      let user = historyFromOneUser.user; 
+      
+      let finishTime = new Date(tab.translated_at);
+      let outputPublishTime = getTabTime(finishTime);
+      let start = new Date(tab['started_at']);
+      let durationShouldBe = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
+      let finishShouldBe = new Date(+start + durationShouldBe*1000);
+      let duration = (finishTime - start)/1000;
+      return (
+        <Link to={{pathname: `${route}/history/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.id}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${tab.id === activeTab ? 'selected' : ''}`} key={index} >
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={user.image || avatar} alt="Textra" /> </figure>
+          <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+            <div className="dashboard-user__tab-title"> {user.first_name + ' ' +
+            user.last_name} </div>
+            <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
+          </div>
+          <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+            <div className="dashboard-user__tab-info__time">
+              <Timer start={start} duration={duration} finish={finishShouldBe}/>
+              <time>{`${outputPublishTime}`}</time>
+            </div>
+            <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
+            <div className="dashboard-user__tab-info__money">{(tab.price/100)}₴</div>
+          </div>
+        </Link>
+      )
+    })}
     </div>
   )}
 };
@@ -573,7 +689,7 @@ class Users extends React.Component {
     this.store = null;
     this._isMounted = false;
     this.changeTypeOfUser = this.changeTypeOfUser.bind(this)
-    this.deleteUser = this.deleteUser.bind(this)
+    this.changeUserStatus = this.changeUserStatus.bind(this)
     this.sortMe = this.sortMe.bind(this)
     this.changeFilter = this.changeFilter.bind(this)
     this.changeSearch = this.changeSearch.bind(this)
@@ -607,48 +723,67 @@ class Users extends React.Component {
     usedRoles: []
   }
 
+  componentWillMount(){
+    if(typeof window !== 'undefined'){
+      let usersAdminListCached =  JSON.parse(window.sessionStorage.getItem('userList'));
+      usersAdminListCached &&  this.setState({usersAdminListCached})
+    }
+  }
+  
   componentDidMount(){
     this._isMounted = true;
     let {page: {pageType, id}} = this.props;
-    this.store = new Store('user');
-    this.store.start();
-    this.store.addListener('update', this.updateHandler);
+    TxRest.getData('user').then(this.updateHandler)
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.store.stop();
-    this.store.removeListener('update', this.updateHandler);
-    this.store = null;
+    if(typeof window !== 'undefined'){
+      window.sessionStorage.setItem('userList', JSON.stringify(this.state.usersListFetched));
+    }
   }
 
   updateHandler(data){
     if(!this._isMounted) return
-    let _self = this;
-    if( data.list[0] === null ) {
-      Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
-            .then((list) => {
-                list.map((item, index) => _self.store.itemUpdated(item.value, index))
-                let {list: usersList , ids} = _self.store.getState();
-                _self.setUsedRoled(usersList);
-                _self.setState({usersList: usersList, usersListFetched: usersList})})
-    }else{
-        _self.setUsedRoled(data.list);
-        _self.setState({usersList: data.list, usersListFetched: data.list})
-        Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
-            .then(async list => { await sleep(10000); return Promise.resolve(list)})
-            .then((list) => {
-                if(!this._isMounted) return
-                list.map((item, index) => _self.store.itemUpdated(item.value, index))
-                let {list: usersList , ids} = _self.store.getState();
-                _self.setUsedRoled(usersList);
-                _self.setState({usersList: usersList, usersListFetched: usersList})})
-    }
+    let usersList = data.map(item => {
+      return {
+        nickname: item.first_name + ' ' + item.last_name, 
+        uuid: item.id,
+        email: item.email, 
+        type: ROLES(item.role), 
+        registrationTime: item.created_at,
+        status: item.status
+      }
+    });
+
+    this.setState({usersList, usersListFetched: usersList})
+    this.setUsedRoled(usersList);
+    //let _self = this;
+    // if( data.list[0] === null ) {
+    //   Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
+    //         .then((list) => {
+    //             list.map((item, index) => _self.store.itemUpdated(item.value, index))
+    //             let {list: usersList , ids} = _self.store.getState();
+    //             _self.setUsedRoled(usersList);
+    //             _self.setState({usersList: usersList, usersListFetched: usersList})})
+    // }else{
+    //     _self.setUsedRoled(data.list);
+    //     _self.setState({usersList: data.list, usersListFetched: data.list})
+    //     Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
+    //         .then(async list => { await sleep(10000); return Promise.resolve(list)})
+    //         .then((list) => {
+    //             if(!this._isMounted) return
+    //             list.map((item, index) => _self.store.itemUpdated(item.value, index))
+    //             let {list: usersList , ids} = _self.store.getState();
+    //             _self.setUsedRoled(usersList);
+    //             _self.setState({usersList: usersList, usersListFetched: usersList})})
+    // }
   }
 
   setUsedRoled(currentDate,cb){
     let usedRoles = {},
         roles = [];
+    console.log(currentDate)
     currentDate.map(o => usedRoles[o.type] = true)
     roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
     this.setState({
@@ -753,8 +888,9 @@ class Users extends React.Component {
       }
     }))
 
-    return new Promise(resolve => setTimeout(resolve ,1000))
-                  .then(_ => {
+    return TxRest.getDataByID(`user/${uuid}/role`,{"role": GETINITIALROLE(value)})
+                  .then( data => {
+                    if(data.message) return
                     let inx
                     _self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
                     return new Promise(r => {
@@ -782,35 +918,30 @@ class Users extends React.Component {
                   })
   }
 
-  deleteUser (uuid){
+  changeUserStatus (uuid, _, {checked}){
     let _self = this;
-    this.setState(Object.assign({}, this.state,{
+    this.setState(Object.assign({}, this.state, {
       deleting:{
         is: true,
         uuid
       }
     }))
-
-    return new Promise(resolve => setTimeout(resolve ,1000))
-              .then(_ => {
-                let inx, inx2;
-                _self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
-                _self.state.usersListFetched.find((o,i) => {if(o.uuid == uuid) inx2 = i});
-
-                return new Promise(r => {
-                    let list = Object.assign([], this.state.usersList);
-                    list.splice(inx,1);
-                    _self.state.usersListFetched.splice(inx2,1);
-                    this.setState(Object.assign(_self.state.usersList, {usersList:list}),r);
-                  })
+    let newStatus = (checked) ? "2" : "0";
   
-              }).then(_ => {
+    return TxRest.getDataByID(`user/${uuid}/status`, {"status": newStatus})
+              .then(data => {
+                if(!_self._isMounted) return 
                 this.setState(Object.assign(this.state,{
                   deleting:{
                     is: false,
                     uuid: undefined
                   }
                 }))
+                if(data.message) return
+                _self.state.usersListFetched.filter(o => o.uuid === uuid)[0]['status'] = data.status
+                let ItemToChange = _self.state.usersList.filter(o => o.uuid === uuid);
+                ItemToChange[0]['status'] = data.status
+                this.forceUpdate();
               })
   }
 
@@ -940,7 +1071,7 @@ class Users extends React.Component {
                   <Table.HeaderCell sorted={ columnNameToSort === 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
-                  <Table.HeaderCell textAlign='center' >Delete</Table.HeaderCell>
+                  <Table.HeaderCell textAlign='center' sorted={ columnNameToSort === 'status' ? columnSortDirection : null}   onClick={this.sortMe('status')}>Status</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -949,16 +1080,16 @@ class Users extends React.Component {
                     <Table.Cell >Пользователи отсутствуют</Table.Cell>
                 </Table.Row>
                 :
-                Array.isArray(currentDate) && currentDate.map(({nickname, uuid, email, type, registrationTime}, index) => (
-                  <Table.Row key={index}>
-                    <Table.Cell><Link to={{
+                Array.isArray(currentDate) && currentDate.map(({nickname, uuid, email, type, registrationTime, status}, index) => (
+                  <Table.Row key={index} >
+                    <Table.Cell  {...(status === "2" && {'disabled':true})}><Link to={{
                         pathname: `/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`,
                         state: {pageType: pageType.toLowerCase().slice(0,pageType.length - 1), id: uuid }
                         }}>
                         {nickname}
                       </Link></Table.Cell>
-                    <Table.Cell>{email}</Table.Cell>
-                    <Table.Cell style={{overflow: 'visible'}}> {!!roles.length && <Icon {...findIcon(roles, type)} />}
+                    <Table.Cell  {...(status === "2" && {'disabled':true})}>{email}</Table.Cell>
+                    <Table.Cell  {...(status === "2" && {'disabled':true})} style={{overflow: 'visible'}}> {!!roles.length && <Icon {...findIcon(roles, type)} />}
                      {  pageType ===  'users' ?
                        <Dropdown inline 
                       {...(loading.is && loading.uuid === uuid && {loading:true})} 
@@ -968,9 +1099,9 @@ class Users extends React.Component {
                       : findIcon(Roles, type, 'text')
                      }
                     </Table.Cell>
-                    <Table.Cell>{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
+                    <Table.Cell  {...(status === "2" && {'disabled':true})} >{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
                     <Table.Cell className="f f-align-2-2">
-                      <button {...(deleting.is && {'disabled':true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} className="admin-list__delbtn btn btn-block btn-flat btn-normal f f-align-2-2"><img src={deleteIcon} alt="icon"/></button>
+                      <Checkbox toggle {...(deleting.is && {'disabled':true})} onClick={debounce(this.changeUserStatus.bind(self,uuid),200,false)} checked={status === "0"}/>
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -984,13 +1115,12 @@ class Users extends React.Component {
 class UserAccount extends React.Component {
   constructor(props){
     super(props);
-    this.massageStore =null;
+    this.massageStore = null;
     this.user = Store.getItem(this.props.page.id)
     if( this.user )
     this.userId = this.user.uuid;
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted = false;
-    
   }
 
   state = {
@@ -998,14 +1128,14 @@ class UserAccount extends React.Component {
   }
 
   componentWillMount(){
-    this.setState({list: MessageStore.getMassage('historymassage', this.userId) })
+    this.setState({list: MessageStore.getMassage('user', this.userId) })
   }
 
 
   componentDidMount(){
     this._isMounted = true;
     let {pageType ,historyId} = this.props.page;
-    this.massageStore = new MessageStore('historymassage', this.userId);
+    this.massageStore = new MessageStore('user', this.userId);
     this.massageStore.start();
     this.massageStore.addListener('updateMessage', this.updateHandler)
   }

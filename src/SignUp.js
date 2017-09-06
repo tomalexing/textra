@@ -69,9 +69,12 @@ class SignUp extends React.Component {
     return (
       (this.state.redirectToReferrer) ? <Redirect to={from} /> :
       <div className="f outer signup-layout">
-        <div className="f f-align-2-2 main" style={bgPic}>
+        <div className="f f-align-13-2 main" style={bgPic}>
             <div className="f f-col main-regist__form">
-              <p className="h3 u-mb-3" >Зарегистрироваться</p>
+              <p className="h3 u-mb-3" >Регистрация</p>
+              <p className="u-mb-4">У Вас уже есть аккаунт?{(
+                    <Link to="/login" className="btn btn-flat">Войти</Link>
+              )}</p>
               <div className="f f-gap-2 registform-regist__social">
                 <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img src={fb} alt="fb"/></button>
                 <button onClick={this.loginVk} className="btn btn-primiry btn-normal btn-block google-color"><img className="f f-align-1-2  u-mx-auto"  src={google} alt="google"/></button>

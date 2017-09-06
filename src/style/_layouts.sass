@@ -27,7 +27,7 @@
           position: relative
           z-index: 102
           text-align: center
-          margin: 30px 0
+          margin: 20px 0
           &:before,
           &:after
             position: absolute
@@ -59,6 +59,7 @@
             color: #1e7bcf
         &__forgotpassword
           color: $text-light
+
 // registr styles
 .login-layout.outer
   .outer-left
@@ -81,6 +82,8 @@
         .safari &
           /* autoprefixer: off */
           -webkit-flex-basis: auto
+      .registform-regist__social
+        min-height: 34px
       .registform
         flex-basis: 73%
         padding: 28px
@@ -1267,6 +1270,7 @@
       letter-spacing: -0.06px
       line-height: 20px
       font-size: 14px
+      white-space: pre-line
     &__bottombar
       +nosel
       color: $text-dark
