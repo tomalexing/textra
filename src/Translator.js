@@ -917,12 +917,12 @@ class FeedList extends React.Component {
     if (typePage == 'personal') equalsType = typeof Number;
     
     let query = {
-      perPage: 50,
+      perPage: 100,
       page: 1,
       fielteredField: {
         field1: {
           name: "translator_id",
-          equals: null , 
+          equals: null, 
           equalsType,
           diactivate: !(typePage === 'personal') && !(typePage === 'common')// is active
         }
@@ -930,7 +930,7 @@ class FeedList extends React.Component {
       fielteredFieldRule: "every" // some || every
     };
     let FeedQuery = new Query(currentData, query),
-    filteredFeed = currentData; //FeedQuery.filter();
+    filteredFeed = FeedQuery.filter();
 
     const RenderCollection = renderItem => {
       return (
@@ -1333,7 +1333,7 @@ class HistoryList extends React.Component {
   }
 
   state={
-    currentData: [],
+    currentData: {},
     translator: this.props.translator ? this.props.translator: {},
     languages: this.props.languages
   }
@@ -1444,7 +1444,10 @@ class HistoryList extends React.Component {
       let duration =  (translated_at - started_at)/1000 ; //sec
 
 
-      let showHeaderDate = this.lastCreatedDate !== null ? this.lastCreatedDate === created_at : true
+      let showHeaderDate = true;
+      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === created_at.getDate() && this.lastCreatedDate.getMonth() === created_at.getMonth() && this.lastCreatedDate.getFullYear() === created_at.getFullYear()){
+        showHeaderDate = false;
+      }
       this.lastCreatedDate = created_at;
 
 

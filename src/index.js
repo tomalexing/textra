@@ -15,6 +15,7 @@ import {
 import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
+import UserStore from './store/UserStore.js';
 import Auth from './store/AuthStore.js';
 import {TxRest} from './services/Api.js';
 import './polyfill';
@@ -57,6 +58,15 @@ const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>
   // eslint-disable-next-line
 const Landing = (props) => <Lazy {...props} load={() => import('./Landing')}/>
 
+  // eslint-disable-next-line
+const Private = (props) => <Lazy {...props} load={() => import('./Private')}/>
+
+  // eslint-disable-next-line
+const Term = (props) => <Lazy {...props} load={() => import('./Term')}/>
+
+// eslint-disable-next-line
+const Support = (props) => <Lazy {...props} load={() => import('./Support')}/>
+
 // ====================================
 // ========= Lazy loadin end ==========
 // ====================================
@@ -72,8 +82,10 @@ class App extends React.Component {
     if(!Auth.isAuthenticated){
       if( Auth.loadSession){
         Store.loadSession()
+        UserStore.loadSession()
       }else{
         Store.clearSession()
+        UserStore.clearSession()
       }
     }
     if (typeof window === 'undefined') return
@@ -87,6 +99,7 @@ class App extends React.Component {
 
   handleBeforeUnload() {
     Store.saveSession();
+    UserStore.saveSession();
   }
 
   render(){
@@ -105,6 +118,10 @@ class App extends React.Component {
                       <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
                       <Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} />
                       <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
+                      <Route path="/private" component={Private} location={location}  key={getUniqueKey()} />
+                      <Route path="/term-of-use" component={Term} location={location}  key={getUniqueKey()} />
+                      <Route path="/help" component={Support} location={location}  key={getUniqueKey()} />
+
                     </ReactCSSTransitionGroup>
 
             )}/>

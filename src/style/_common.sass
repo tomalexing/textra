@@ -27,7 +27,14 @@ body
 	font-size: 22px
 	color: $text-dark
 	font-style: normal
-	font-weight: 300
+	font-weight: 700
+
+.h1-big
+	font-size: 26px
+	color: $text-dark
+	font-style: normal
+	font-weight: 700
+	
 .h2
 	font-size: 20px 
 	color: $text-dark
@@ -86,6 +93,15 @@ button
 	color: rgba(0, 122, 207, 0.85)
 	text-decoration: underline
 	font-weight: 700
+
+.btn-flat2
+	background-color: transparent
+	color: #323232
+	text-decoration: none
+	font-weight: 400
+	+tr(color .4s)
+	&:hover
+		color: rgba(0, 122, 207, 0.85)
 
 .btn-block
 	display: block
@@ -254,7 +270,7 @@ input[type='submit']
 	&-col
 		flex-direction: column
 	&-gap
-		@for $i from 1 through 10
+		@for $i from 1 through 20
 			&-#{$i}
 				$half-gap: $base-gap * $i * 0.5
 
@@ -264,7 +280,7 @@ input[type='submit']
 					margin-left: $half-gap
 					margin-right: $half-gap
 	&-v-gap
-		@for $i from 1 through 10
+		@for $i from 1 through 20
 			&-#{$i}
 				$gap: $base-gap * $i
 				> *:first-child

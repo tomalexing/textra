@@ -259,8 +259,8 @@ class DashBoard extends React.Component {
 
     this.languageStore.stop();
     this.languageStore.removeListener('update', this.updateLanguageHandler);
-
     this.languageStore = null;
+
     this.store = null;
     Store.saveSession();
     this.listeners.forEach(removeEventListener => removeEventListener())
@@ -481,16 +481,7 @@ class HistoryList extends React.Component {
       this.setState({currentData: MessageStore.getMessages('translated-topic/user', id)})
 
     this.setState({languages, translator});
-    // if(data)
-    // Promise.all(data.messages.map(item => {
-    //   return (TxRest.getData(`topic/${item.id}`).then( data => {
-    //     if(data.message) return Promise.resolve(); // TODO handle error message
-    //     return Promise.resolve(data);
-    //   }))
-    //   })).then( data => {
-    //     if(!_self._isMounted) return 
-    //       _self.setState({currentData: data});
-    //   })
+
   }
 
   getLangPropInObj({id,slug}){
@@ -571,9 +562,13 @@ class HistoryList extends React.Component {
       let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
       let duration =  (translated_at - started_at)/1000 ; //sec
 
-      let showHeaderDate = this.lastCreatedDate !== null ? this.lastCreatedDate === created_at : true
-      this.lastCreatedDate = created_at;
 
+      let showHeaderDate = true;
+      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === created_at.getDate() && this.lastCreatedDate.getMonth() === created_at.getMonth() && this.lastCreatedDate.getFullYear() === created_at.getFullYear()){
+        showHeaderDate = false;
+      }
+      this.lastCreatedDate = created_at;
+    
       return (
         <div key={idx}>
           { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
@@ -819,8 +814,8 @@ class Create extends React.Component {
 
   state = {
     optionsLang: [],
-    valueLangFrom: 'RUS',
-    valueLangTo: 'ENG',
+    valueLangFrom: 'ENG',
+    valueLangTo: 'RUS',
     valueTranslator: undefined,
     currentNumberOfChar: 0,
     isSearchMenuTranslatorVisible: false,

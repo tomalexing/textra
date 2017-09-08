@@ -117,22 +117,26 @@ class Header extends React.Component{
                   <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
                 </div>
                 <ul className="f f-align-1-2 header-menu">
-                  <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>
+                  { Auth.isAuthenticated && <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>}
                   <NavLink to={'/about'}>О нас</NavLink>
                   <NavLink to={'/help'}>Поддержка</NavLink>
                 </ul>
                 <div className="f f-align-2-2 header-account">
-                  {this.props.currentRole !== 'admin' &&  <div className="f f-col f-align-1-3 header-details">
+                  { Auth.isAuthenticated && this.props.currentRole !== 'admin' &&  <div className="f f-col f-align-1-3 header-details">
                     <div className="header-email">{user.email}</div>
                     <div className="header-details__more">
                       <Link to={'/'} className="header-replenish">пополнить</Link>
                       <span className="header-balance">{`${Number(user.balance/100).toFixed(2)} ₴`}</span>
                     </div>
                   </div>}
-                  <div className="f f-align-2-2 header-avatar">
+                   { Auth.isAuthenticated && <div className="f f-align-2-2 header-avatar">
                     <figure className="f f-align-2-2 header-avatar__in"> <img src={avatar} alt="Textra" /> </figure>
                     <div className="header-logout" onClick={this.logout}>Выйти</div>
-                  </div>
+                  </div>}
+                  { !Auth.isAuthenticated && <div className="f f-gap-2 stuff__bottom">
+                      <Link className="btn btn-flat2 btn-normal" to={{pathname:"/signup", state:{from:'/'}}} >Зарегистрироваться</Link>
+                      <Link className="btn btn-primiry btn-normal" to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
+                  </div>}
                 </div>  
             </header>
   );

@@ -17,7 +17,7 @@ import appeals from "./assets/appeals.svg";
 import deleteIcon from './assets/delete.svg';
 
 import "./polyfill";
-import { Auth } from "./index";
+import  Auth from './store/AuthStore.js';
 import {
   BrowserRouter as Router,
   Route,
@@ -41,7 +41,8 @@ import {
   getFullTimeDigits,
   dump,
   quickSort,
-  getTabTime
+  getTabTime,
+  ScrollRestortion
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -191,7 +192,9 @@ class Admin extends React.Component {
       pageType: 'users',
       id: undefined,
       historyId: undefined
-    }
+    },
+    translator: {},
+    languages: []
   };
 
   addStyleSeheet(){
@@ -213,8 +216,9 @@ class Admin extends React.Component {
       page:{
         pageType: RouterState ? RouterState.pageType : 'users',
         id: RouterState ? RouterState.id : undefined ,
-        historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
-      }
+        historyId: RouterState ? RouterState.historyId : undefined,
+      },
+      translator: RouterState ? RouterState.translator : null
     })
   }
 
@@ -295,7 +299,7 @@ class Admin extends React.Component {
 
   updateLanguageHandler({list}){
     if(!this._isMounted) return
-    this.setState({language: list})
+    this.setState({languages: list})
   }
 
   boundRef = place => (n => (this[place] = n)).bind(this);
@@ -308,7 +312,7 @@ class Admin extends React.Component {
     let {usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
     let currentDate, user, allUsers = false;
 
-    let { sidebar, secondScreen, mainScreen, language } = this.state;
+    let { sidebar, secondScreen, mainScreen, languages, translator } = this.state;
 
     return (
       <div className="f f-col outer admin">
@@ -353,7 +357,7 @@ class Admin extends React.Component {
                 <SideList
                   route={`${Routes["user"].path}/${id}`}
                   page={this.state.page}
-                  language={language}
+                  languages={languages}
                 />
               </div>
             )}
@@ -393,11 +397,21 @@ class Admin extends React.Component {
                       _self={this}
                       page={this.state.page}
                     />
+                    <RoutePassProps 
+                      path={`${Routes["user"].path}${Routes["user"].param}/pending${Routes["history"].param}`}
+                      component={Pending} 
+                      typePage={this.state.page.pageType} 
+                      id={this.state.page.historyId} 
+                      usedId={this.state.page.id} 
+                      languages={languages}
+                    />
                     <RoutePassProps
                       path={`${Routes["user"].path}${Routes["user"].param}/history${Routes["history"].param}`}
-                      component={UserAccount}
+                      component={UserFullHistory}
                       page={this.state.page}
                       _self={this}
+                      languages={languages}
+                      translator={translator}
                     /> 
                     <RoutePassProps
                       path={`${Routes["appeal"].path}${Routes["appeal"].param}`}
@@ -434,7 +448,7 @@ class SideList extends React.PureComponent{
     pendingTabs: [],
     workingTabs: [],
     historyTabs: [],
-    language: this.props.language
+    languages: this.props.languages
   }
 
   componentDidMount(){
@@ -442,13 +456,12 @@ class SideList extends React.PureComponent{
     this.historyStore = new UserStore('user', this.userId);
     this.historyStore.start();
     this.historyStore.addListener('updateRooms', this.updateHandler);
-
   }
 
-  componentWillReceiveProps({language}){
+  componentWillReceiveProps({languages}){
     if(!this._isMounted) return
-    if(language)
-      this.setState({language})
+    if(this.state.languages !== languages)
+      this.setState({languages})
   }
 
   componentWillUnmount() {
@@ -460,61 +473,19 @@ class SideList extends React.PureComponent{
 
   async updateHandler(data){
     if(!this._isMounted) return
-    let rooms;
-    let user = data.list.map(item => {
-      rooms = item.topics;
-      return {
-        nickname: item.first_name + ' ' + item.last_name, 
-        uuid: item.id,
-        email: item.email, 
-        type: ROLES(item.role), 
-        registrationTime: item.created_at,
-        role: item.role,
-        totalTime: item.total_time,
-        amountLetters: item.total_letters,
-        balance: item.balance,
-        earnBalance: item.earn_balance,
-        status: item.status
-    }})[0];
-    
-    this.setState({
-      pendingTabs : rooms.filter(o => o.status === "0").map((item, idx) => {
-          return {
-            ...item,
-            avatar: avatar, 
-            index: idx
-          }
-      }),
-      workingTabs : rooms.filter(o => o.status === "1").map((item, idx) => {
-          return {
-            ...item,
-            avatar: avatar, 
-            index: idx
-          }
-      }),
-      historyTabs : rooms.filter(o => o.status === "2").map((item, idx) => {
-          return {
-            ...item,
-            avatar: avatar, 
-            index: idx
-          }
-      })
-    })
-    this.setState({user});
+    this.setState({...data});
   } 
 
   getLangPropInObj({id,slug}){
-    return this.state.language && this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : 0
+    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
   }
 
   render(){
     let {page: {pageType, id, historyId}} = this.props;
-
     let {user, pendingTabs, workingTabs, historyTabs} = this.state;
     let route = `/admin/${pageType}/${id}`;
     let activeTab = historyId;
     if(!user){
-      
       return(<div className="f sidebar">
               <div className="admin-user-details">
                   <div className="admin-user-details__topArea">
@@ -532,9 +503,9 @@ class SideList extends React.PureComponent{
     )}
 
     let registrationTime = new Date(user.registrationTime);
-    return(<div className="f sidebar">
+    return(<ScrollRestortion scrollId={`admin${this.props.id}`}   className="f sidebar">
         <div className="admin-user-details">
-            <div className="admin-user-details__topArea">
+            <div className="admin-user-details__topArea"> 
               <figure className="f f-align-2-2 admin-user-details__avatar">
                 <img src={avatar} alt="Textra" />
               </figure>
@@ -592,8 +563,8 @@ class SideList extends React.PureComponent{
     { pendingTabs.map(tab => {
       
       return (
-        <Link  to={{pathname: `${route}/history/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.uuid}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} key={tab.index} >
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+        <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.user && tab.user.image ||avatar } alt="Textra" /> </figure>
           <div className="f f-col f-align-1-1 dashboard-user__tab-details">
             <div className="dashboard-user__tab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
             > 
@@ -611,12 +582,13 @@ class SideList extends React.PureComponent{
     { workingTabs.map(tab => {
       let publishTime = new Date(tab.created_at);
       let outputPublishTime = getTabTime(publishTime);
-      let user = tab.user; 
+      let userAttached = tab.translator; 
+
       return (
-        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} key={tab.index}>
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+        <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={userAttached && userAttached.image||avatar} alt="Textra" /> </figure>
           <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title">{ user.first_name + ' ' + user.last_name}</div>
+            <div className="dashboard-user__tab-title">{ userAttached.first_name + ' ' + userAttached.last_name}</div>
             <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
           </div>
           <div className="f f-col f-align-2-3 dashboard-user__tab-info">
@@ -644,8 +616,7 @@ class SideList extends React.PureComponent{
     {/* History TABs */}
     {this.state.historyTabs.map((historyFromOneUser, index) => {
       let tab = historyFromOneUser;
-      let user = historyFromOneUser.user; 
-      
+      let userAttached = historyFromOneUser.translator; 
       let finishTime = new Date(tab.translated_at);
       let outputPublishTime = getTabTime(finishTime);
       let start = new Date(tab['started_at']);
@@ -653,11 +624,11 @@ class SideList extends React.PureComponent{
       let finishShouldBe = new Date(+start + durationShouldBe*1000);
       let duration = (finishTime - start)/1000;
       return (
-        <Link to={{pathname: `${route}/history/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.id}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${tab.id === activeTab ? 'selected' : ''}`} key={index} >
+        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${userAttached.id}`, state:{pageType: 'user', id: user.uuid, historyId: userAttached.id, translator: userAttached}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${tab.id === activeTab ? 'selected' : ''}`} >
           <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={user.image || avatar} alt="Textra" /> </figure>
           <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title"> {user.first_name + ' ' +
-            user.last_name} </div>
+            <div className="dashboard-user__tab-title"> {userAttached.first_name + ' ' +
+            userAttached.last_name} </div>
             <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
           </div>
           <div className="f f-col f-align-2-3 dashboard-user__tab-info">
@@ -671,7 +642,7 @@ class SideList extends React.PureComponent{
         </Link>
       )
     })}
-    </div>
+    </ScrollRestortion>
   )}
 };
 
@@ -1055,10 +1026,10 @@ class Users extends React.Component {
                   text: 'Все',
                   value: 'a'
                   },...roles.map(o => {return { text: o.text, value: o.value }})])} 
-                  icon='filter'   
+                  icon='filter'
                   floating
-                  labeled 
-                  button 
+                  labeled
+                  button
                   header={ <Dropdown.Header icon='tags' content='Фильтр по ролям' /> }
                   className='icon admin-list__filter'
                   onChange={self.changeFilter}/>
@@ -1112,30 +1083,31 @@ class Users extends React.Component {
 }
 
 
-class UserAccount extends React.Component {
+class UserFullHistory extends React.Component {
   constructor(props){
     super(props);
     this.massageStore = null;
-    this.user = Store.getItem(this.props.page.id)
-    if( this.user )
-    this.userId = this.user.uuid;
+    this.translator = props.translator;
+    this.languages = props.languages;
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted = false;
   }
 
   state = {
-    list: null
+    list: null,
+    translator: null,
+    languages: []
   }
 
   componentWillMount(){
-    this.setState({list: MessageStore.getMassage('user', this.userId) })
+    this.setState({list: MessageStore.getMessages('user', this.userId), translator: this.translator})
   }
 
 
   componentDidMount(){
     this._isMounted = true;
-    let {pageType ,historyId} = this.props.page;
-    this.massageStore = new MessageStore('user', this.userId);
+    let {pageType ,id, historyId} = this.props.page;
+    this.massageStore = new MessageStore(`translated-topic/user/${id}/translator`,historyId);
     this.massageStore.start();
     this.massageStore.addListener('updateMessage', this.updateHandler)
   }
@@ -1155,6 +1127,10 @@ class UserAccount extends React.Component {
     this.massageStore = null;
   }
 
+  getLangPropInObj({id,slug}){
+    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  }
+
   shouldComponentUpdate(nextProps, nextState){
 
     if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
@@ -1162,95 +1138,221 @@ class UserAccount extends React.Component {
     }
     console.log('not rerender')
     return false
-  }  
+  } 
+
+  componentWillReceiveProps({languages}){
+    if(this.state.languages !== languages){
+      this.setState({languages})
+    }
+  }
+
+  // render() {
+  //   let { _self  } = this.props;
+  //   let { list } = this.state;
+  //   if(!list){
+  //     return(
+  //       <div/>
+  //     )
+
+  //   }
+
+  //   const RenderCollection = renderItem => {
+  //     return (
+  //       <div>
+  //         {
+  //           Object.values(list).map( (item ,index) => {
+  //               return renderItem(item, index, new Date(item.publishTime))
+  //           })
+  //         }
+          
+  //       </div>
+  //     );
+  //   };
+  //   return (Object.entries(list).length === 0
+  //           ? <div className={"f f-align-2-33 admin-historypost u-mx-3 u-my-2"}>
+  //               <div className={"admin-historypost__avatar"}>
+  //                   <img src={avatar} />
+  //               </div>
+  //               <div className={"f f-align-2-2 admin-historypost__placeholder"}>
+  //                   <span>История отсутствуют</span>
+  //               </div>
+  //             </div>
+  //           : RenderCollection((currentDate, index, publishTime) => (
+  //           <div key={index} className={"f f-col f-align-1-1 admin-historypost"}>
+  //               {currentDate.postType === 'post' &&<div className={"data__delimiter"}>
+  //                 {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}
+  //               </div>}
+  //               <div className={`f f-align-1-1 admin-historypost-${currentDate.postType}`}>
+  //               <div className={`admin-historypost-${currentDate.postType}__content`}>
+  //                   <div className={`admin-historypost-${currentDate.postType}__content__text`}>
+  //                   {currentDate.content}
+  //                   </div>
+  //                   {currentDate.postType === 'post' && <div className={`f f-align-1-2 f-gap-4 admin-historypost-${currentDate.postType}__content__bottombar`}>
+  //                     <LangLabel from={currentDate.from} to={currentDate.to} />
+  //                     <Indicator
+  //                         className={"f f-align-2-2"}
+  //                         icon={icon_dur}
+  //                         value={humanReadableTime(currentDate.duration)}
+  //                         hint={"Длительность перевода"}
+  //                     />
+  //                     <Indicator
+  //                         className={"f f-align-2-2"}
+  //                         icon={
+  //                         <Timer
+  //                             start={currentDate.startWorkingTime}
+  //                             duration={currentDate.duration}
+  //                             isBig={true}
+  //                         />
+  //                         }
+  //                         value={humanReadableTime(
+  //                         currentDate.duration -
+  //                             (new Date() - new Date(currentDate.startWorkingTime)) / 1000
+  //                         )}
+  //                         hint={"Оставшееся время"}
+  //                     />
+  //                     <Indicator
+  //                         className={"f f-align-2-2"}
+  //                         icon={icon_letternum}
+  //                         value={currentDate.letterNumber}
+  //                         hint={"Количество символов"}
+  //                     />
+  //                     <Indicator
+  //                         className={"f f-align-2-2"}
+  //                         icon={icon_cost}
+  //                         value={currentDate.cost}
+  //                         hint={"Стоимость"}
+  //                     />
+
+  //                   </div>}
+  //               </div>
+  //               <div className={`admin-historypost-${currentDate.postType}__date`}>
+  //                   {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
+  //               </div>
+  //               </div>
+  //           </div>)
+  //   ));
+  //}
 
   render() {
-    let { _self  } = this.props;
+    let { list, translator } = this.state || {list: []},
+      _self = this; 
 
-    let { list } = this.state;
+    this.lastCreatedDate = null;
+    if (!list.length)
+      return(<div/>)
+    list = list.reverse();
+    console.log(list);
+    const renderCollection = renderItem => (
+      <ScrollRestortion scrollId={`history${this.props.id}`}  className={'f f-col dashboard-user__history'} >
+        
+        {/* ALl merged history */}
 
-    if(!list){
-      return(
-        <div/>
-      )
+        {list.map((item, idx) => renderItem(item, idx))}
+        
 
-    }
+      </ScrollRestortion>
+    )
 
-    const RenderCollection = renderItem => {
+    return ( renderCollection((currentData, idx) => {
+      if(!currentData || !currentData.source_messages.length )
+          return <div key={idx} />
+      let created_at = new Date(currentData.created_at);
+      let translated_at = new Date(currentData.translated_at);
+      let started_at = new Date(currentData.started_at);
+    
+      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'});
+      let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
+      let duration =  (translated_at - started_at)/1000 ; //sec
+
+      let showHeaderDate = true;
+      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === created_at.getDate() && this.lastCreatedDate.getMonth() === created_at.getMonth() && this.lastCreatedDate.getFullYear() === created_at.getFullYear()){
+        showHeaderDate = false;
+      }
+      this.lastCreatedDate = created_at;
+      
       return (
-        <div>
-          {
-            Object.values(list).map( (item ,index) => {
-                return renderItem(item, index, new Date(item.publishTime))
-            })
-          }
-          
-        </div>
-      );
-    };
-    return (Object.entries(list).length === 0
-            ? <div className={"f f-align-2-33 admin-historypost u-mx-3 u-my-2"}>
-                <div className={"admin-historypost__avatar"}>
-                    <img src={avatar} />
-                </div>
-                <div className={"f f-align-2-2 admin-historypost__placeholder"}>
-                    <span>История отсутствуют</span>
-                </div>
+        <div key={idx}>
+          { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
+            <div className={'dashboard-user__history-post__avatar'}>
+              <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
+            </div>
+            <div className={'dashboard-user__history-post__content'}>
+              <div className={'dashboard-user__history-post__content__text'}>
+                {currentData.source_messages.length > 0 &&  currentData.source_messages[currentData.source_messages.length-1].content}
               </div>
-            : RenderCollection((currentDate, index, publishTime) => (
-            <div key={index} className={"f f-col f-align-1-1 admin-historypost"}>
-                {currentDate.postType === 'post' &&<div className={"data__delimiter"}>
-                  {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}
-                </div>}
-                <div className={`f f-align-1-1 admin-historypost-${currentDate.postType}`}>
-                <div className={`admin-historypost-${currentDate.postType}__content`}>
-                    <div className={`admin-historypost-${currentDate.postType}__content__text`}>
-                    {currentDate.content}
-                    </div>
-                    {currentDate.postType === 'post' && <div className={`f f-align-1-2 f-gap-4 admin-historypost-${currentDate.postType}__content__bottombar`}>
-                      <LangLabel from={currentDate.from} to={currentDate.to} />
-                      <Indicator
-                          className={"f f-align-2-2"}
-                          icon={icon_dur}
-                          value={humanReadableTime(currentDate.duration)}
-                          hint={"Длительность перевода"}
+              <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
+                {currentData.source_language_id && currentData.translate_language_id &&  
+                    <LangLabel 
+                      from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
+                      to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
                       />
-                      <Indicator
-                          className={"f f-align-2-2"}
-                          icon={
-                          <Timer
-                              start={currentDate.startWorkingTime}
-                              duration={currentDate.duration}
-                              isBig={true}
-                          />
-                          }
-                          value={humanReadableTime(
-                          currentDate.duration -
-                              (new Date() - new Date(currentDate.startWorkingTime)) / 1000
-                          )}
-                          hint={"Оставшееся время"}
-                      />
-                      <Indicator
-                          className={"f f-align-2-2"}
-                          icon={icon_letternum}
-                          value={currentDate.letterNumber}
-                          hint={"Количество символов"}
-                      />
-                      <Indicator
-                          className={"f f-align-2-2"}
-                          icon={icon_cost}
-                          value={currentDate.cost}
-                          hint={"Стоимость"}
-                      />
+                } 
+                {currentData.source_messages.length > 0 &&
+                    <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(durationShouldBe)} hint={'Длительность перевода'} /> }
 
-                    </div>}
-                </div>
-                <div className={`admin-historypost-${currentDate.postType}__date`}>
-                    {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-                </div>
-                </div>
-            </div>)
-    ));
+                {currentData.translated_at && currentData.started_at &&
+                <Indicator
+                  className={'f f-align-2-2'}
+                  icon={
+                    <Timer
+                      start={started_at}
+                      duration={duration}
+                      isBig={true}
+                      finish={finishShouldBe}
+                    />
+                  }
+                  value={humanReadableTime((duration))} // sec
+                  hint={'Оставшееся время'} />
+                }
+                {currentData.source_messages.length > 0 &&
+                <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
+                {currentData.source_messages.length > 0 &&
+                <Indicator className={'f f-align-2-2'} icon={icon_cost} value={`${(currentData.price/100).toFixed(2)}₴`} hint={'Стоимость'} />}
+              </div>
+            </div>
+            <div className={'dashboard-user__history-post__constols'}>
+            </div>
+            {started_at && <div className={'dashboard-user__history-post__date'}>
+              {started_at.getHours()}:{getFullTimeDigits(started_at.getMinutes())}
+            </div>}
+          </div>
+
+
+           {/* RESPONSE */}
+
+
+          <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
+            <div className={'dashboard-user__history-reply__avatar'}>
+              <img src={translator.image || avatar} alt={translator.first_name} />
+            </div>
+            <div className={'dashboard-user__history-reply__content'}>
+              <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
+                      if(node == null) return
+                      ref = node;
+                      if( !(_self.props.isTablet && isTablet) ){ // when has changed
+                        start = 50;
+                        isTablet = _self.props.isTablet;
+                      }
+                      start = Math.max(ref.scrollHeight, start);
+                      ref.style.height = start + 'px';
+                    }})()}  className={'dashboard-user__history-reply__content__text'} disabled  value={currentData.translate_messages.length > 0 && currentData.translate_messages[currentData.translate_messages.length-1].content} />
+            </div>
+            <div className={'dashboard-user__history-reply__constols'}>
+              <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.copy}>
+                <img src={copy} alt="copy" />
+                <span>Копировать</span>
+
+              </button>
+            </div>
+            <div className={'dashboard-user__history-reply__date'}>
+              {translated_at.getHours()}:{getFullTimeDigits(translated_at.getMinutes())}
+            </div>
+          </div>
+        </div>
+      )
+    })
+    )
   }
 }
 
@@ -1365,6 +1467,138 @@ class Appeal extends React.Component {
                 </div>
                 ))
     );
+  }
+}
+
+class Pending extends React.Component {
+  constructor(p){
+    super(p);
+    this.store = this.props.store;
+    this.id = this.props.id;
+    this.userId = this.props.usedId;
+    this._isMounted = false;
+    
+  }
+
+  state = {
+    currentData: null,
+    languages:  this.props.languages,
+    index: this.props.index,
+    stale: false
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+    let _self = this;
+    
+    let currentDataFromStore = UserStore.getItem(this.userId, this.id);
+    if( currentDataFromStore ) this.setState({currentData : currentDataFromStore})
+    TxRest.getData(`topic/${this.id}`).then((data) => {
+        if(data.message || !this._isMounted) return;
+        if(_self.state.currentData)
+          data =  Object.assign({}, _self.state.currentData, data, _self.state.currentData.index );
+        _self.setState({ currentData: data, stale : data.status === '2' });
+        _self.store && _self.store.itemUpdated(data, _self.state.index);
+    })
+  }
+
+  componentWillReceiveProps({store, languages, id}){
+    this.store = store;
+    if(id !== this.id){
+      this.id = id;
+      console.log('ckeck why id was changed')
+    }
+    if(this.state.languages !== languages)
+      this.setState({languages: languages})
+  }
+
+  componentWillUnmount(){
+    this._isMounted = false;
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+
+    if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
+      return true
+    }
+    return false
+  }
+
+  getLangPropInObj({id,slug}){
+    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  }
+
+  render() {
+    let { currentData } = this.state,
+      created_at = null;
+    
+    if(!currentData)
+        return <div/> 
+    
+    if(currentData.status === '2'){
+       return <Redirect to={{pathname:`/dashboard/history/${currentData.translator_id}`,state:{page:{typePage:'history', id: currentData.translator_id},translator: currentData.translator}}} />
+    }
+    
+    if(currentData.created_at){
+      created_at = new Date(currentData.created_at);
+    }
+    
+    if(currentData.source_messages && currentData.source_messages.length > 0){
+      var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
+    }
+    return (
+        <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
+            {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
+            <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
+              <div className={'dashboard-user__searching-post__avatar'}>
+                <img src={currentData.avatar || avatar } />
+              </div>  
+              <div className={'dashboard-user__searching-post__content'}>
+                <div className={'dashboard-user__searching-post__content__text'}>
+                  {currentData.source_messages[0].content}
+                </div>
+                <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
+                  {currentData.source_language_id && currentData.translate_language_id &&  
+                  <LangLabel 
+                    from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
+                    to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
+                    />
+                  }
+                {currentData.source_messages && currentData.source_messages.length > 0 &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(duration)} hint={'Длительность перевода'} /> }
+                {currentData.updated_at &&  currentData.status === '1' &&
+                  <Batch
+                    flushCount={0}
+                    flushInterval={150}
+                    count={1}
+                    debug={false}
+                    render={()=> {
+                      let value = ~~Math.abs(duration - (new Date - new Date(currentData.updated_at)) / 1000);
+                      //console.log(value)
+                      return(<Indicator
+                        className={'f f-align-2-2'}
+                        icon={
+                          <Timer
+                            start={currentData.updated_at}
+                            duration={duration}
+                            isBig={true} />}
+                        value={humanReadableTime(value)}
+                        hint={'Оставшееся время'} />)
+                    }}/>}
+                  {currentData.source_messages.length > 0 &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_letternum} value={currentData.source_messages[0].letters_count} hint={'Количество символов'} />}
+                  {currentData.source_messages.length > 0 &&
+                  <Indicator className={'f f-align-2-2'} icon={icon_cost} value={`${Number(currentData.price/100).toFixed(2)}₴`} hint={'Стоимость'} />}
+                </div>
+              </div>
+              <div className={'dashboard-user__searching-post__constols'}>
+              </div>
+              {created_at && <div className={'dashboard-user__searching-post__date'}>
+                {created_at.getHours()}:{getFullTimeDigits(created_at.getMinutes())}
+              </div>}
+            </div>
+          </div>
+    )
   }
 }
 
