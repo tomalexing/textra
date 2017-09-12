@@ -178,11 +178,49 @@ export const TxRest = (() => {
           }
       })
     }
+          /**
+     *
+     * 
+     Delete data from server by DELETE method with authorization header
+      @param {String} path - server endpoint relatively of domain
+      @param {Fucntion} cb - if omit callback use, Promise#then to get data
+      @returns {(Promise<{}|Error>|undefined)} A Promise
+    */
+    function deleteData(path, cb){
+      let _self = this;
+      return new Promise( (resolve, reject) => {
+          try { 
+            fetch(`${host}${port}/${path}`, {
+              method: 'DELETE',
+              mode: 'cors',
+              cache: "no-cache",
+              headers: new Headers({
+                        'Authorization': `Bearer ${AuthStore.token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'}),
+            }).then(response => {
+              return response.status === 200 && response.statusText === 'OK'
+                      ? Promise.resolve(response.status) 
+                      : Promise.reject(response.status)
+            }).then( async data => {
+              if(typeof cb === 'function'){
+                  cb(data);
+              }
+              resolve(data);
+            })
+          } catch (err) {
+            console.trace(err.stack);
+            reject(err);
+          }
+      })
+    }
+    
     return {
       getData,
       getDataByID,
       putData,
       initSocket,
-      reInitilizeSocket
+      reInitilizeSocket,
+      deleteData
     }
 })()

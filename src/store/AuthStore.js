@@ -1,6 +1,7 @@
 import { TxRest } from './../services/Api.js';
 import Store from './Store.js'
 import UserStore from './UserStore.js'
+import FeedStore from './FeedStore.js'
 
 const ROLES = (num) => {
   switch(num){
@@ -70,9 +71,11 @@ const  Auth = {
       if(this.loadSession){
         Store.loadSession();
         UserStore.loadSession();
+        FeedStore.loadSession();
       }else{
         Store.clearSession();
         UserStore.clearSession();
+        FeedStore.clearSession();
         TxRest.reInitilizeSocket();
       }
 
@@ -98,9 +101,11 @@ const  Auth = {
       if(this.loadSession){
         Store.loadSession();
         UserStore.loadSession();
+        FeedStore.loadSession();
       }else{
         Store.clearSession();
         UserStore.clearSession();
+        FeedStore.clearSession();
         TxRest.reInitilizeSocket();
       }
 

@@ -164,7 +164,6 @@
     text-align: center
     margin: 60px auto 40px
     overflow: visible
-    +nosel
   &-moduleCenter
     width: 350px
     margin: 0 auto
@@ -174,6 +173,7 @@
   &-subheader
     padding-top: 20px
     color: $text-light
+    line-height: 18px
   &-highLight
     color: #1189d3 !important
 
@@ -195,33 +195,29 @@
     background: #00eaf8 linear-gradient(143deg, #00eaf8 0%, #6d42ef 100%) center/cover no-repeat
     &__featurePic
       width: 750px
-      height: 449px
-      box-shadow: 0 16px 20px rgba(0, 0, 0, 0.2)
+      height: 442px
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2)
       margin-bottom: -70px
-      +nosel
       img
-        height: 100%
-        width: auto
+        width: 750px
+        height: 449px
   .intro2-block
     height: 570px
     background-color: #f2faff
     &__featurePic
-      width: 727px
-      height: 449px
-      box-shadow: 0 16px 20px rgba(0, 0, 0, 0.2)
+      width: 749px
+      height: 441px
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2)
       margin-bottom: -70px
-      +nosel
       img
-        height: 100%
-        width: auto
+        width: 749px
+        height: 463px
   .service-block
     height: 600px
     padding: 140px 0 80px
-    +nosel
     &__description,
     &__featurePic
       width: 50%
-
 .footer
   height: 80px
   padding: 0 16px
@@ -1163,11 +1159,10 @@
         +nosel
       &__info
         margin-left: auto
-        width: 18px
         height: 14px
         border-radius: 8px
         background-color: #fff
-        width: 18px
+        padding: 0 4px
         font-size: 8px
         font-weight: 400
         letter-spacing: -0.04px

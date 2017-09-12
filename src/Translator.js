@@ -56,6 +56,7 @@ import Indicator from "./components/Indicator";
 import deepEqual from 'deep-equal';
 
 import Store from './store/Store.js';
+import FeedStore from './store/FeedStore.js';
 import MessageStore from './store/MessageStore.js';
 import {TxRest} from './services/Api.js';
 
@@ -100,7 +101,8 @@ class Translator extends React.Component {
     this.boundRef = this.boundRef.bind(this);
     this.refresh = this.refresh.bind(this);
     this.registerRefreshComponent = this.registerRefreshComponent.bind(this);
-    this.listRefreshComponents = []
+    this.listRefreshComponents = [];
+
   }
 
   state = {
@@ -115,6 +117,7 @@ class Translator extends React.Component {
       typePage: 'feed',
       id: ''
     },
+    amountFeed: null
   };
 
   componentWillMount() {
@@ -144,6 +147,11 @@ class Translator extends React.Component {
       this.setState({mainScreen: false, secondScreen: true})
     }
     this.setState({page:{typePage, id}});
+
+    let _self = this;
+    this.registerRefreshComponent('amountFeed', ({allFeed,feedPerson,feedCommon})=>{
+      _self.setState({amountFeed:{allFeed,feedPerson,feedCommon}})
+    })
   }
   
 
@@ -162,11 +170,11 @@ class Translator extends React.Component {
     );
 
     // get languages
+     let _self = this;
     this.languageStore = new Store('language');
     let languageStoredIds = Store.getIds('language');
     if(languageStoredIds.length !== 0) {
       let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
-      let _self = this;
       this.updateLanguageHandler({list : langsFromStore})
             .then( _ => {
                     if( _self.state.languages.length === 0 )
@@ -220,9 +228,7 @@ class Translator extends React.Component {
   render() {
     let { location: { pathname ,state : {page: {typePage, id}, historyUser } = { page: {typePage:'', id:'', historyUser: ''}}} } = this.props;
 
-
-
-    let {page, languages, isTablet, sidebar, secondScreen, mainScreen } = this.state;
+    let {page, languages, isTablet, sidebar, secondScreen, mainScreen, amountFeed } = this.state;
 
     return (
       <div className="f f-col outer translator">
@@ -248,9 +254,9 @@ class Translator extends React.Component {
                     <img src={icon_posts} />
                   </span>
                   <span>Запросы</span>
-                  <span className={"f f-align-2-2 translator-menu__item__info"}>
-                    3
-                  </span>
+                  { amountFeed && amountFeed.allFeed !== 0 && <span className={"f f-align-2-2 translator-menu__item__info"}>
+                    {amountFeed.allFeed}
+                  </span>}
                 </NavLink>
                 <NavLink
                   className={"f f-align-1-2 translator-menu__item translator-menu__item__level-2" }
@@ -261,9 +267,10 @@ class Translator extends React.Component {
                 >
                   <span className={"f f-align-2-2 translator-menu__item__icon"}/>
                   <span>Общие</span>
-                  <span className={"f f-align-2-2 translator-menu__item__info"}>
-                    2
-                  </span>
+
+                  { amountFeed && amountFeed.feedCommon  !== 0 && <span className={"f f-align-2-2 translator-menu__item__info"}>
+                      {amountFeed.feedCommon}
+                    </span>}
                 </NavLink>
                 <NavLink
                   className={ "f f-align-1-2 translator-menu__item translator-menu__item__level-2" }
@@ -274,9 +281,9 @@ class Translator extends React.Component {
                 >
                   <span className={"f f-align-2-2 translator-menu__item__icon"}/>
                   <span>Персональные</span>
-                  <span className={"f f-align-2-2 translator-menu__item__info"}>
-                    1
-                  </span>
+                  {amountFeed && amountFeed.feedPerson  !== 0  && <span className={"f f-align-2-2 translator-menu__item__info"}>
+                    {amountFeed.feedPerson}
+                  </span> }
                 </NavLink>
                 <NavLink
                   className={ "f f-align-1-2 translator-menu__item translator-menu__item__level-1" }
@@ -408,6 +415,7 @@ class Translator extends React.Component {
                       page={page}
                       languages={languages}
                       historyUser={historyUser}
+                      refresh = {this.refresh}
                     />
                     <RoutePassProps
                       path={`${Routes["reply"].path}${Routes["reply"].param}`}
@@ -774,54 +782,6 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
 
 const lcMatch = (q, s) => s && s.toLowerCase().indexOf(q.toLowerCase()) >= 0;
 
-class Query {
-  constructor(data, query) {
-    this.isNotExeed = this.isNotExeed.bind(this);
-    this.eqField = this.eqField.bind(this);
-    this.filter = this.filter.bind(this);
-    this.displayedCount = 0;
-    this.data = data;
-    this.query = query;
-  }
-  eqField = (fieldList, item, rule = "every") => {
-    switch (rule) {
-      case "every":
-        return Object.values(fieldList).every(
-          f => {
-            if(f.equalsType){ // equels by type first 
-               return(f.diactivate ? true : typeof item[f.name] === f.equalsType)
-            }else{
-              return(f.diactivate ? true : item[f.name] === f.equals)
-            }
-          }
-        );  
-      case "some":
-        return Object.values(fieldList).some(
-          f =>{
-            if(f.equalsType){ // equels by type first 
-               return(f.diactivate ? true : typeof item[f.name] === f.equalsType)
-            }else{
-              return(f.diactivate ? true : item[f.name] === f.equals)
-            }
-          }
-        );
-    }
-  };
-  isNotExeed = (q, ind) => {
-    if (q.perPage < 0) return true;
-    return q.perPage * q.page - 1 >= this.displayedCount++;
-  };
-
-  filter = () =>
-    Object.values(this.data).filter(
-      (item, idx) =>
-        this.eqField(
-          this.query["fielteredField"],
-          item,
-          this.query["fielteredFieldRule"]
-        ) && this.isNotExeed(this.query, idx)
-    );
-}
 
 class FeedList extends React.Component {
 
@@ -837,20 +797,22 @@ class FeedList extends React.Component {
   state = {
     currentData: [],
     languages: [],
-    isfeedExcess: false
+    isfeedExcess: false,
+    loaded: false
   }
 
   componentDidMount(){
     console.log('mount')
     this._isMounted = true;
-    let ids = Store.getIds('pending-topic');
+    let ids = FeedStore.getIds('pending-topic');
     if(ids && ids.length > 0){ // get from cache 
       let listItems = ids.map(id => {
-        return Store.getItem(id);
+        return FeedStore.getItem(id);
       })
       this.feedUpdateHandler({from: 'cache', list: listItems})
     }
-    this.feedStore = new Store('pending-topic');
+    let {page: {typePage, id} } = this.props;
+    this.feedStore = new FeedStore('pending-topic', typePage);
     this.feedStore.start();
     this.feedStore.addListener('update', this.feedUpdateHandler);
 
@@ -858,6 +820,7 @@ class FeedList extends React.Component {
 
     let _self = this; 
     this.props.registerRefreshComponent('feedExcess', isfeedExcess => _self.setState({isfeedExcess}))
+
   }
 
   feedUpdateHandler(data){
@@ -869,7 +832,8 @@ class FeedList extends React.Component {
       item.index = idx;
       return item
     })
-    this.setState({currentData: indexedList})
+    this.props.refresh('amountFeed', data)
+    this.setState({currentData: indexedList, loaded: true})
   }
 
   componentWillReceiveProps({languages}){
@@ -901,7 +865,16 @@ class FeedList extends React.Component {
     let _self = this;
     return function(e){
         TxRest.getDataByID(`join-topic/${id}`,{}).then(data => {
-           if(data.message) return  // TODO: handle error
+          if(data.message) return  // TODO: handle error
+          let {allFeed, feedCommon, feedPerson} = _self.feedStore.getState();
+          allFeed--; 
+          if( !!_self.state.currentData[index]['translated_id']){
+            feedPerson--;
+            _self.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+          }else{
+            feedCommon--;
+            _self.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+          }
           _self.state.currentData.splice(index,1);
           _self.forceUpdate();
           _self.props.refresh('inwork');
@@ -911,26 +884,8 @@ class FeedList extends React.Component {
 
   render() {
     let { location: { pathname }, isTablet, _self: parentThis, page: {typePage, id} } = this.props;
-    let { currentData, isfeedExcess } = this.state;
+    let { currentData, isfeedExcess, loaded } = this.state;
     let _self = this;
-    let equalsType = false;
-    if (typePage == 'personal') equalsType = typeof Number;
-    
-    let query = {
-      perPage: 100,
-      page: 1,
-      fielteredField: {
-        field1: {
-          name: "translator_id",
-          equals: null, 
-          equalsType,
-          diactivate: !(typePage === 'personal') && !(typePage === 'common')// is active
-        }
-      },
-      fielteredFieldRule: "every" // some || every
-    };
-    let FeedQuery = new Query(currentData, query),
-    filteredFeed = FeedQuery.filter();
 
     const RenderCollection = renderItem => {
       return (
@@ -958,7 +913,7 @@ class FeedList extends React.Component {
                 }}
             />
             {!isTablet && <div className="f f-align-1-2 translator-feed__topline"><span>Запросы</span></div>}
-          {filteredFeed.map((feedData, index) => {
+          {currentData.map((feedData, index) => {
             feedData.publishTime = new Date(feedData.created_at);
             feedData.duration = feedData.source_messages.length>0 ? feedData.source_messages[0].letters_count * _self.getLangPropInObj({id: feedData.translate_language_id, slug:'letter_time'}) : 0
             return renderItem(feedData, index);
@@ -973,7 +928,7 @@ class FeedList extends React.Component {
                 <img src={avatar} />
               </div>
               <div className={"f f-align-2-2 translator-feed__placeholder"}>
-                <span>Запросы на перевод отсутствуют</span>
+                <span>Запросы на перевод {loaded} отсутствуют</span>
               </div>
             </div>
         </div>
@@ -1083,6 +1038,9 @@ class Reply extends React.Component {
     this.getLangPropInObj = this.getLangPropInObj.bind(this)
     this.sendTranslaton = this.sendTranslaton.bind(this)
     this.inWorkStore = null;
+    this.startSocket = this.startSocket.bind(this);
+    this.onSocket = this.onSocket.bind(this);
+    this.isSocketOn = false;
   }
 
   state = {
@@ -1108,6 +1066,47 @@ class Reply extends React.Component {
     this.props.registerRefreshComponent('reply', ( currentData )=>{
          _self.setState({currentData: currentData[0]})
     })
+
+    if(Auth.alreadyInitSocket){
+      this.startSocket();
+    }else{
+      Auth.addListener('AuthStore.alreadyInitSocket', this.startSocket)
+    }
+
+    let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
+    feedPerson = Number(window.sessionStorage.feedPerson) || 0,
+    allFeed = feedCommon + feedPerson;
+    this.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+      
+  }
+
+  
+  startSocket(){
+      !this.isSocketOn && window.io.socket.on('topic', this.onSocket);
+      this.isSocketOn = true;
+  }
+
+  onSocket(data){
+    let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
+        feedPerson = Number(window.sessionStorage.feedPerson) || 0,
+        allFeed = +feedCommon + +feedPerson + 1,
+        prefix = '';
+        if(window.sessionStorage.feedCommon === undefined || window.sessionStorage.feedPerson === undefined){
+          prefix = '+';
+        }
+        if( !!data['translator_id']){
+          window.sessionStorage.feedPerson = feedPerson + 1;
+          feedPerson = +feedPerson + 1;
+          allFeed = prefix + allFeed;
+          feedPerson = prefix + feedPerson;
+          this.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+        }else{
+          window.sessionStorage.feedCommon = feedCommon + 1;
+          feedCommon = +feedCommon + 1;
+          allFeed = prefix + allFeed;
+          feedCommon = prefix + feedCommon;
+          this.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+        }
   }
 
   updateHandler({list}){
@@ -1126,8 +1125,15 @@ class Reply extends React.Component {
       this.inWorkStore.removeListener('update', this.updateList)
       this.inWorkStore = null;
     }
+    Auth.removeListener('AuthStore.alreadyInitSocket')
+    if(window.io) {
+      this.isSocketOn = false;
+      window.io.socket.off('topic', this.onSocket);
+    }
+
     this._isMounted = false;
     this.timesItWasEnlarge = 0;
+
 
   }
 
@@ -1146,7 +1152,7 @@ class Reply extends React.Component {
         this.answerNode.style.height = 'auto';
         this.startPos =  Math.min(this.answerNode.scrollHeight, 20*10)
         this.answerNode.style.height = this.startPos + 'px';
-        this.timesItWasEnlarge++
+        this.timesItWasEnlarge++;
       }
 
   }
@@ -1330,6 +1336,9 @@ class HistoryList extends React.Component {
     this.messageStore =null;
     this.updateHandler = this.updateHandler.bind(this);
     this.lastCreatedDate = null;
+    this.startSocket = this.startSocket.bind(this);
+    this.onSocket = this.onSocket.bind(this);
+    this.isSocketOn = false;
   }
 
   state={
@@ -1348,6 +1357,12 @@ class HistoryList extends React.Component {
     this._isMounted = true;
     this.messageStore.start();
     this.messageStore.addListener('updateMessage', this.updateHandler)
+
+    let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
+        feedPerson = Number(window.sessionStorage.feedPerson) || 0,
+        allFeed = feedCommon + feedPerson;
+    this.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+      
   }
 
   updateHandler({list}){
@@ -1363,9 +1378,49 @@ class HistoryList extends React.Component {
     this.setState({languages, translator});
   }
 
+  componentWillUnmount(){
+    this._isMounted = false;
+    this.messageStore.stop();
+    this.messageStore.removeListener('updateMessage', this.updateHandler)
+    this.messageStore = null;
+    Auth.removeListener('AuthStore.alreadyInitSocket')
+    if(window.io) {
+      this.isSocketOn = false;
+      window.io.socket.off('topic', this.onSocket);
+    }
+  }
+
   getLangPropInObj({id,slug}){
     if(!this._isMounted) return 
     return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  }
+
+  startSocket(){
+      !this.isSocketOn && window.io.socket.on('topic', this.onSocket);
+      this.isSocketOn = true;
+  }
+
+  onSocket(data){
+    let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
+        feedPerson = Number(window.sessionStorage.feedPerson) || 0,
+        allFeed = +feedCommon + +feedPerson + 1,
+        prefix = '';
+        if(window.sessionStorage.feedCommon === undefined || window.sessionStorage.feedPerson === undefined){
+          prefix = '+';
+        }
+        if( !!data['translator_id']){
+          window.sessionStorage.feedPerson = feedPerson + 1;
+          feedPerson = +feedPerson + 1;
+          allFeed = prefix + allFeed;
+          feedPerson = prefix + feedPerson;
+          this.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+        }else{
+          window.sessionStorage.feedCommon = feedCommon + 1;
+          feedCommon = +feedCommon + 1;
+          allFeed = prefix + allFeed;
+          feedCommon = prefix + feedCommon;
+          this.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
+        }
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -1445,15 +1500,15 @@ class HistoryList extends React.Component {
 
 
       let showHeaderDate = true;
-      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === created_at.getDate() && this.lastCreatedDate.getMonth() === created_at.getMonth() && this.lastCreatedDate.getFullYear() === created_at.getFullYear()){
+      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === translated_at.getDate() && this.lastCreatedDate.getMonth() === translated_at.getMonth() && this.lastCreatedDate.getFullYear() === translated_at.getFullYear()){
         showHeaderDate = false;
       }
-      this.lastCreatedDate = created_at;
+      this.lastCreatedDate = translated_at;
 
 
       return (
         <div key={idx}>
-          { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()}</div>}
+          { showHeaderDate && <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()}</div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
               <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />

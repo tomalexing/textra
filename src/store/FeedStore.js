@@ -9,32 +9,42 @@ import AuthStore from './AuthStore.js'
  * Object.<type, Array.<id>>,
  * @type {{string : Array<string>}}  
  */
-var idCache = {}
+var idFeedCache = {}
 
 /**
  * Item cache. Persisted to sessionStorage.
  * Object.<id, item>
  * @type {{string:{}}}  
  */
-var itemCache = {}
+var itemFeedCache = {}
 
 /**
  * Story items in rank order for display, by type.
  * Object.<type, Array.<item>>
  * @type {{string:Array<{}>}}  
  */
-var showLists = {}
+var showFeedLists = {}
 
+
+var feedPerson = 0
+
+var feedCommon = 0
 
 /**
  * Populate the story list for the given story type from the cache.
  */
-function populateList(type) {
-  var ids = idCache[type]
-  var storyList = showLists[type];
+function populateList(type, query) {
+  var ids = idFeedCache[type]
+  var storyList = showFeedLists[type];
+  feedPerson = feedCommon = 0;
   for (var i = 0, l = ids.length; i < l; i++) {
-    storyList[i] = itemCache[ids[i]] || null
+    storyList[i] = itemFeedCache[ids[i]] || null
+    !!storyList[i]['translator_id'] ? feedPerson++ : feedCommon++;
   }
+  window.sessionStorage.feedCommon = feedCommon
+  window.sessionStorage.feedPerson = feedPerson
+  let queredFeed = new Query(storyList, query);
+  showFeedLists[type] = queredFeed.filter();
 }
 
 function parseJSON(json, defaultValue) {
@@ -50,14 +60,14 @@ export default class Store extends EventEmitter {
    * Get an ids by type from the cache.
    */
   static getIds(type) {
-    return idCache[type] || null
+    return idFeedCache[type] || null
   }
 
   /**
    * Get an item from the cache.
    */
   static getItem(id) {
-    return itemCache[id] || null
+    return itemFeedCache[id] || null
   }
 
   /**
@@ -65,38 +75,40 @@ export default class Store extends EventEmitter {
    */
   static loadSession() {
     if (typeof window === 'undefined') return
-    idCache = parseJSON(window.sessionStorage.idCache, {})
-    itemCache = parseJSON(window.sessionStorage.itemCache, {})
+    idFeedCache = parseJSON(window.sessionStorage.idFeedCache, {})
+    itemFeedCache = parseJSON(window.sessionStorage.itemFeedCache, {})
   }
 
   static clearSession(){
     if (typeof window === 'undefined') return
-    window.sessionStorage.clear(idCache);
-    window.sessionStorage.clear(itemCache);
-    idCache = {};
-    itemCache = {};
-    showLists = {};
+    window.sessionStorage.clear(idFeedCache);
+    window.sessionStorage.clear(itemFeedCache);
+    idFeedCache = {};
+    itemFeedCache = {};
+    showFeedLists = {};
   }
   /**
    * Serialise caches to sessionStorage as JSON.
    */
   static saveSession() {
     if (typeof window === 'undefined') return
-    window.sessionStorage.idCache = JSON.stringify(idCache)
-    window.sessionStorage.itemCache = JSON.stringify(itemCache)
+    window.sessionStorage.idFeedCache = JSON.stringify(idFeedCache)
+    window.sessionStorage.itemFeedCache = JSON.stringify(itemFeedCache)
   }
 
-  constructor(type, id = false) {
+  constructor(type, typePage = false) {
     super()
+
     this.type = type
-    if(id)
-       this.id = id
+
+    if(typePage) this.typePage = typePage;
+
     // Ensure cache objects for this type are initialised
-    if (!(type in idCache)) {
-      idCache[type] = []
+    if (!(type in idFeedCache)) {
+      idFeedCache[type] = []
     }
-    if (!(type in showLists)) {
-      showLists[type] = []
+    if (!(type in showFeedLists)) {
+      showFeedLists[type] = []
       populateList(type)
     }
 
@@ -104,22 +116,39 @@ export default class Store extends EventEmitter {
     this.onStorage = this.onStorage.bind(this)
     this.onStoriesUpdated = this.onStoriesUpdated.bind(this)
     this.startSocket = this.startSocket.bind(this)
+
+    
+    this.query = {
+      perPage: 500,
+      page: 1,
+      fielteredField: {
+        field1: {
+          name: "translator_id",
+          equals: this.typePage === 'personal', // true for num value in the field  
+          diactivate: !(this.typePage === 'personal') && !(this.typePage === 'common')// is active
+        }
+      },
+      fielteredFieldRule: "every" // some || every
+    };
   }
 
   getState() {
     return {
-      ids: idCache[this.type],
-      list: showLists[this.type]
+      ids: idFeedCache[this.type],
+      list: showFeedLists[this.type],
+      allFeed: feedPerson + feedCommon,
+      feedPerson: feedPerson,
+      feedCommon: feedCommon
     }
   }
 
   itemUpdated(item, index) {
     if(index  === -1){
-      showLists[this.type].unshift(item);
+      showFeedLists[this.type].unshift(item);
     }else{
-      showLists[this.type][index] = item
+      showFeedLists[this.type][index] = item
     }
-    itemCache[this.type + item.id] = item
+    itemFeedCache[this.type + item.id] = item
   }
 
   /**
@@ -127,7 +156,7 @@ export default class Store extends EventEmitter {
    * cache has changed.
    */
   onStorage(e) {
-    if (itemCache[e.key]) {
+    if (itemFeedCache[e.key]) {
       this.emit(e.key)
     }
   }
@@ -138,18 +167,18 @@ export default class Store extends EventEmitter {
   onStoriesUpdated(data) {
     
     if(Array.isArray(data) && data.length === 0) {
-      idCache[this.type]= [];
+      idFeedCache[this.type]= [];
       return
     }
     let _self = this;
     if(Array.isArray(data)){
       let ids = data.reduce((acc, item, idx) => {
-        itemCache[_self.type + item.id] = item;
+        itemFeedCache[_self.type + item.id] = item;
        
         return acc.concat(_self.type + item.id);
       },[]);
-      showLists[this.type] = [];
-      idCache[this.type]= ids;
+      showFeedLists[this.type] = [];
+      idFeedCache[this.type]= ids;
 
     }else{
 
@@ -158,13 +187,13 @@ export default class Store extends EventEmitter {
         console.log('An error in the Store')
         return
       }
-      if(idCache[this.type].indexOf(this.type + data.id) === -1 ) 
-        idCache[this.type].unshift(this.type + data.id);
+      if(idFeedCache[this.type].indexOf(this.type + data.id) === -1 ) 
+        idFeedCache[this.type].unshift(this.type + data.id);
 
-      itemCache[this.type + data.id] = Object.assign({}, itemCache[this.type + data.id],  data);
+      itemFeedCache[this.type + data.id] = Object.assign({}, itemFeedCache[this.type + data.id],  data);
     }
 
-    populateList(this.type)
+    populateList(this.type, this.query)
     this.emit('update', this.getState())
   }
 
@@ -192,7 +221,50 @@ export default class Store extends EventEmitter {
     AuthStore.removeListener('AuthStore.alreadyInitSocket')
     if(window.io) {
       isSocketOn = false;
-      window.io.socket.off(this.type, this.onStoriesUpdated);
+      window.io.socket.off('topic', this.onStoriesUpdated);
     }
+  }
+}
+
+
+class Query {
+  constructor(data, query) {
+    this.isNotExeed = this.isNotExeed.bind(this);
+    this.eqField = this.eqField.bind(this);
+    this.filter = this.filter.bind(this);
+    this.displayedCount = 0;
+    this.data = data;
+    this.query = query;
+  }
+  eqField = (fieldList, item, rule = "every") => {
+    switch (rule) {
+      case "every":
+        return Object.values(fieldList).every(
+          f => { 
+            return(f.diactivate ? true : !!item[f.name] === f.equals)
+          }
+        );  
+      case "some":
+        return Object.values(fieldList).some(
+          f =>{
+            return(f.diactivate ? true : !!item[f.name] === f.equals)
+          }
+        );
+    }
+  };
+  isNotExeed = (q, ind) => {
+    if (q.perPage < 0) return true;
+    return q.perPage * q.page - 1 >= this.displayedCount++;
+  };
+
+  filter = () => {
+    return Object.values(this.data).filter(
+      (item, idx) =>
+        this.eqField(
+          this.query["fielteredField"],
+          item,
+          this.query["fielteredFieldRule"]
+        ) && this.isNotExeed(this.query, idx)
+    );
   }
 }

@@ -143,6 +143,15 @@ const ROLES = (num) => {
   }
 };
 
+const APPEALS = (num) => {
+  switch(num){
+  case('0') : return('p')
+  case('1') : return('g')
+  case('2') : return('o')
+  default   : return('o')
+  }
+};
+
 const GETINITIALROLE = (num) => {
   switch(num){
   case('d') : return('0')
@@ -152,22 +161,17 @@ const GETINITIALROLE = (num) => {
   default   : return('3')
   }
 };
-    // u - user
-    // c - controller
-    // t - translater
-    // p - possibility
-    // a - appeal
-    // o - other
+
 
 const findIcon = (objs, id, prop = 'icon') => Object.values(objs).find(o => o.value == id)[prop];
 
 
-    // Types of user :
+    // Types of user:
     // u - user
     // c - controller
     // t - translater
     // p - possibility
-    // a - appeal
+    // g - appeal
     // o - other
 
 class Admin extends React.Component {
@@ -218,7 +222,8 @@ class Admin extends React.Component {
         id: RouterState ? RouterState.id : undefined ,
         historyId: RouterState ? RouterState.historyId : undefined,
       },
-      translator: RouterState ? RouterState.translator : null
+      translator: RouterState ? RouterState.translator : null,
+      item: RouterState ? RouterState.item : null
     })
   }
 
@@ -312,7 +317,7 @@ class Admin extends React.Component {
     let {usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
     let currentDate, user, allUsers = false;
 
-    let { sidebar, secondScreen, mainScreen, languages, translator } = this.state;
+    let { sidebar, secondScreen, mainScreen, languages, translator , item} = this.state;
 
     return (
       <div className="f f-col outer admin">
@@ -418,6 +423,7 @@ class Admin extends React.Component {
                       component = {Appeal}
                       page = {this.state.page}
                       _self={this}
+                      appeal={item}
                     />
                   </Switch>
                 </div>
@@ -503,7 +509,7 @@ class SideList extends React.PureComponent{
     )}
 
     let registrationTime = new Date(user.registrationTime);
-    return(<ScrollRestortion scrollId={`admin${this.props.id}`}   className="f sidebar">
+    return(<ScrollRestortion scrollId={`admin-${id}`} className="f sidebar">
         <div className="admin-user-details">
             <div className="admin-user-details__topArea"> 
               <figure className="f f-align-2-2 admin-user-details__avatar">
@@ -561,7 +567,6 @@ class SideList extends React.PureComponent{
       })} */}
      {/* PENDINGS TABs */} 
     { pendingTabs.map(tab => {
-      
       return (
         <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
           <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.user && tab.user.image ||avatar } alt="Textra" /> </figure>
@@ -582,7 +587,7 @@ class SideList extends React.PureComponent{
     { workingTabs.map(tab => {
       let publishTime = new Date(tab.created_at);
       let outputPublishTime = getTabTime(publishTime);
-      let userAttached = tab.translator; 
+      let userAttached = tab.translator || tab.user; 
 
       return (
         <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
@@ -614,9 +619,9 @@ class SideList extends React.PureComponent{
     })}
     
     {/* History TABs */}
-    {this.state.historyTabs.map((historyFromOneUser, index) => {
-      let tab = historyFromOneUser;
-      let userAttached = historyFromOneUser.translator; 
+    {this.state.historyTabs.map((tab, index) => {
+      let userAttached = tab.translator || tab.user;
+      Object.assign(userAttached, {role: tab.user  ? 'translator' : 'user'});
       let finishTime = new Date(tab.translated_at);
       let outputPublishTime = getTabTime(finishTime);
       let start = new Date(tab['started_at']);
@@ -666,7 +671,10 @@ class Users extends React.Component {
     this.changeSearch = this.changeSearch.bind(this)
     this.rememberLastValue = this.rememberLastValue.bind(this)
     this.updateHandler = this.updateHandler.bind(this)
+    this.requestUpdateHandler = this.requestUpdateHandler.bind(this)
     this.lastDropDownOpenedValue = undefined;
+
+    
   }
 
   state = {
@@ -691,27 +699,61 @@ class Users extends React.Component {
     },
     usersList: null,
     usersListFetched: null,
-    usedRoles: []
+    usedRoles: [],
+    page: this.props.page
   }
 
   componentWillMount(){
     if(typeof window !== 'undefined'){
-      let usersAdminListCached =  JSON.parse(window.sessionStorage.getItem('userList'));
-      usersAdminListCached &&  this.setState({usersAdminListCached})
+      if(this.state.page.pageType === 'users'){ // 
+        let usersAdminListCached =  JSON.parse(window.sessionStorage.getItem('userList'));
+        usersAdminListCached &&  this.setState({usersList: usersAdminListCached, usersListFetched: usersAdminListCached})
+      }else{ // for user's appeals 
+        let usersAdminListCached =  JSON.parse(window.sessionStorage.getItem('userRequest'));
+        usersAdminListCached &&  this.setState({usersList: usersAdminListCached, usersListFetched: usersAdminListCached})
+      }
     }
   }
   
   componentDidMount(){
     this._isMounted = true;
     let {page: {pageType, id}} = this.props;
-    TxRest.getData('user').then(this.updateHandler)
+
+    if(this.state.page.pageType === 'users'){
+       TxRest.getData('user').then(this.updateHandler)
+    }else{ // for user's appeals 
+       TxRest.getData('request').then(this.requestUpdateHandler)
+    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     if(typeof window !== 'undefined'){
-      window.sessionStorage.setItem('userList', JSON.stringify(this.state.usersListFetched));
+      if(this.state.page.pageType === 'users'){
+         window.sessionStorage.setItem('userList', JSON.stringify(this.state.usersListFetched));
+      }else{ // for user's appeals 
+        window.sessionStorage.setItem('userRequest', JSON.stringify(this.state.usersListFetched));
+      }
     }
+  }
+
+  requestUpdateHandler(data){
+    if(!this._isMounted) return
+    let usersList = data.map(item => {
+      return {
+        nickname: item.user ? item.user : 'Unregistered', 
+        uuid: item.id,
+        email: item.user ? item.user : 'Unregistered', 
+        type: APPEALS(item.type), 
+        registrationTime: item.created_at,
+        status: 0,
+        publishTime: item.created_at,
+        content: item.message
+      }
+    });
+
+    this.setState({usersList, usersListFetched: usersList})
+    this.setUsedRoled();
   }
 
   updateHandler(data){
@@ -728,7 +770,7 @@ class Users extends React.Component {
     });
 
     this.setState({usersList, usersListFetched: usersList})
-    this.setUsedRoled(usersList);
+    this.setUsedRoled();
     //let _self = this;
     // if( data.list[0] === null ) {
     //   Promise.all(data.ids.map(id => TxRest.getDataByID(this.props.page.pageType.slice(0, -1), id)))
@@ -751,12 +793,15 @@ class Users extends React.Component {
     // }
   }
 
-  setUsedRoled(currentDate,cb){
-    let usedRoles = {},
+  setUsedRoled(cb){
+    let usedRoles = [],
         roles = [];
-    console.log(currentDate)
-    currentDate.map(o => usedRoles[o.type] = true)
-    roles = Roles.filter(o => Object.keys(usedRoles).some(r => r === o.value));
+    if(this.state.page.pageType === 'users'){
+      usedRoles = ['u','c','d', 't'];
+    }else{
+      usedRoles = ['p', 'g', 'o'];
+    }   
+    roles = Roles.filter(o => usedRoles.some(r => r === o.value));
     this.setState({
       usedRoles: roles
     },() =>{
@@ -916,6 +961,38 @@ class Users extends React.Component {
               })
   }
 
+  deleteUser (uuid){
+    let _self = this;
+    this.setState(Object.assign({}, this.state,{
+      deleting:{
+        is: true,
+        uuid
+      }
+    }))
+
+    return TxRest.deleteData(`request/${uuid}`)
+              .then( _ => {
+                let inx, inx2;
+                _self.state.usersList.find((o,i) => {if(o.uuid == uuid) inx = i});
+                _self.state.usersListFetched.find((o,i) => {if(o.uuid == uuid) inx2 = i});
+
+                return new Promise(r => {
+                    let list = Object.assign([], this.state.usersList);
+                    list.splice(inx,1);
+                    _self.state.usersListFetched.splice(inx2,1);
+                    this.setState(Object.assign(_self.state.usersList, {usersList:list}),r);
+                  })
+  
+              }).then(_ => {
+                this.setState(Object.assign(this.state,{
+                  deleting:{
+                    is: false,
+                    uuid: undefined
+                  }
+                }))
+              })
+  }
+
   sortMe  = (columnNameToSort) => () => {
     let self = this;
 
@@ -1008,7 +1085,7 @@ class Users extends React.Component {
                   <Table.HeaderCell sorted={ columnNameToSort === 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
-                  <Table.HeaderCell textAlign='center' >Delete</Table.HeaderCell>
+                  <Table.HeaderCell textAlign='center' >Status/Delete</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -1035,14 +1112,14 @@ class Users extends React.Component {
                   onChange={self.changeFilter}/>
                 <Input icon='search' iconPosition='left' className='admin-list__search' value={!!search.value ? search.value : '' } onChange={self.changeSearch} />
               </div>
-              <Table color={'blue'} compact fixed celled sortable={true} style={{ width: '90%', minWidth:'959px', marginLeft: 'auto', marginRight: 'auto'}}>
+              <Table color={'blue'} compact fixed celled sortable={true} style={{ width: '90%', minWidth:'959px', margin: '50px auto 100px'}}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell sorted={ columnNameToSort === 'nickname' ? columnSortDirection : null} onClick={this.sortMe('nickname')}>Name</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'email' ? columnSortDirection : null} onClick={this.sortMe('email')} >E-mail address</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'type' ? columnSortDirection : null} onClick={this.sortMe('type')}>User Type</Table.HeaderCell>
                   <Table.HeaderCell sorted={ columnNameToSort === 'registrationTime' ? columnSortDirection : null} onClick={this.sortMe('registrationTime')}>Registration Date</Table.HeaderCell>
-                  <Table.HeaderCell textAlign='center' sorted={ columnNameToSort === 'status' ? columnSortDirection : null}   onClick={this.sortMe('status')}>Status</Table.HeaderCell>
+                  <Table.HeaderCell textAlign='center' sorted={ columnNameToSort === 'status' ? columnSortDirection : null}  onClick={this.sortMe('status')}>Status/Delete</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -1053,9 +1130,9 @@ class Users extends React.Component {
                 :
                 Array.isArray(currentDate) && currentDate.map(({nickname, uuid, email, type, registrationTime, status}, index) => (
                   <Table.Row key={index} >
-                    <Table.Cell  {...(status === "2" && {'disabled':true})}><Link to={{
+                    <Table.Cell ><Link to={{
                         pathname: `/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`,
-                        state: {pageType: pageType.toLowerCase().slice(0,pageType.length - 1), id: uuid }
+                        state: {pageType: pageType.toLowerCase().slice(0,pageType.length - 1), id: uuid, item: currentDate[index] }
                         }}>
                         {nickname}
                       </Link></Table.Cell>
@@ -1071,8 +1148,14 @@ class Users extends React.Component {
                      }
                     </Table.Cell>
                     <Table.Cell  {...(status === "2" && {'disabled':true})} >{new Date(registrationTime).toDateString()} {new Date(registrationTime).getHours()}:{new Date(registrationTime).getMinutes()}</Table.Cell>
-                    <Table.Cell className="f f-align-2-2">
-                      <Checkbox toggle {...(deleting.is && {'disabled':true})} onClick={debounce(this.changeUserStatus.bind(self,uuid),200,false)} checked={status === "0"}/>
+                   <Table.Cell className="f f-align-2-2">
+                      {/*  checkbox for block/unblock user */}
+                      {pageType === 'users' && 
+                      <Checkbox toggle {...(deleting.is && {'disabled':true})} onClick={debounce(this.changeUserStatus.bind(self,uuid),200,false)} checked={status === "0"}/>}
+                       {/*  delete for  user's request */}
+                      {pageType === 'appeals' && 
+                      <button {...(deleting.is && {'disabled':true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} className="admin-list__delbtn btn btn-block btn-flat btn-normal f f-align-2-2"><img src={deleteIcon} alt="icon"/></button>}
+
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -1106,8 +1189,10 @@ class UserFullHistory extends React.Component {
 
   componentDidMount(){
     this._isMounted = true;
-    let {pageType ,id, historyId} = this.props.page;
-    this.massageStore = new MessageStore(`translated-topic/user/${id}/translator`,historyId);
+    let {pageType, id, historyId} = this.props.page;
+    let userId = this.props.translator['role'] === 'translator' ? historyId : id;
+    let translatorId = this.props.translator['role'] === 'translator' ? id : historyId ;
+    this.massageStore = new MessageStore(`translated-topic/user/${userId}/translator`, translatorId);
     this.massageStore.start();
     this.massageStore.addListener('updateMessage', this.updateHandler)
   }
@@ -1241,9 +1326,8 @@ class UserFullHistory extends React.Component {
     if (!list.length)
       return(<div/>)
     list = list.reverse();
-    console.log(list);
     const renderCollection = renderItem => (
-      <ScrollRestortion scrollId={`history${this.props.id}`}  className={'f f-col dashboard-user__history'} >
+      <ScrollRestortion scrollId={`history-${this.props.id}-${this.props.historyId}`}  className={'f f-col dashboard-user__history'} >
         
         {/* ALl merged history */}
 
@@ -1265,14 +1349,14 @@ class UserFullHistory extends React.Component {
       let duration =  (translated_at - started_at)/1000 ; //sec
 
       let showHeaderDate = true;
-      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === created_at.getDate() && this.lastCreatedDate.getMonth() === created_at.getMonth() && this.lastCreatedDate.getFullYear() === created_at.getFullYear()){
+      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === translated_at.getDate() && this.lastCreatedDate.getMonth() === translated_at.getMonth() && this.lastCreatedDate.getFullYear() === translated_at.getFullYear()){
         showHeaderDate = false;
       }
-      this.lastCreatedDate = created_at;
+      this.lastCreatedDate = translated_at;
       
       return (
         <div key={idx}>
-          { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
+          { showHeaderDate && <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
               <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
@@ -1361,42 +1445,23 @@ class Appeal extends React.Component {
 
   constructor(props){
     super(props);
-    this.massageStore = null; 
-    this.user = Store.getItem(this.props.page.id)
-    if( this.user )
-    this.userId = this.user.uuid;
-    this.updateHandler = this.updateHandler.bind(this);
     this._isMounted = false;
     }
 
   state = {
-    list: null
+    appeal: null
   }
 
   componentWillMount(){
-    this.setState({list: MessageStore.getMassage('appeal', this.userId) })
+    let {page:{ id }, appeal} = this.props;
+    this.setState({appeal})
   }
 
   componentDidMount(){
     this._isMounted = true;
-    let {historyId} = this.props.page;
-    this.massageStore = new MessageStore('appeal', this.userId);
-    this.massageStore.start();
-    this.massageStore.addListener('updateMessage', this.updateHandler)
-  }
-
-  updateHandler(list){
-    if(!this._isMounted) return    
-    if(list !== null){
-      this.setState(list)
-    }else{
-      console.log('iis')
-    }
   }
 
   componentWillUnmount(){
-    this.massageStore.removeListener('updateMessage', this.updateHandler);
-    this.massageStore = null;
     this._isMounted = false;
   }
 
@@ -1412,9 +1477,10 @@ class Appeal extends React.Component {
   render() {
     let { _self  } = this.props;
 
-    let { list } = this.state;
+    let { appeal } = this.state;
 
-    if(!list){
+    let list= [appeal];
+    if(!list.length){
       return(
         <div/>
       )
@@ -1436,7 +1502,7 @@ class Appeal extends React.Component {
                     <img src={avatar} />
                 </div>
                 <div className={"f f-align-2-2 admin-appeal__placeholder"}>
-                    <span>История отсутствуют</span>
+                    <span>Запрос отсутствует</span>
                 </div>
               </div>
             : RenderCollection((currentDate, index, publishTime) => (
@@ -1449,7 +1515,7 @@ class Appeal extends React.Component {
                           <img src={avatar} alt={currentDate.nickname} />
                         </figure>
                         <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
-                          <div className="admin-user-details__personalInfo__title">{currentDate.title} </div>
+                          <div className="admin-user-details__personalInfo__title">{currentDate.nickname} </div>
                           <div className="admin-user-details__personalInfo__email">{currentDate.email}</div>
                           <div className={`admin-user-details__personalInfo__type admin-user-details__personalInfo__type${String.prototype.toUpperCase.call(currentDate.type)}`}>
                             {findIcon(Roles, currentDate.type, 'text')}

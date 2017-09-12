@@ -564,14 +564,14 @@ class HistoryList extends React.Component {
 
 
       let showHeaderDate = true;
-      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === created_at.getDate() && this.lastCreatedDate.getMonth() === created_at.getMonth() && this.lastCreatedDate.getFullYear() === created_at.getFullYear()){
+      if(this.lastCreatedDate && this.lastCreatedDate.getDate() === translated_at.getDate() && this.lastCreatedDate.getMonth() === translated_at.getMonth() && this.lastCreatedDate.getFullYear() === translated_at.getFullYear()){
         showHeaderDate = false;
       }
-      this.lastCreatedDate = created_at;
+      this.lastCreatedDate = translated_at;
     
       return (
         <div key={idx}>
-          { showHeaderDate && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
+          { showHeaderDate && <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
               <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
@@ -1135,7 +1135,7 @@ class Create extends React.Component {
           <div className={'dashboard-user__create-posteditor'}>
             <textarea
               type="text"
-              tabIndex={1}
+              tabIndex={1} 
               name="create[message]"
               value={translatorMessage}
               placeholder={'Ваш запрос на перевод...'}

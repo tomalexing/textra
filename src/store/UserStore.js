@@ -76,7 +76,7 @@ export default class Store extends EventEmitter {
    * Get an item from the cache.
    */
   static getItem(userId, itemId) {
-    return Array.isArray(itemCacheByUserId[userId]) && itemCacheByUserId[userId].find(o => o.source_messages[0].id === itemId) || null
+    return Array.isArray(itemCacheByUserId[userId]) && itemCacheByUserId[userId].source_messages && itemCacheByUserId[userId].find(o => o.source_messages[0].id === itemId) || null
   }
 
   /**

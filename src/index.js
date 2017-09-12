@@ -16,6 +16,7 @@ import { createBrowserHistory } from 'history'
 import  { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
 import UserStore from './store/UserStore.js';
+import FeedStore from './store/FeedStore.js';
 import Auth from './store/AuthStore.js';
 import {TxRest} from './services/Api.js';
 import './polyfill';
@@ -82,10 +83,12 @@ class App extends React.Component {
     if(!Auth.isAuthenticated){
       if( Auth.loadSession){
         Store.loadSession()
+        FeedStore.loadSession()
         UserStore.loadSession()
       }else{
         Store.clearSession()
         UserStore.clearSession()
+        FeedStore.clearSession()
       }
     }
     if (typeof window === 'undefined') return
@@ -100,6 +103,7 @@ class App extends React.Component {
   handleBeforeUnload() {
     Store.saveSession();
     UserStore.saveSession();
+    FeedStore.saveSession();
   }
 
   render(){

@@ -263,6 +263,11 @@ export class ScrollRestortion extends React.Component {
           }
         }, 500), false);
       }
+      var scrollPos = window.sessionStorage.getItem(`ScrollRestortion${this.scrollId}`);
+      if(scrollPos){
+        let el = this.refs[this.scrollId];
+        if( el ) el.scrollTop =  scrollPos || 0
+      }
     }
   }
 

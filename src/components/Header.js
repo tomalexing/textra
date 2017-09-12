@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, withRouter, Redirect} from 'react-router-dom';
 import logo from './../assets/logo.png';
+import logo2x from './../assets/logo-2x.png';
+
 import avatar from './../assets/default-avatar.png';
 import {hasClass, addClass, removeClass, delegate} from './../utils';
 import PropTypes from 'prop-types';
@@ -99,7 +101,7 @@ class Header extends React.Component{
     ) 
     return(  <header className="f main__header">
                 <div className="f f-align-2-2 header-logo">
-                  <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
+                  <Link to={'/'} ><img src={logo} srcSet={`${logo} 1x, ${logo2x} 2x`} alt="Textra" /> </Link>
                 </div>
                 <div className="f f-align-2-2 header-menu__mobile">
                   <button  ref={n => this.mobile_btn = n} className="f f-col f-align-2-2 header-menu__mobile__btn" onTouchEnd={this.toggleMobileMenu}>
@@ -114,7 +116,7 @@ class Header extends React.Component{
                   </ul>
                 </div>
                  <div className="f f-align-2-2 header-logo__mobile">
-                  <Link to={'/'} ><img src={logo} alt="Textra" /> </Link>
+                  <Link to={'/'} ><img srcSet={`${logo} 1x, ${logo2x} 2x`}  src={logo} alt="Textra" /></Link>
                 </div>
                 <ul className="f f-align-1-2 header-menu">
                   { Auth.isAuthenticated && <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>}
@@ -135,7 +137,7 @@ class Header extends React.Component{
                   </div>}
                   { !Auth.isAuthenticated && <div className="f f-gap-2 stuff__bottom">
                       <Link className="btn btn-flat2 btn-normal" to={{pathname:"/signup", state:{from:'/'}}} >Зарегистрироваться</Link>
-                      <Link className="btn btn-primiry btn-normal" to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
+                      <Link className="btn u-px-2 btn-primiry btn-normal" to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
                   </div>}
                 </div>  
             </header>

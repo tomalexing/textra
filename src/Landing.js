@@ -3,9 +3,13 @@ import { Link } from "react-router-dom";
 import Header from "./components/Header.js"
 import {Footer} from "./components/Footer.js"
 import dashboard from "./assets/dashboard.png";
+import dashboard2x from "./assets/dashboard-2x.png";
 import translator from "./assets/translator.png";
-import service1 from "./assets/service1.svg";
-import service2 from "./assets/service2.svg";
+import translator2x from "./assets/translator-2x.png";
+import service1 from "./assets/service1.png";
+import service2 from "./assets/service2.png";
+import service12x from "./assets/service1-2x.png";
+import service22x from "./assets/service2-2x.png";
 
 export default class Landing extends React.Component {
   componentDidMount() {
@@ -24,14 +28,14 @@ export default class Landing extends React.Component {
                     <p className="text-white text-subheader">Узнайте о возможностях сервиса быстрых онлайн-переводов и начните получать переводы уже сейчас.</p>
                   </div>
                   <div className="intro-block__featurePic">
-                    <img src={dashboard} alt="Textra dashboard"/>
+                    <img srcSet={`${dashboard} 1x, ${dashboard2x} 2x`}  src={dashboard} alt="Textra dashboard"/>
                   </div>
               </div>
         </div>
         <div className="service-block">
               <div className="container f f-row f-align-2-2">
                   <div className="f f-align-2-2  service-block__featurePic">
-                    <img src={service1} alt="Textra service1"/>
+                    <img srcSet={`${service1} 1x, ${service12x} 2x`} src={service1} alt="Textra service1"/>
                   </div>
                   <div className="f f-align-2-2 f-col service-block__description">
                       <div className="text-moduleCenter">  
@@ -48,7 +52,7 @@ export default class Landing extends React.Component {
                     <p className="text-subheader">После регистрации как переводчик высможете зарабатывать в любом месте. Отправляейте запрос.</p>
                   </div>
                   <div className="intro2-block__featurePic">
-                    <img src={translator} alt="Textra dashboard-translator"/>
+                    <img  srcSet={`${translator} 1x, ${translator2x} 2x`}  src={translator} alt="Textra dashboard-translator"/>
                   </div>
               </div>
         </div>
@@ -61,7 +65,7 @@ export default class Landing extends React.Component {
                     </div>
               </div>
               <div className="f f-align-2-2  service-block__featurePic">
-                <img src={service2} alt="Textra service2"/>
+                <img srcSet={`${service2} 1x, ${service22x} 2x`} src={service2} alt="Textra service2"/>
               </div>
             </div>
         </div>
