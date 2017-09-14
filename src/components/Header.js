@@ -144,7 +144,7 @@ class Header extends React.Component{
                   <NavLink to={'/help'}>Поддержка</NavLink>
                 </ul>
                 <div className="f f-align-2-2 header-account">
-                  { Auth.isAuthenticated && this.props.currentRole !== 'admin' &&  <div className="f f-col f-align-1-3 header-details">
+                  { Auth.isAuthenticated &&  <div className="f f-col f-align-1-3 header-details">
                     <div className="header-email">{user.email}</div>
                     <div className="header-details__more">
                       {this.props.currentRole === 'user' && <span id="liqpay_checkout" onClick={this.payment}className="header-replenish">пополнить</span>}
@@ -153,6 +153,9 @@ class Header extends React.Component{
                       
                       {this.props.currentRole === 'translator' && <span className="header-balance">{`${Number(user.earn_balance/100).toFixed(2)} ₴`}</span>}
 
+                      {this.props.currentRole === 'admin' && <span className="header-balance">{`Welcome, ${Auth.user.first_name} ${Auth.user.last_name}`}</span>}
+
+                      {this.props.currentRole === 'controller' && <span className="header-balance">{`Welcome, ${Auth.user.first_name} ${Auth.user.last_name}`}</span>}
                     </div>
                   </div>}
                    { Auth.isAuthenticated && <div className="f f-align-2-2 header-avatar">

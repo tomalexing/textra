@@ -121,12 +121,12 @@ const Roles = [
     icon: { name: 'circle', color: 'blue', size: 'small' },
   }, 
    {
-    text: 'Жалоба',
+    text: 'Отзыв',
     value: 'g', // grumble
     icon: { name: 'circle', color: 'red', size: 'small' },
   }, 
    {
-    text: 'Другое',
+    text: 'Прочее',
     value: 'o', // other
     icon: { name: 'circle', color: 'grey', size: 'small' },
   }, 
@@ -770,7 +770,8 @@ class Users extends React.Component {
         email: item.email, 
         type: ROLES(item.role), 
         registrationTime: item.created_at,
-        status: item.status
+        status: item.status,
+        role: item.role
       }
     });
 
@@ -1077,6 +1078,13 @@ class Users extends React.Component {
     let {loading, deleting, sorting:{columnNameToSort, columnSortDirection}, filter:{text}, search, usedRoles: roles} = this.state;
     let currentDate = this.state.usersList;
     let self = this;
+    //hide admin from constollers
+    if(Auth.role !== 'admin'){
+      let idx;
+      currentDate && currentDate.map((o, i) => { if(o.role === '0') idx = i; })
+      if(idx) currentDate.splice(idx, 1);
+    }
+
     if(currentDate === null){
       return(<div>
               <div className="f f-align-1-2 admin-list__topbar">
@@ -1133,7 +1141,7 @@ class Users extends React.Component {
                     <Table.Cell >Пользователи отсутствуют</Table.Cell>
                 </Table.Row>
                 :
-                Array.isArray(currentDate) && currentDate.map(({nickname, uuid, email, type, registrationTime, status}, index) => (
+                Array.isArray(currentDate) && currentDate.map(({nickname, uuid, email, type, registrationTime, status, role}, index) => (
                   <Table.Row key={index} >
                     <Table.Cell ><Link to={{
                         pathname: `/admin/${pageType.toLowerCase().slice(0,pageType.length - 1)}/${uuid}`,
@@ -1142,7 +1150,7 @@ class Users extends React.Component {
                         {nickname}
                       </Link></Table.Cell>
                     <Table.Cell  {...(status === "2" && {'disabled':true})}>{email}</Table.Cell>
-                    <Table.Cell  {...(status === "2" && {'disabled':true})} style={{overflow: 'visible'}}> {!!roles.length && <Icon {...findIcon(roles, type)} />}
+                    <Table.Cell  {...((status === "2" || Auth.role !== "admin") && {'disabled':true})} style={{overflow: 'visible'}}> {!!roles.length && <Icon {...findIcon(roles, type)} />}
                      {  pageType ===  'users' ?
                        <Dropdown inline 
                       {...(loading.is && loading.uuid === uuid && {loading:true})} 
@@ -1156,7 +1164,7 @@ class Users extends React.Component {
                    <Table.Cell className="f f-align-2-2">
                       {/*  checkbox for block/unblock user */}
                       {pageType === 'users' && 
-                      <Checkbox toggle {...(deleting.is && {'disabled':true})} onClick={debounce(this.changeUserStatus.bind(self,uuid),200,false)} checked={status === "0"}/>}
+                      <Checkbox toggle {...((deleting.is || role === '0') && {'disabled':true})} onClick={debounce(this.changeUserStatus.bind(self,uuid),200,false)} checked={status === "0"}/>}
                        {/*  delete for  user's request */}
                       {pageType === 'appeals' && 
                       <button {...(deleting.is && {'disabled':true})}  onClick={debounce(this.deleteUser.bind(self,uuid),200,false)} className="admin-list__delbtn btn btn-block btn-flat btn-normal f f-align-2-2"><img src={deleteIcon} alt="icon"/></button>}
@@ -1524,7 +1532,7 @@ class Appeal extends React.Component {
                 </div>
               </div>
             : RenderCollection((currentDate, index, publishTime) => (
-              <div>
+              <div key={getUniqueKey()}>
                 <div className={"data__delimiter admin-history-data__delimiter "}>{publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}</div>
                 <div key={index} className={"f f-row f-align-13-1 admin-history"}>
                     <div className={"f f-align-1-1 f-col f-gap-2 admin-history-post "}>

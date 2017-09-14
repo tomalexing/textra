@@ -1509,7 +1509,7 @@ class HistoryList extends React.Component {
           { showHeaderDate && <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()}</div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
-              <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
+              <img src={historyUser.image || avatar} alt={historyUser.first_name} />
             </div>
             <div className={'dashboard-user__history-post__content'}>
               <div className={'dashboard-user__history-post__content__text'}>
@@ -1556,7 +1556,7 @@ class HistoryList extends React.Component {
 
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
             <div className={'dashboard-user__history-reply__avatar'}>
-              <img src={historyUser.image || avatar} alt={historyUser.first_name} />
+                <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
             </div>
             <div className={'dashboard-user__history-reply__content'}>
               <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {

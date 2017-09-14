@@ -981,7 +981,7 @@ class Create extends React.Component {
 
   optionTranslatorField(v) {
     if (!(v.login || v.value)) return <div><img style={{ width: '30px' }} src={avatar} /> <span>Переводчик</span></div>;
-    let customInput = <div> <img style={{ width: '30px' }} src={v.image || avatar} /><span style={{ marginLeft: '10px' }}>{v.login || v.value}</span></div>
+    let customInput = <div> <img style={{ width: '30px', borderRadius: '50%', overflow: 'hidden' }} src={v.image || avatar} /><span style={{ marginLeft: '10px' }}>{v.login || v.value}</span></div>
     return customInput;
   }
 
@@ -1101,7 +1101,7 @@ class Create extends React.Component {
             />
             <div className={'dashboard-user__create-topbar__chooser'}  >
               <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
-                <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{ width: '30px' }} src={avatar} />
+                <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{ width: '30px' }} src={!!valueTranslator && valueTranslator.image || avatar} />
                 <span className={'dashboard-user__create-topbar__chooser-trigger__name'} >{(!!valueTranslator && (valueTranslator.login || valueTranslator.value)) || 'Переводчик'}</span>
                 <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({ isOpen: isSearchMenuTranslatorVisible })}</span>
               </div>

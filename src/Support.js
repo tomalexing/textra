@@ -23,10 +23,10 @@ export default class Support extends React.Component {
       label: 'Стать переводчиком'
     },{
       value: 1,
-      label: 'Жалоба'
+      label: 'Отзыв'
     },{
       value: 2,
-      label: 'Другое'
+      label: 'Прочее'
     }
     ],
     comment: ''

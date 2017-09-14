@@ -3,10 +3,6 @@ import { Link } from "react-router-dom";
 import Header from "./components/Header.js"
 import {Footer} from "./components/Footer.js"
 import formSerialize from 'form-serialize';
-import 'react-select/dist/react-select.css';
-import Select from 'react-select';
-import icon_arrow from './assets/arrow-down.png';
-import Auth from './store/AuthStore.js';
 import {TxRest} from './services/Api.js';
 
 export default class RestorePassword extends React.Component {
@@ -38,15 +34,6 @@ export default class RestorePassword extends React.Component {
 
   componentWillUnmount(){
     this._isMounted = false;
-  }
-
-
-
-  arrowElementLangs({ isOpen }) {
-    if (isOpen)
-      return <img style={{ transform: 'rotate(-90deg)' }} src={icon_arrow} />
-    else
-      return <img style={{ transform: 'rotate(90deg)' }} src={icon_arrow} />
   }
 
   render() {
