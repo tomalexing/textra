@@ -20,7 +20,6 @@ import FeedStore from './store/FeedStore.js';
 import Auth from './store/AuthStore.js';
 import {TxRest} from './services/Api.js';
 import './polyfill';
-
 //import DashBoard from './Dashboard.js';
 
 
@@ -29,7 +28,7 @@ injectTapEventPlugin();
 if (navigator.userAgent.indexOf('Safari') != -1 &&  navigator.userAgent.indexOf('Chrome') == -1) {
     addClass(document.body, "safari");
 }
-  console.log(navigator.userAgent);
+
 
 // ====================================
 // ========= Lazy loadin ==============
@@ -68,6 +67,9 @@ const Term = (props) => <Lazy {...props} load={() => import('./Term')}/>
 // eslint-disable-next-line
 const Support = (props) => <Lazy {...props} load={() => import('./Support')}/>
 
+// eslint-disable-next-line
+const RestorePassword = (props) => <Lazy {...props} load={() => import('./RestorePassword')}/>
+
 // ====================================
 // ========= Lazy loadin end ==========
 // ====================================
@@ -80,6 +82,8 @@ class App extends React.Component {
     //Auth.refreshToken();
     Auth.init();
     TxRest.initSocket();
+    TxRest.initLiqPay();
+
     if(!Auth.isAuthenticated){
       if( Auth.loadSession){
         Store.loadSession()
@@ -91,6 +95,7 @@ class App extends React.Component {
         FeedStore.clearSession()
       }
     }
+
     if (typeof window === 'undefined') return
     window.addEventListener('beforeunload', this.handleBeforeUnload)
   }
@@ -125,6 +130,7 @@ class App extends React.Component {
                       <Route path="/private" component={Private} location={location}  key={getUniqueKey()} />
                       <Route path="/term-of-use" component={Term} location={location}  key={getUniqueKey()} />
                       <Route path="/help" component={Support} location={location}  key={getUniqueKey()} />
+                      <Route path="/restorepassword" component={RestorePassword} location={location}  key={getUniqueKey()} />
 
                     </ReactCSSTransitionGroup>
 

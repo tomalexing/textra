@@ -232,7 +232,7 @@ class Translator extends React.Component {
 
     return (
       <div className="f f-col outer translator">
-        <Header />
+        <Header currentRole={this.props.currentRole}/>
         <div className="f h100" ref={n => this.boundRef("bg")(n)}>
           <div
             style={{
@@ -716,7 +716,7 @@ class SideList extends React.Component{
           return (
             <Link
               to={{pathname: `${Routes[route].path}/${typePage === 'history' ? tab.user_id : tab.id}`, state: {page:{typePage:route, id: typePage ===  'history' ? tab.user_id : tab.id}, historyUser: typePage ===  'history' ? tab.user : '', secondScreen: false, mainScreen: true}}}
-              className={`f f-align-1-2 translator-tab ${tab.id === page.id ? "selected" : ""}`}
+              className={`f f-align-1-2 translator-tab ${tab.id === page.id || tab.user_id === page.id ? "selected" : ""}`}
               key={index}
             >
               <figure className="f f-align-2-2 translator-tab-avatar"><img src={ tab.user.image || avatar} alt="Textra" /></figure>
@@ -730,12 +730,12 @@ class SideList extends React.Component{
                 <div className="translator-tab-info__time">
                   <Batch
                     flushCount={0}
-                    flushInterval={200} 
+                    flushInterval={300} 
                     count={1}
                     debug={false}
                     render={(()=> {
                        if(this.props.page.typePage !== 'history'){
-                        let start = tab['created_at'];
+                        let start = tab['started_at'];
                         let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
 
                         return <Timer start={start} duration={duration} />
@@ -824,8 +824,6 @@ class FeedList extends React.Component {
   }
 
   feedUpdateHandler(data){
-    console.log(data)
-
     if(!this._isMounted || !data) return;
 
     let indexedList = data.list.map((item, idx) => {
@@ -875,6 +873,7 @@ class FeedList extends React.Component {
             feedCommon--;
             _self.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
           }
+          _self.feedStore.deleteItem(index, id);
           _self.state.currentData.splice(index,1);
           _self.forceUpdate();
           _self.props.refresh('inwork');
@@ -935,7 +934,7 @@ class FeedList extends React.Component {
       : RenderCollection((feed, index) => (
           <div key={index} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'can__get__more'} u-mx-3 u-my-2`}>
             <div className={"translator-feed__avatar"}>
-              <img src={avatar} alt={feed.user.first_name} />
+              <img src={feed.user && feed.user.image || avatar} alt={feed.user.first_name} />
               {currentData.isTablet &&
                 <div className={"translator-feed__content__topbar__name"}>
                   {feed.nickname}
@@ -1177,6 +1176,7 @@ class Reply extends React.Component {
       if(data.id){
         _self.props.refresh('inwork');
         _self.setState({translateMessage:'', redirectToFeed: true})
+        Auth.update(data.translator);
       }else{
         console.log(data) // TODO: handle error
       }
@@ -1195,7 +1195,6 @@ class Reply extends React.Component {
     if(!currentData)
         return <div/>
 
-    console.log(currentData)
 
     let _self = this, started_at = null;
     if(currentData.started_at){
@@ -1504,7 +1503,6 @@ class HistoryList extends React.Component {
         showHeaderDate = false;
       }
       this.lastCreatedDate = translated_at;
-
 
       return (
         <div key={idx}>

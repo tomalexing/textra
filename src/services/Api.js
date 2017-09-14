@@ -70,6 +70,28 @@ export const TxRest = (() => {
 
     }
 
+    function initLiqPay(){
+
+        if(window.LiqPayCheckoutCallback ) return
+        if(!AuthStore.isAuthenticated || AuthStore.role !== 'user'  ) return
+
+        let _self = this;
+          ((d, s, id, cb) => {
+          const element = d.getElementsByTagName(s)[0];
+          const fjs = element;
+          let js = element;
+          js = d.createElement(s);
+          js.id = id;
+          js.type = 'text/javascript';
+          js.src = 'https://static.liqpay.com/libjs/checkout.js';
+          fjs.parentNode.insertBefore(js, fjs);
+          js.onload = cb;
+          })(document, 'script', 'liqpay', () => {
+              
+          });
+
+    }
+
     /**
      *
      * 
@@ -221,6 +243,7 @@ export const TxRest = (() => {
       putData,
       initSocket,
       reInitilizeSocket,
-      deleteData
+      deleteData,
+      initLiqPay
     }
 })()

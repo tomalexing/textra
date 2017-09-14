@@ -92,47 +92,53 @@ class Login extends React.Component {
     !hasClass(this.toggleElem, 'toggled') ? addClass(this.toggleElem, 'toggled'): removeClass(this.toggleElem, 'toggled');
   }
 
-  loginGoog = (info) => {
+  loginGoog = async (info) => {
+    let {accessToken, googleId, profileObj: { givenName, familyName, email, imageUrl } = {givenName:'', familyName:'', email: '', imageUrl: ''}} = info;
+    if(!accessToken) return
+    imageUrl = imageUrl.replace(/s\d{2,3}-c/,'s200-c');
+    let form = {access_token: accessToken,
+                google_id: googleId, 
+                email, 
+                first_name: givenName,
+                last_name: familyName,
+                image: imageUrl};
 
-    // try {
-    //   fetch('/login', {
-    //     method: 'POST',
-    //     credentials: 'include',
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: JSON.stringify(info)
-    //   }).then(response => {
-    //     return response.json();
-    //   }).then(data => {
-    //     if (data.err) throw Error(data.err);
-    //   })
-    // }
-    // catch (err) {
-    //   console.trace(err.stack)
-    // }
-
-    console.log(info);
-
+    let data = await TxRest.getDataByID('signInGoogle', form)
+    if(data.message){
+      let errors = `<p><img src=${warningMark} alt='warning'/> ${data.message}</p>`;
+      if(this.errorFieldIn) this.errorFieldIn.parentNode.innerHTML = ''; // clean UP
+      this.errorFieldIn = this.errorField.insertAdjacentElement('beforeend' , document.createElement('div'));
+      this.errorFieldIn.innerHTML = errors; // new Error from Server
+    }else{
+      if(this.errorFieldIn) this.errorFieldIn.innerHTML = ''; // clean UP
+      let _self = this;
+      Auth.authenticate(() => {
+        _self.setState({ redirectToReferrer: true })
+      }, data)
+    }
   }
 
-  loginFb = (info) => {
-
-        // try {
-        //   fetch('/login', {
-        //     method: 'POST',
-        //     credentials: 'include',
-        //     headers: {'Content-Type': 'application/json'},
-        //     body: JSON.stringify(info)
-        //   }).then(response => {
-        //     return response.json();
-        //   }).then(data => {
-        //     if (data.err) throw Error(data.err);
-        //   })
-        // }
-        // catch (err) {
-        //   console.trace(err.stack)
-        // }
-  
-      console.log(info);
+  loginFb = async (info) => {
+    let {accessToken, userID, name, email} = info;
+    if(!accessToken) return
+    let form = {access_token: accessToken,
+                facebook_id: userID, 
+                email,
+                first_name: name,
+                image: 'https://graph.facebook.com/' + userID + '/picture?type=large'};
+    let data = await TxRest.getDataByID('signInFacebook', form);
+    if(data.message){
+      let errors = `<p><img src=${warningMark} alt='warning'/> ${data.message}</p>`;
+      if(this.errorFieldIn) this.errorFieldIn.parentNode.innerHTML = ''; // clean UP
+      this.errorFieldIn = this.errorField.insertAdjacentElement('beforeend' , document.createElement('div'));
+      this.errorFieldIn.innerHTML = errors; // new Error from Server
+    }else{
+      if(this.errorFieldIn) this.errorFieldIn.innerHTML = ''; // clean UP
+      let _self = this;
+      Auth.authenticate(() => {
+        _self.setState({ redirectToReferrer: true })
+      }, data)
+    }
   }
 
   render() {
@@ -159,7 +165,7 @@ class Login extends React.Component {
                 <div className="f f-gap-2 registform-regist__social"> 
                   {/* <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button> */}
                   <FacebookLogin
-                    appId={ process.env.NODE_ENV == 'development' ? "761774717317607" : "1658887587468539" }  // for localhost and textra.iondigi.com
+                    appId={ process.env.NODE_ENV == 'development' ? "761774717317607" : "495884620782080" }  // for localhost and textra.iondigi.com
                     autoLoad={false}
                     fields="name,email,picture"
                     scope="public_profile,email,user_birthday"
@@ -189,11 +195,11 @@ class Login extends React.Component {
                 {/* Login Form */}
                 <TxForm submit={this.login} getErrorField={this._getErrorField}>
                   <TxInput ref='name' tabIndex='1' setFocusToInput={true} type="email" name="email" validate={['email', 'required']}   className="field-block u-mb-3" placeholder="Email"/>
-                  <TxInput type="password"tabIndex='1' name="password" validate={[{'minLength':6}, 'required']}  className="field-block  u-my-3" placeholder="Пароль"/>
+                  <TxInput type="password" tabIndex='1' name="password" validate={[{'minLength':6}, 'required']}  className="field-block  u-my-3" placeholder="Пароль"/>
                   <TxInput type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
                 </TxForm>
 
-                <Link to={'/'} className="f f-align-3-3 u-mt-1 registform-forgotpassword">Забыли пароль?</Link>
+                <Link to={'/restorepassword'} className="f f-align-3-3 registform__forgotpassword">Забыли пароль?</Link>
                 <div id="status"></div>
               </div>
           </div>

@@ -24,8 +24,8 @@ export default class Landing extends React.Component {
         <div className="intro-block">
               <div className="container f f-col f-align-2-2 stuff">
                   <div className="text-center">
-                    <h1 className="h1-big text-white text-header">Textra – онлайн-сервис быстрых ручных переводов</h1>
-                    <p className="text-white text-subheader">Узнайте о возможностях сервиса быстрых онлайн-переводов и начните получать переводы уже сейчас.</p>
+                    <h1 className="h1-big text-white text-header">TEXTRA – Ваш личный профессиональный переводчик!</h1>
+                    <p className="text-white text-subheader">Узнайте о возможностях сервиса быстрых онлайн-переводов и решите для себя вопрос с профессиональным переводом текста прямо сейчас!</p>
                   </div>
                   <div className="intro-block__featurePic">
                     <img srcSet={`${dashboard} 1x, ${dashboard2x} 2x`}  src={dashboard} alt="Textra dashboard"/>
@@ -39,8 +39,8 @@ export default class Landing extends React.Component {
                   </div>
                   <div className="f f-align-2-2 f-col service-block__description">
                       <div className="text-moduleCenter">  
-                        <h1 className="h1 text-header"><span className="text-highLight">Переводи</span> любой текст быстро и качественно</h1>
-                        <p className="text-subheader">После регистрации у вас будет возможность получать быстрые переводы. Отправляейте запрос на перевод текста с любой точки платнеты и получайте быстрые переводы текстов от квалифицированных переводчиков.  </p>
+                        <h1 className="h1 text-header"><span className="text-highLight">Доверьте </span> перевод своего текста профессионалам и получите результат гарантировано быстро.</h1>
+                        <p className="text-subheader">Наши квалифицированные переводчики делают свою работу сразу после получения заказа, что значительно сэкономит Ваше время. А создавать заказы так же просто, как общаться в мессенджере.</p>
                       </div>
                   </div>
               </div>
@@ -48,8 +48,8 @@ export default class Landing extends React.Component {
         <div className="intro2-block">
               <div className="container f f-col f-align-2-2 stuff">
                   <div className="text-center">
-                    <h1 className="h1 text-header"><span className="text-highLight">Маркетплейс</span> для переводчиков</h1>
-                    <p className="text-subheader">После регистрации как переводчик высможете зарабатывать в любом месте. Отправляейте запрос.</p>
+                    <h1 className="h1 text-header"><span className="text-highLight">Зарабатывайте</span> с Textra!</h1>
+                    <p className="text-subheader">Профессиональный переводчик, гибкий работы и стабильный доход – это про Вас? Будем рады рассмотреть Вашу кандидатуру для участия в нашей команде.</p>
                   </div>
                   <div className="intro2-block__featurePic">
                     <img  srcSet={`${translator} 1x, ${translator2x} 2x`}  src={translator} alt="Textra dashboard-translator"/>
@@ -60,8 +60,8 @@ export default class Landing extends React.Component {
             <div className="container f f-row f-align-2-2">
               <div className="f f-align-2-2 f-col service-block__description">
                     <div className="text-moduleCenter">  
-                      <h1 className="h1 text-header"><span className="text-highLight">Удобный</span> кросс-браузерный адаптивный интерфейс</h1>
-                      <p className="text-subheader">Зарабатывай в системе с любого места на планете. Все, что для этого нужно, мобильный телефон или компьютер с доступом в интернет.</p>
+                      <h1 className="h1 text-header"><span className="text-highLight">Удобный</span> кросс-браузерный адаптивный интерфейс </h1>
+                      <p className="text-subheader">Зарабатывай в системе с любого места на планете. Все, что для этого нужно – смартфон или компьютер с доступом в интернет.</p>
                     </div>
               </div>
               <div className="f f-align-2-2  service-block__featurePic">

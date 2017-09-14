@@ -6,6 +6,7 @@ import formSerialize from 'form-serialize';
 import 'react-select/dist/react-select.css';
 import Select from 'react-select';
 import icon_arrow from './assets/arrow-down.png';
+import {TxRest} from './services/Api.js';
 
 export default class Support extends React.Component {
   constructor(p){
@@ -16,13 +17,16 @@ export default class Support extends React.Component {
     this._isMounted = false;
   }
   state={
-    value: 't',
+    value: 0,
     options: [{
-      value: 't',
+      value: 0,
       label: 'Стать переводчиком'
     },{
-      value: 'a',
+      value: 1,
       label: 'Жалоба'
+    },{
+      value: 2,
+      label: 'Другое'
     }
     ],
     comment: ''
@@ -41,7 +45,14 @@ export default class Support extends React.Component {
     e.preventDefault();
     let {option, comment} = formSerialize(e.target, { hash: true, empty: true });
     console.log(option, comment)
-    this.setState({value:'t', comment: ''})
+    let _self = this;
+
+    TxRest.putData('request',{
+      type: option.toString(),
+      message: comment
+    }).then(_ => {
+        _self.setState({value:0, comment: ''})
+    })
 
   }
 

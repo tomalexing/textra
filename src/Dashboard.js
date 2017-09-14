@@ -303,7 +303,7 @@ class DashBoard extends React.Component {
     
     return (
       <div className="f f-col outer dashboard-user">
-        <Header />
+        <Header currentRole={this.props.currentRole}/>
         
         <div className="f h100">
           <div className="f f-align-2-2 outer-left"  style={{display:`${!isTablet?'flex':mainScreen?'none':'flex'}`}}>

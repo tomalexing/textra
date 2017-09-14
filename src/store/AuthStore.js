@@ -53,7 +53,7 @@ const  Auth = {
   removeListener(name){
     delete this.listeners[name];
   },
-    authorize(cb, data) {
+  authorize(cb, data) {
     return new Promise((resolve, reject) => {
       this.isAuthenticated = true;
       this.role = ROLES(data.user.role);

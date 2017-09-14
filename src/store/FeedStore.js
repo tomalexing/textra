@@ -151,6 +151,10 @@ export default class Store extends EventEmitter {
     itemFeedCache[this.type + item.id] = item
   }
 
+  deleteItem(index){
+    idFeedCache[this.type].splice(index,1);
+  }
+
   /**
    * Emit an item id event if a storage key corresponding to an item in the
    * cache has changed.

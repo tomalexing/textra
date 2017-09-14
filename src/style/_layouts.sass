@@ -59,6 +59,7 @@
             color: #1e7bcf
         &__forgotpassword
           color: $text-light
+          font-size: 10px
 
 // registr styles
 .login-layout.outer
@@ -133,6 +134,9 @@
             color: #1e7bcf
         &__forgotpassword
           color: $text-light
+          font-size: 14px
+          margin-top: -5px
+
   .outer-right
     width: calc(100% -  334px)
     +r(768)
@@ -160,7 +164,7 @@
 // landing layout 
 .text
   &-center
-    width: 350px
+    width: 473px
     text-align: center
     margin: 60px auto 40px
     overflow: visible
@@ -594,21 +598,22 @@
       position: relative
     &-post__avatar
       flex: 0 0 50px
-      width: 50px
-      height: 50px
-      border-radius: 50%
-      overflow: hidden
-      +nosel
-      +r(768)
-        flex: 0 0 20px
-        width: 20px
-        height: 20px
+      img
+        width: 50px
+        height: 50px
+        overflow: hidden
+        border-radius: 50%
       img
         +r(768)
           flex: 0 0 20px
           width: 20px
           height: 20px
           width: 20px
+      +nosel
+      +r(768)
+        flex: 0 0 20px
+        width: 20px
+        height: 20px
     &-post__content
       border-radius: 4px
       background-color: $bg-blue
@@ -665,6 +670,11 @@
         width: 20px
         height: 20px
       img
+        width: 50px
+        height: 50px
+        overflow: hidden
+        border-radius: 50%
+        object-fit: cover
         +r(768)
           flex: 0 0 20px
           width: 20px
@@ -845,6 +855,12 @@
     background: $selected-blue
   &-avatar
     flex: 0 1 65px
+    img
+      flex: 0 0 50px
+      width: 50px
+      height: 50px
+      border-radius: 50%
+      overflow: hidden
   &-details
     flex: 1 1 198px
     min-width: 0
@@ -926,6 +942,11 @@
     background: $selected-blue
   &-avatar
     flex: 0 1 65px
+    img
+      width: 50px
+      height: 50px
+      overflow: hidden
+      border-radius: 50%
   &-details
     flex: 1 1 198px
     min-width: 0
@@ -1021,7 +1042,7 @@
       background-color: #fff
     &-from
       border-radius: 4px 0 0 4px
-      height: 15px
+      height: 16px
       color: #9ca9b2
       line-height: 17px
       color: white
@@ -1243,6 +1264,12 @@
     background: $selected-blue
   &-avatar
     flex: 0 1 65px
+    img
+      width: 50px
+      height: 50px
+      overflow: hidden
+      border-radius: 50%
+      object-fit: cover
   &-details
     flex: 0 1 198px
     min-width: 0
@@ -1338,6 +1365,12 @@
     overflow: hidden
     border: 1px solid $grey
     +nosel
+    img
+      width: 50px
+      height: 50px
+      overflow: hidden
+      border-radius: 50%
+      object-fit: cover
   &__content
     border-radius: 4px
     background-color: $bg-blue
@@ -1395,7 +1428,6 @@
     width: calc(100% + 35px)
     height: 1px
     background: $grey
-   
   textarea
     display: block
     font-size: 16px
@@ -1465,6 +1497,12 @@
         margin-top: 40px
     &__avatar
       flex: 0 1 65px
+      margin-right: 10px
+      img
+        width: 65px
+        height: 65px
+        border-radius: 50%
+        overflow: hidden
       +r(768)
         display: flex
         align-items: center
@@ -1604,6 +1642,11 @@
         width: 20px
         height: 20px
     img
+      width: 50px
+      height: 50px
+      overflow: hidden
+      border-radius: 50%
+      object-fit: cover
       +r(768)
         flex: 0 0 20px
         width: 20px
@@ -1655,12 +1698,17 @@
     flex: 0 0 auto
   &-reply__avatar
     flex: 0 0 50px
+    img
+      width: 50px
+      height: 50px
+      overflow: hidden
+      border-radius: 50%
+      object-fit: cover
     +nosel
     +r(768)
       flex: 0 0 20px
       width: 20px
       height: 20px
-    img
       +r(768)
         flex: 0 0 20px
         width: 20px
@@ -1882,6 +1930,8 @@
     img
       width: 50px
       height: 50px
+      border-radius: 50%
+      overflow: hidden
   &__personalInfo
     flex: 0 1 198px
     min-width: 0
@@ -1957,6 +2007,11 @@
     background: $selected-blue
   &-avatar
     flex: 0 1 65px
+    img
+      width: 50px
+      height: 50px
+      border-radius: 50%
+      overflow: hidden
   &-details
     flex: 0 1 198px
     min-width: 0
