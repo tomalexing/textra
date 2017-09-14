@@ -187,7 +187,6 @@ class Admin extends React.Component {
   }
 
   state = {
-    redirectToReferrer: false,
     items: [],
     mainScreen: true,
     secondScreen: false,
@@ -198,7 +197,8 @@ class Admin extends React.Component {
       historyId: undefined
     },
     translator: {},
-    languages: []
+    languages: [],
+    redirectToMain: false
   };
 
   addStyleSeheet(){
@@ -216,29 +216,34 @@ class Admin extends React.Component {
     let { location: { pathname, state: RouterState } } = this.props;
     let activeTabA = pathname.split("/");
     let _self = this;
+    if(!RouterState && pathname !== '/admin/users' ){
+      if(pathname !== '/admin')
+        this.setState({redirectToMain:true});
+    }
     await this.setState({
       page:{
         pageType: RouterState ? RouterState.pageType : 'users',
         id: RouterState ? RouterState.id : undefined ,
         historyId: RouterState ? RouterState.historyId : undefined,
       },
-      translator: RouterState ? RouterState.translator : null,
-      item: RouterState ? RouterState.item : null
+      attachedUser: RouterState ? RouterState.attachedUser : null, // for history
+      item: RouterState ? RouterState.item : null // for appeals
     })
   }
 
   componentDidMount(){
     this._isMounted = true;
-    this.listeners.push(
-      delegate.call(this, window, "touchend", `.${Array.from(this.bg.classList).join(".")}`,
-        event => {
-          if (!this.state.sidebar || event.target.closest(".sidebar__menu")) return;
-
-          this.setState({ sidebar: false });
-        },
-        false
-      )
-    );
+    if(this.bg){
+      this.listeners.push(
+        delegate.call(this, window, "touchend", `.${Array.from(this.bg.classList).join(".")}`,
+          event => {
+            if (!this.state.sidebar || event.target.closest(".sidebar__menu")) return;
+            this.setState({ sidebar: false });
+          },
+          false
+        )
+      );
+    }
 
     
     this.languageStore = new Store('language');
@@ -311,13 +316,13 @@ class Admin extends React.Component {
 
 
   render() {
-
-
     const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
-    let {usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
     let currentDate, user, allUsers = false;
+    let { sidebar, secondScreen, mainScreen, languages, attachedUser , item , redirectToMain, usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
 
-    let { sidebar, secondScreen, mainScreen, languages, translator , item} = this.state;
+    if(redirectToMain) {
+      return(<Redirect to={'/admin/users'} />) 
+    }
 
     return (
       <div className="f f-col outer admin">
@@ -416,7 +421,7 @@ class Admin extends React.Component {
                       page={this.state.page}
                       _self={this}
                       languages={languages}
-                      translator={translator}
+                      attachedUser={attachedUser}
                     /> 
                     <RoutePassProps
                       path={`${Routes["appeal"].path}${Routes["appeal"].param}`}
@@ -513,7 +518,7 @@ class SideList extends React.PureComponent{
         <div className="admin-user-details">
             <div className="admin-user-details__topArea"> 
               <figure className="f f-align-2-2 admin-user-details__avatar">
-                <img src={avatar} alt="Textra" />
+                <img src={user.image || avatar} alt={user.nickname} />
               </figure>
               <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
                 <div className="admin-user-details__personalInfo__title">{user.nickname} </div>
@@ -529,7 +534,7 @@ class SideList extends React.PureComponent{
                   <data>{registrationTime.getDate()}.{registrationTime.getMonth()}.{registrationTime.getFullYear()}</data></div>
               <div className="f f-align-13-2 admin-user-details__serviceInfo__spendTime"><span>Общее время переводов:</span><data>{humanReadableTime(user.totalTime)}</data></div>
               <div className="f f-align-13-2 admin-user-details__serviceInfo__amountSymble"><span>Кол-во символов перевода:</span><data>{user.amountLetters}</data></div>
-              <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.role === "3" ?  user.balance : user.earnBalance}</data></div>
+              <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.role === "3" ?  `${(user.balance/100).toFixed(2)}₴` : `${(user.earnBalance/100).toFixed(2)}₴`}</data></div>
             </div>  
         </div>
        {/* {list.map((tab, index) => {
@@ -587,13 +592,13 @@ class SideList extends React.PureComponent{
     { workingTabs.map(tab => {
       let publishTime = new Date(tab.created_at);
       let outputPublishTime = getTabTime(publishTime);
-      let userAttached = tab.translator || tab.user; 
+      let attachedUser = tab.translator || tab.user; 
 
       return (
         <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={userAttached && userAttached.image||avatar} alt="Textra" /> </figure>
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser && attachedUser.image||avatar} alt="Textra" /> </figure>
           <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title">{ userAttached.first_name + ' ' + userAttached.last_name}</div>
+            <div className="dashboard-user__tab-title">{ attachedUser.first_name + ' ' + attachedUser.last_name}</div>
             <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
           </div>
           <div className="f f-col f-align-2-3 dashboard-user__tab-info">
@@ -620,8 +625,8 @@ class SideList extends React.PureComponent{
     
     {/* History TABs */}
     {this.state.historyTabs.map((tab, index) => {
-      let userAttached = tab.translator || tab.user;
-      Object.assign(userAttached, {role: tab.user  ? 'translator' : 'user'});
+      let attachedUser = tab.translator || tab.user;
+      Object.assign(attachedUser, {role: tab.user  ? 'translator' : 'user'});
       let finishTime = new Date(tab.translated_at);
       let outputPublishTime = getTabTime(finishTime);
       let start = new Date(tab['started_at']);
@@ -629,11 +634,11 @@ class SideList extends React.PureComponent{
       let finishShouldBe = new Date(+start + durationShouldBe*1000);
       let duration = (finishTime - start)/1000;
       return (
-        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${userAttached.id}`, state:{pageType: 'user', id: user.uuid, historyId: userAttached.id, translator: userAttached}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${tab.id === activeTab ? 'selected' : ''}`} >
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={user.image || avatar} alt="Textra" /> </figure>
+        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${attachedUser.id}`, state:{pageType: 'user', id: user.uuid, historyId: attachedUser.id, attachedUser: attachedUser}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${tab.id === activeTab ? 'selected' : ''}`} >
+          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser.image || avatar} alt="Textra" /> </figure>
           <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title"> {userAttached.first_name + ' ' +
-            userAttached.last_name} </div>
+            <div className="dashboard-user__tab-title"> {attachedUser.first_name + ' ' +
+            attachedUser.last_name} </div>
             <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
           </div>
           <div className="f f-col f-align-2-3 dashboard-user__tab-info">
@@ -1170,7 +1175,7 @@ class UserFullHistory extends React.Component {
   constructor(props){
     super(props);
     this.massageStore = null;
-    this.translator = props.translator;
+    this.attachedUser = props.attachedUser;
     this.languages = props.languages;
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted = false;
@@ -1178,24 +1183,32 @@ class UserFullHistory extends React.Component {
 
   state = {
     list: null,
-    translator: null,
+    attachedUser: null,
     languages: []
   }
 
   componentWillMount(){
-    this.setState({list: MessageStore.getMessages('user', this.userId), translator: this.translator})
+    this.setState({list: MessageStore.getMessages('user', this.userId), attachedUser: this.attachedUser})
   }
 
 
   componentDidMount(){
     this._isMounted = true;
     let {pageType, id, historyId} = this.props.page;
-    let userId = this.props.translator['role'] === 'translator' ? historyId : id;
-    let translatorId = this.props.translator['role'] === 'translator' ? id : historyId ;
-    this.massageStore = new MessageStore(`translated-topic/user/${userId}/translator`, translatorId);
+
+    if(this.attachedUser){
+      var userId = this.attachedUser && this.attachedUser['role'] === 'translator' ? historyId : id;
+      var translatorId = this.attachedUser && this.attachedUser['role'] === 'translator' ? id : historyId ;
+    }else{
+      var userId = historyId;
+      var translatorId = id;
+    }
+
+    this.massageStore = new MessageStore(`translated-topic/user/${userId}/translator`, translatorId );
     this.massageStore.start();
     this.massageStore.addListener('updateMessage', this.updateHandler)
   }
+
 
   updateHandler(list){
     if(!this._isMounted) return    
@@ -1319,13 +1332,17 @@ class UserFullHistory extends React.Component {
   //}
 
   render() {
-    let { list, translator } = this.state || {list: []},
+    let { list, attachedUser } = this.state || {list: []},
       _self = this; 
 
     this.lastCreatedDate = null;
     if (!list.length)
       return(<div/>)
     list = list.reverse();
+
+    this.userInfo = UserStore.getUser(this.props.page.id);
+
+
     const renderCollection = renderItem => (
       <ScrollRestortion scrollId={`history-${this.props.id}-${this.props.historyId}`}  className={'f f-col dashboard-user__history'} >
         
@@ -1353,13 +1370,14 @@ class UserFullHistory extends React.Component {
         showHeaderDate = false;
       }
       this.lastCreatedDate = translated_at;
-      
+
+
       return (
         <div key={idx}>
           { showHeaderDate && <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
-              <img src={Auth.user.image || avatar} alt={Auth.user.first_name} />
+              <img src={this.userInfo && this.userInfo.image || avatar} alt={this.userInfo.first_name} />
             </div>
             <div className={'dashboard-user__history-post__content'}>
               <div className={'dashboard-user__history-post__content__text'}>
@@ -1408,7 +1426,7 @@ class UserFullHistory extends React.Component {
 
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
             <div className={'dashboard-user__history-reply__avatar'}>
-              <img src={translator.image || avatar} alt={translator.first_name} />
+              <img src={attachedUser.image || avatar} alt={attachedUser.nickname} />
             </div>
             <div className={'dashboard-user__history-reply__content'}>
               <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
@@ -1617,7 +1635,7 @@ class Pending extends React.Component {
             {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
             <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
               <div className={'dashboard-user__searching-post__avatar'}>
-                <img src={currentData.avatar || avatar } />
+                <img src={currentData.user && currentData.user.image || avatar } />
               </div>  
               <div className={'dashboard-user__searching-post__content'}>
                 <div className={'dashboard-user__searching-post__content__text'}>

@@ -5,6 +5,7 @@ import './style/app.css';
 import './style/index.css';
 import logo from './assets/logo.png';
 import avatar from './assets/default-avatar.png';
+import animatedAvatar from './assets/default-avatar.svg';
 import icon_arrow from './assets/arrow-down.png';
 import icon_cost from './assets/cost-of-translation.svg';
 import icon_dur from './assets/duration-of-translation.svg';
@@ -164,14 +165,12 @@ class DashBoard extends React.Component {
       pendingTabs : data.list.filter(o => o.status === "0").map((item, idx) => {
           return {
             ...item,
-            avatar: avatar, 
             index: idx
           }
       }),
       workingTabs : data.list.filter(o => o.status === "1").map((item, idx) => {
           return {
             ...item,
-            avatar: avatar, 
             index: idx
           }
       }),
@@ -323,7 +322,7 @@ class DashBoard extends React.Component {
 
                 return (
                   <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index} >
-                    <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={animatedAvatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__searchtab-details">
                       <div className="dashboard-user__searchtab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
                       > 
@@ -344,7 +343,7 @@ class DashBoard extends React.Component {
                 let translator = tab.translator; 
                 return (
                   <Link key={getUniqueKey()} to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index}>
-                    <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.avatar} alt="Textra" /> </figure>
+                    <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={translator.image || avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                       <div className="dashboard-user__tab-title">{ translator.first_name + ' ' + translator.last_name}</div>
                       <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
@@ -732,12 +731,13 @@ class Pending extends React.Component {
     if(currentData.source_messages && currentData.source_messages.length > 0){
       var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
     }
+
     return (
         <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
             {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
             <div className={'f f-align-1-11 f-gap-2 dashboard-user__searching-post '}>
               <div className={'dashboard-user__searching-post__avatar'}>
-                <img src={currentData.avatar || avatar } />
+                <img src={Auth.user && Auth.user.image || avatar } />
               </div>
               <div className={'dashboard-user__searching-post__content'}>
                 <div className={'dashboard-user__searching-post__content__text'}>
@@ -1054,10 +1054,10 @@ class Create extends React.Component {
      return <Redirect push={true} to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
     }
     if(!isEnoughMoney || blockSubmit){
-      document.getElementById('submit').setAttribute('disabled','true')
+      document.getElementById('submit').setAttribute('disabled','true');
       this.disabled = true;
     }
-    if((isEnoughMoney && this.disabled ) || (!blockSubmit && this.disabled)){
+    if((isEnoughMoney && this.disabled && !blockSubmit)){
        document.getElementById('submit').removeAttribute('disabled');
       this.disabled = false;
     }

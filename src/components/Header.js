@@ -130,7 +130,7 @@ class Header extends React.Component{
                       <span></span>
                   </button>
                   <ul ref={n => this.mobile_menu = n} className="f f-col f-align-2-2 header-menu__mobile__in">
-                    <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>
+                    <NavLink to={'/'} comp={isActive}>Рабочий стол</NavLink>
                     {/* <NavLink to={'/about'}>О нас</NavLink> */}
                     <NavLink to={'/help'}>Поддержка</NavLink>
                   </ul>

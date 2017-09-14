@@ -79,6 +79,13 @@ export default class Store extends EventEmitter {
     return Array.isArray(itemCacheByUserId[userId]) && itemCacheByUserId[userId].source_messages && itemCacheByUserId[userId].find(o => o.source_messages[0].id === itemId) || null
   }
 
+    /**
+   * Get user by id.
+   */
+  static getUser(userId, type = 'user') {
+    return userCache[type] && userCache[type][userId]
+  }
+
   /**
    * Deserialise caches from sessionStorage.
    */
@@ -185,7 +192,8 @@ export default class Store extends EventEmitter {
         amountLetters: data.total_letters,
         balance: data.balance,
         earnBalance: data.earn_balance,
-        status: data.status
+        status: data.status,
+        image: data.image
     }
     
     userCache[this.type][this.id] = user;
