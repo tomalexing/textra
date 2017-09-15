@@ -12,7 +12,7 @@ export default class Private extends React.Component {
     return (
     <div className="page-layout">
         <Header currentRole={this.props.currentRole}/>
-        <div className="container f-v-gap-5 f-gap-15 u-mt-10">
+        <div className="container f-v-gap-5 f-gap-5 u-mt-10">
               <h1 className="h1-big u-text-center">Политика конфиденциальности</h1>
               <p className="text-highLight u-text-center">Effective date: 18 July 2017</p>
               <p>Welcome to Raters! By accessing or using the Raters website, the Raters service, or any applications (including mobile applications) made available by Raters Group Ltd. (together, the “Service”), however accessed, you agree to be bound by these terms of use (“Terms of Use”). The Service is owned, provided and controlled by Raters Group Ltd., located at 1-7 Commercial Road, Paddock Wood, Kent, TN12 6EN, United Kingdom (“Raters”). These Terms of Use affect your legal rights and obligations. If you do not agree to be bound by all of these Terms of Use, please do not access or use the Service.

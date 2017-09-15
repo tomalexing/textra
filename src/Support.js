@@ -77,7 +77,7 @@ export default class Support extends React.Component {
     return (
     <div className="page-layout f f-col">
         <Header currentRole={this.props.currentRole}/>
-        <div className="container f-v-gap-2 f-gap-15 u-mt-10">
+        <div className="container f-v-gap-2 f-gap-5 u-mt-10">
             <h1 className="h1-big u-my-5 u-text-center">Как мы можем помочь Вам?</h1>
             <h1 className="h2 text-header">Оставьте заявку или задайте нам вопрос</h1>
             <p>Если Вы желаете стать переводчиком нашего сервиса, то можете оставить заявку. Мы обязательно рассмотрим ее в кротчайшие сроки и свяжемся с Вами. Если же Вы хотите оставить отзыв или задать вопрос, то можете сделать это в поле ниже. Мы с радостью поможем Вам.</p>

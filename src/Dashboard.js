@@ -409,7 +409,7 @@ class DashBoard extends React.Component {
               {this.state.isTablet?
                 <div className="f f-align-1-2 breadcrumbs">
                     <button onClick={() => { this.setState({mainScreen: false}) }} className="f f-align-2-2 btn btn-flat breadcrumbs__back" ><svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12"><path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" /></svg>Назад</button> 
-                    <span>{'переводчик'||'ожидается'}</span>
+                    <span>{typePage === 'create' ? 'создать запрос на перевод' : typePage === 'pending' ? 'ожидание переводчика' :  typePage === 'inwork' ? 'в работе' : typePage === 'history' ? `история ${translator.first_name} ${translator.last_name}`: ''}</span>
                 </div>
               :''}
               <Switch>
@@ -1111,7 +1111,7 @@ class Create extends React.Component {
                 <span className={'dashboard-user__create-topbar__chooser-trigger__name'} >{(!!valueTranslator && (valueTranslator.login || valueTranslator.value)) || 'Переводчик'}</span>
                 <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({ isOpen: isSearchMenuTranslatorVisible })}</span>
               </div>
-              <div className={`dashboard-user__create-topbar__chooser-menu ${isSearchMenuTranslatorVisible ? 'show-chooser-menu' : ''}`}>
+              <div className={`dashboard-user__create-topbar__chooser-menu ${isSearchMenuTranslatorVisible ? 'js-showChooserMenu' : ''}`}>
                 <Select
                   ref={(n) => this.createTranslatorMenu = n}
                   name="create[translator]"

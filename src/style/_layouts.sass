@@ -3,6 +3,8 @@
   .main
     padding: 50px
     overflow: auto
+    +r(768)
+      padding: 5px
     &-regist__form
       width: 327px
       min-height: 418px
@@ -168,20 +170,33 @@
     text-align: center
     margin: 60px auto 40px
     overflow: visible
+    +r(767)
+      width: 100%
+      padding: 0 10px
+      margin-top: 0px
   &-moduleCenter
     width: 350px
     margin: 0 auto
     overflow: visible
+    +r(767)
+      padding: 0 10px
+      width: 100%
   &-white
     color: #fff !important
   &-subheader
     padding-top: 20px
     color: $text-light
     line-height: 18px
+    +r(767)
+      text-align: center
   &-highLight
     color: #1189d3 !important
-
+  &-header
+    +r(767)
+      font-size: 20px
+      text-align: center
 .landing-layout
+  overflow: hidden
   .main__header
     position: fixed
     top: 0
@@ -197,36 +212,82 @@
     height: 630px
     padding-top: 70px
     background: #00eaf8 linear-gradient(143deg, #00eaf8 0%, #6d42ef 100%) center/cover no-repeat
+    +r(767)
+      height: auto
+      padding: 80px 0
     &__featurePic
       width: 750px
       height: 442px
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2)
       margin-bottom: -70px
+      +r(767)
+        margin-bottom: -20px
+        width: auto
+        height: 209px
       img
         width: 750px
         height: 449px
+        +r(767)
+          width: 350px
+          height: 209px
   .intro2-block
     height: 570px
     background-color: #f2faff
+    +r(767)
+      height: auto
+      padding: 40px 0 70px
     &__featurePic
       width: 749px
       height: 441px
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2)
       margin-bottom: -70px
+      +r(767)
+        margin-bottom: -20px
+        width: auto
+        height: 209px
       img
         width: 749px
         height: 463px
+        +r(767)
+          width: 350px
+          height: 215px
   .service-block
     height: 600px
     padding: 140px 0 80px
+    +r(767)
+      padding: 70px 0
+      height: auto
     &__description,
     &__featurePic
       width: 50%
+      +r(767)
+         width: 100%
+    &__featurePic
+      +r(767)
+        margin-bottom: 20px
+        width: 30%
+        img
+          width: 100%
+
+    &:nth-child(3) > .container
+      +r(767)
+         flex-flow: column
+    &:nth-child(5) > .container
+      +r(767)
+         flex-flow: column-reverse
 .footer
   height: 80px
   padding: 0 16px
   border-top: 1px solid #e9e9e9
   margin-top: auto
+  +r(767)
+    height: auto
+    padding: 20px 16px
+    flex-flow: column-reverse
+  &__social
+    +r(767)
+      justify-content: center
+      margin-bottom: 20px 
   &__social li
     margin: 0 16px
   &__social li:last-child
@@ -331,7 +392,7 @@
     margin: auto
   &__back
     position: absolute
-    top: 5px
+    top: 7px
     color: rgb(0, 192, 255)
     font-size: 10px
     margin-left: 10px
@@ -340,15 +401,15 @@
     svg
       height: 5px
       position: absolute
-      top: 4px
       left: -3px
+      top: 2px
       .safari &
         top: 3px
     &:hover
       color: darken(rgb(0, 192, 255),10)
   &__next
     position: absolute
-    top: 5px
+    top: 7px
     right: 0
     font-size: 10px
     color: rgb(0, 192, 255)
@@ -357,7 +418,7 @@
     svg
       height: 5px
       position: absolute
-      top: 4px
+      top: 2px
       right: -3px
       .safari &
         top: 3px
@@ -378,12 +439,13 @@
   &__create-topbar
     height: 65px
     flex: 0 0 auto
-    z-index: 101
+    z-index: 100
     padding: 0 20px
     +nosel
     +r(768)
         padding: 8px
   &__create-topbar
+    z-index: 101
     +r(768)
       height: 113px
       align-items: flex-end
@@ -432,15 +494,15 @@
         top: 118%
         right: 0
         opacity: 0
-        z-index: -1
+         z-index: -1
         +tr(opacity .5s)
         +r(768)
           width: 0
-        &.show-chooser-menu
+        &.js-showChooserMenu
           width: 120%
           opacity: 1
           +tr(opacity .5s)
-          z-index: 100
+          z-index: 110
   &__create-bottombar
     .submit-post
       margin-left: auto
@@ -451,7 +513,7 @@
   &__create-posteditor
     flex: 1 1 auto
     height: 100%
-    z-index: 100
+    z-index: 99
     border-top: 1px solid $grey
     border-bottom: 1px solid $grey
     padding: 20px
@@ -467,7 +529,7 @@
       height: 100%
       border: 0
       position: relative
-      z-index: 100
+      z-index: 99
       .safari &
         height: 100vh
     button
@@ -507,7 +569,6 @@
           flex: 0 0 20px
           width: 20px
           height: 20px
-          width: 18px
     &-post__content
       border-radius: 4px
       background-color: $bg-blue

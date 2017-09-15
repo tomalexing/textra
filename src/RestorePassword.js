@@ -41,7 +41,7 @@ export default class RestorePassword extends React.Component {
     return (
     <div className="page-layout f f-col">
         <Header currentRole={this.props.currentRole}/>
-        <div className="container f-v-gap-2 f-gap-15 u-mt-10">
+        <div className="container f-v-gap-2 f-gap-5 u-mt-10">
             <h1 className="h2 text-header">Восстановление пароля</h1>
             <p>Для восстановления вашего доступа к сервису Textra.com, пожалуйста, введите полный адрес электронной почты (email), который вы используете для входа на портал.</p>
             <form onSubmit={this.onSubmit}>

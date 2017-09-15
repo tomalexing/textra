@@ -1204,6 +1204,7 @@ class Reply extends React.Component {
       started_at = new Date(currentData.started_at);
     }
     currentData.duration = currentData.source_messages && currentData.source_messages.length > 0 ?  currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'}) : 0
+
     const RenderCollection = renderItem => {
       return (
         <div>
@@ -1211,7 +1212,7 @@ class Reply extends React.Component {
                 this={this.props._self}
                 isTablet={isTablet}
                 Title={{
-                    title: 'dfa',//currentData[0].first_name + ' ' + currentData.user.last_name,  // we get [0] because the very first item in thread can be only from user
+                    title: currentData.user && `Перевод для ${currentData.user.first_name}  ${currentData.user.last_name}`,  // we get [0] because the very first item in thread can be only from user
                     shownOnDesktop: false
                 }}
                 Left={{
@@ -1473,7 +1474,7 @@ class HistoryList extends React.Component {
             this={_self}
             isTablet={isTablet}
             Title={{
-                title:  currentData[Object.keys(currentData)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
+                title:  historyUser && historyUser.first_name + ' ' +  historyUser.last_name,
                 shownOnDesktop: false
             }}
             Left={{
