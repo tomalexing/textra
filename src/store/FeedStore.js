@@ -191,6 +191,9 @@ export default class Store extends EventEmitter {
         console.log('An error in the Store')
         return
       }
+      
+      if( data.translator_id && AuthStore.user.id !== data.translator_id) return // not for this user personal feed
+
       if(idFeedCache[this.type].indexOf(this.type + data.id) === -1 ) 
         idFeedCache[this.type].unshift(this.type + data.id);
 

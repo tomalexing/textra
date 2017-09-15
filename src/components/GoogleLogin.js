@@ -34,7 +34,7 @@ const _shouldAddDisabledProp = (tag) => [
   'fieldset',
 ].indexOf((tag + '').toLowerCase()) >= 0;
 
-class FacebookLogin extends React.Component {
+class GoogleLogin extends React.Component {
 
   static propTypes = {
     onSuccess: PropTypes.func.isRequired,
@@ -115,7 +115,7 @@ class FacebookLogin extends React.Component {
           window.gapi.auth2.init(params).then(
             (res) => {
               if (res.isSignedIn.get()) {
-                this._handleSigninSuccess(res.currentUser.get());
+                //this._handleSigninSuccess(res.currentUser.get());
               }
             },
             err => onFailure(err)
@@ -234,4 +234,4 @@ class FacebookLogin extends React.Component {
   }
 }
 
-export default FacebookLogin;
+export default GoogleLogin;

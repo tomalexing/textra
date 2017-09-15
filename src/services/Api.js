@@ -117,7 +117,7 @@ export const TxRest = (() => {
                 return response.json();
               }).then( async data => {
                 if(typeof cb === 'function'){
-                    cb(data);
+                    cb(data, resolve);
                 }
                 resolve(data);
               })
@@ -190,7 +190,7 @@ export const TxRest = (() => {
               return response.json();
             }).then( async data => {
               if(typeof cb === 'function'){
-                  cb(data);
+                  cb(data, resolve);
               }
               resolve(data);
             })
@@ -226,7 +226,7 @@ export const TxRest = (() => {
                       : Promise.reject(response.status)
             }).then( async data => {
               if(typeof cb === 'function'){
-                  cb(data);
+                  cb(data, resolve);
               }
               resolve(data);
             })

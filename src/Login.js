@@ -78,8 +78,8 @@ class Login extends React.Component {
     }else{
       if(this.errorFieldIn) this.errorFieldIn.innerHTML = ''; // clean UP
       let _self = this;
-      Auth.authenticate(() => {
-        _self.setState({ redirectToReferrer: true })
+      Auth.authenticate((resolve) => {
+        _self.setState({ redirectToReferrer: true }, resolve)
       }, data)
     }
   }

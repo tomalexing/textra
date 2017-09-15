@@ -79,7 +79,7 @@ const  Auth = {
         TxRest.reInitilizeSocket();
       }
 
-      if (typeof cb === 'function') cb();
+      if (typeof cb === 'function') cb(resolve);
       resolve();
     })
   },
@@ -109,7 +109,7 @@ const  Auth = {
         TxRest.reInitilizeSocket();
       }
 
-      if (typeof cb === 'function') cb();
+      if (typeof cb === 'function') cb(resolve);
       resolve();
     })
   },
@@ -139,7 +139,7 @@ const  Auth = {
       //window.localStorage.removeItem('user');
       window.localStorage.removeItem('token');
       this.alreadyInitSocket = false;
-      if (typeof cb === 'function') cb();
+      if (typeof cb === 'function') cb(resolve);
       resolve();
     })
   }

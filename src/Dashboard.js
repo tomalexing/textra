@@ -5,6 +5,8 @@ import './style/app.css';
 import './style/index.css';
 import logo from './assets/logo.png';
 import avatar from './assets/default-avatar.png';
+import avatarLite from './assets/avatar-lite.png';
+import avatarAll from './assets/avatar-all.png';
 import animatedAvatar from './assets/default-avatar.svg';
 import icon_arrow from './assets/arrow-down.png';
 import icon_cost from './assets/cost-of-translation.svg';
@@ -924,7 +926,7 @@ class Create extends React.Component {
        message
     }
 
-    if(translator)
+    if(translator && translator !== 'Все переводчики')
       Object.assign(data,  {translator_id: this.state.valueTranslator['label']});
 
     TxRest.putData('topic', data).then((data, err) => {
@@ -980,8 +982,8 @@ class Create extends React.Component {
   }
 
   optionTranslatorField(v) {
-    if (!(v.login || v.value)) return <div><img style={{ width: '30px' }} src={avatar} /> <span>Переводчик</span></div>;
-    let customInput = <div> <img style={{ width: '30px', borderRadius: '50%', overflow: 'hidden' }} src={v.image || avatar} /><span style={{ marginLeft: '10px' }}>{v.login || v.value}</span></div>
+    if (!(v.login || v.value)) return <div><img style={{ width: '30px' }} src={avatarLite} /> <span>Переводчик</span></div>;
+    let customInput = <div> <img style={{ width: '30px', borderRadius: '50%', overflow: 'hidden' }} src={v.image || avatarLite} /><span style={{ marginLeft: '10px' }}>{v.login || v.value}</span></div>
     return customInput;
   }
 
@@ -1007,13 +1009,17 @@ class Create extends React.Component {
   getTranslators(receivedLater) {
     let {translators}  = !!receivedLater ? {translators:receivedLater} : this.props;
     if(!translators.length) return 
-    return this.setState({ translatorsOpt: translators.map(item => {
-          return {
-            label: item.id,
-            value: item.first_name + ' ' + item.last_name,
-            image: item.image
-          }
-        })
+    return this.setState({ translatorsOpt: [{
+      label: -1,
+      value: 'Все переводчики',
+      image: avatarAll
+    }].concat(translators.map(item => {
+        return {
+          label: item.id,
+          value: item.first_name + ' ' + item.last_name,
+          image: item.image
+        }
+      }))
       })
   }
 
@@ -1048,7 +1054,7 @@ class Create extends React.Component {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
            valueTranslator, isSearchMenuTranslatorVisible, isBlocking, 
            translatorMessage, letterTime, letterPrice, isEnoughMoney, 
-           blockSubmit, redirectToPending, newId, translatorsOpt} = this.state;
+           blockSubmit, redirectToPending, newId, translatorsOpt: translatorsPool } = this.state;
 
     if( redirectToPending ){
      return <Redirect push={true} to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
@@ -1101,7 +1107,7 @@ class Create extends React.Component {
             />
             <div className={'dashboard-user__create-topbar__chooser'}  >
               <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
-                <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{ width: '30px' }} src={!!valueTranslator && valueTranslator.image || avatar} />
+                <img className={'dashboard-user__create-topbar__chooser-trigger__avatar'} style={{ width: '30px' }} src={!!valueTranslator && valueTranslator.image || avatarLite} />
                 <span className={'dashboard-user__create-topbar__chooser-trigger__name'} >{(!!valueTranslator && (valueTranslator.login || valueTranslator.value)) || 'Переводчик'}</span>
                 <span className={'dashboard-user__create-topbar__chooser-trigger__arrow'} >{this.arrowElementLangs({ isOpen: isSearchMenuTranslatorVisible })}</span>
               </div>
@@ -1124,7 +1130,7 @@ class Create extends React.Component {
                   valueRenderer={this.valueTranslatorField}
                   optionRenderer={this.optionTranslatorField}
                   arrowRenderer={this.arrowElementTranslator}
-                  options={translatorsOpt}
+                  options={translatorsPool}
                   onBlur={this.makeSearchMenuTranslatorUnnisible}
                   onValueClick={this.makeSearchMenuTranslatorUnnisible}
 

@@ -1066,6 +1066,8 @@ class Reply extends React.Component {
          _self.setState({currentData: currentData[0]})
     })
 
+
+    // real time for sidebar digits
     if(Auth.alreadyInitSocket){
       this.startSocket();
     }else{
@@ -1081,11 +1083,14 @@ class Reply extends React.Component {
 
   
   startSocket(){
+    
       !this.isSocketOn && window.io.socket.on('topic', this.onSocket);
       this.isSocketOn = true;
   }
 
   onSocket(data){
+    if( data.translator_id && Auth.user.id !== data.translator_id) return // not for this user personal feed
+    
     let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
         feedPerson = Number(window.sessionStorage.feedPerson) || 0,
         allFeed = +feedCommon + +feedPerson + 1,
@@ -1143,8 +1148,6 @@ class Reply extends React.Component {
 
 
   currentNumberOfChar({target: {value}}){
-      console.log(value);
-      
       this.setState({isBlocking: value.length > 0, translateMessage: value})
    
       if(this._isMounted && this.answerNode ){
@@ -1357,6 +1360,13 @@ class HistoryList extends React.Component {
     this.messageStore.start();
     this.messageStore.addListener('updateMessage', this.updateHandler)
 
+    // real time for sidebar digits
+    if(Auth.alreadyInitSocket){
+      this.startSocket();
+    }else{
+      Auth.addListener('AuthStore.alreadyInitSocket', this.startSocket)
+    }
+
     let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
         feedPerson = Number(window.sessionStorage.feedPerson) || 0,
         allFeed = feedCommon + feedPerson;
@@ -1400,6 +1410,9 @@ class HistoryList extends React.Component {
   }
 
   onSocket(data){
+
+    if( data.translator_id && Auth.user.id !== data.translator_id) return // not for this user personal feed
+    
     let feedCommon = Number(window.sessionStorage.feedCommon) || 0,
         feedPerson = Number(window.sessionStorage.feedPerson) || 0,
         allFeed = +feedCommon + +feedPerson + 1,

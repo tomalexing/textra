@@ -22,6 +22,17 @@ import {TxRest} from './services/Api.js';
 import './polyfill';
 //import DashBoard from './Dashboard.js';
 
+// Chech for safari privat mode
+if (typeof localStorage === 'object') {
+  try {
+      localStorage.setItem('localStorage', 1);
+      localStorage.removeItem('localStorage');
+  } catch (e) {
+      Storage.prototype._setItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function() {};
+      alert('Your web browser does not support storing settings locally. In Safari, the most common cause of this is using "Private Browsing Mode". Some settings may not save or some features may not work properly for you.');
+  }
+}
 
 injectTapEventPlugin();
 
