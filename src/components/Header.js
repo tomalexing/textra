@@ -163,8 +163,8 @@ class Header extends React.Component{
                     <div className="header-logout" onClick={this.logout}>Выйти</div>
                   </div>}
                   { !Auth.isAuthenticated && <div className="f f-gap-2 stuff__bottom">
-                      <Link className="btn btn-flat2 btn-normal" to={{pathname:"/signup", state:{from:'/'}}} >Зарегистрироваться</Link>
-                      <Link className="btn u-px-2 btn-primiry btn-normal" to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
+                      <Link className={`btn btn-flat2 btn-${ window && window.innerWidth > 768 ? 'normal' : 'mini' }`} to={{pathname:"/signup", state:{from:'/'}}} >Зарегистрироваться</Link>
+                      <Link className={`btn u-px-2 btn-primiry btn-${ window && window.innerWidth > 768 ? 'normal' : 'mini' }`} to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
                   </div>}
                 </div>  
             </header>

@@ -344,6 +344,7 @@ class Translator extends React.Component {
                   registerRefreshComponent={this.registerRefreshComponent}
                   refresh = {this.refresh}
                   page={page}
+                  Left={{shownOnDesktopLeftBtn: true}}
                 />
               </div>
             )}
@@ -473,12 +474,12 @@ class Translator extends React.Component {
 const BreadCrumbs = ({
   this: _self,
   Title: {title, shownOnDesktop},
-  Left: { leftBtn, leftBtnName, newLeftBtnState },
+  Left: { leftBtn, leftBtnName, newLeftBtnState, shownOnDesktopLeftBtn},
   Right: { rightBtn, rightBtnName, newRightBtnState },
   isTablet
 }) => {
   return isTablet
-    ? <div className="f f-align-1-2 breadcrumbs">
+    ? <div className="f f-align-13-2 breadcrumbs">
         {leftBtn
           ? <button
               onClick={() => {
@@ -511,14 +512,30 @@ const BreadCrumbs = ({
                 width="7"
                 height="12"
                 viewBox="0 0 7 12"
-                style={{ transform: "rotate(180deg)" }}
               >
                 <path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" />
               </svg>
             </button>
           : ""}
       </div>
-    : shownOnDesktop &&  <div className="f f-align-1-2 translator-tab__topline"> <span>{title}</span> </div>;
+    : shownOnDesktop &&  <div className="f f-align-1-2 translator-tab__topline"> 
+      {shownOnDesktopLeftBtn
+          ? <Link
+              to={'/'}
+              className="f f-align-1-2 btn btn-flat translator-tab__topline__back"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="7"
+                height="12"
+                viewBox="0 0 7 12"
+              >
+                <path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" />
+              </svg>
+              {leftBtnName}
+            </Link>
+          : ""}
+      <span>{title}</span> </div>;
 };
 
 class DisplaySwitcher extends React.Component {
@@ -672,31 +689,50 @@ class SideList extends React.Component{
       title = this.props.title,
       isTablet,
       this: _rootSelf,
-      Left = {
-            leftBtn: true,
-            leftBtnName: "Меню",
-            newLeftBtnState: { mainScreen: false, sidebar: true, secondScreen: true }
-      },
       Right = {
         rightBtn: false
       },
       page
     } = this.props;
 
+    let Left = Object.assign({
+      leftBtn: true,
+      leftBtnName: "Меню",
+      newLeftBtnState: { mainScreen: false, sidebar: true, secondScreen: true }
+    },this.props.Left)
+
     let {list} = this.state;
     let {typePage} = this.props.page;
     return (
       <ScrollRestortion scrollId={`sidebarTranslatorDb`}  className={'f sidebar'} >
-          <BreadCrumbs
+          {isTablet && <BreadCrumbs
+            this={_rootSelf}
+            isTablet={isTablet}
+            Title={{
+                title: title,
+                shownOnDesktop: false
+            }}
+            Left={Left}
+            Right={Right}
+          />}
+
+          {/* litle fix for desktop*/}
+          {!isTablet && <BreadCrumbs
             this={_rootSelf}
             isTablet={isTablet}
             Title={{
                 title: title,
                 shownOnDesktop: true
             }}
-            Left={Left}
+            Left = {{
+              leftBtn: true,
+              leftBtnName: "Назад",
+              newLeftBtnState: { mainScreen: true, sidebar: false, secondScreen: false },
+              shownOnDesktopLeftBtn: Left.shownOnDesktopLeftBtn
+            }}
             Right={Right}
-          />
+          />}
+
         {list.map((tab, index) => {
           let publishTime = new Date(tab.started_at);
           let now = new Date();
@@ -711,7 +747,7 @@ class SideList extends React.Component{
           if( publishTime.getFullYear() === now.getFullYear() && publishTime.getMonth() === now.getMonth() && publishTime.getDate() === now.getDate()){
             outputPublishTime = `${publishTime.getHours()}:${getFullTimeDigits(publishTime.getMinutes())}`
           }
-                            //     inwork has sourcemessage
+          //     inwork has sourcemessage
           let duration =    tab.source_messages.length > 0 ? tab.source_messages[0].letters_count * this.getLangPropInObj({id: tab.translate_language_id, slug:'letter_time'}) : (new Date(tab.translated_at) - new Date(tab.started_at)) / 1000 ;
           return (
             <Link

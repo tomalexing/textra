@@ -93,10 +93,12 @@ class SignUp extends React.Component {
   loginFb = async (info) => {
     let {accessToken, userID, name, email} = info;
     if(!accessToken) return
+    let [first_name, arrayLastName ] = name.split(' ');    
     let form = {access_token: accessToken,
                 facebook_id: userID, 
                 email,
-                first_name: name,
+                first_name,
+                last_name: '' + arrayLastName,
                 image: 'https://graph.facebook.com/' + userID + '/picture?type=large'};
     let data = await TxRest.getDataByID('signInFacebook', form);
     if(data.message){

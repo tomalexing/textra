@@ -30,6 +30,7 @@
     overflow: auto
     height: 100%
     border: 1px solid $grey
+    border-top: none
     background: #fff
   .main
     z-index: 1
@@ -44,6 +45,7 @@
   overflow: hidden
   +r(768)
     height: 100%
+    padding-top: 40px
 
 .main__header
   height: $headerheight
@@ -53,6 +55,8 @@
   padding: 16px
   z-index: 700
   +r(768)
+    position: fixed
+    top: 0
     height: 40px
     align-items: center
   .header-logo
@@ -212,4 +216,8 @@
         font-size: 13px
         +nosel
         +tr(opacity .5s)
+        +r(768)
+          top: 4px
+          font-size: 9px
+          
     

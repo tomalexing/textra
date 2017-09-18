@@ -265,7 +265,7 @@
     &__featurePic
       +r(767)
         margin-bottom: 20px
-        width: 30%
+        width: 60%
         img
           width: 100%
 
@@ -376,7 +376,7 @@
   left: 0px
   position: fixed
   width: 100%
-  height: 24px
+  height: 30px
   color: #1ea5fc
   background: #fff
   font-family: Roboto
@@ -390,38 +390,34 @@
   span
     color: $grey-light
     margin: auto
-  &__back
     position: absolute
-    top: 7px
+    width: 100%
+    right: 100%
+    left: 0
+    top: 8px
+    text-align: center
+    line-height: 14px
+    vertical-align: middle
+    z-index: -1
+  &__back
     color: rgb(0, 192, 255)
     font-size: 10px
-    margin-left: 10px
+    margin-left: 5px
     margin-right: 4px
     text-decoration: none
+    vertical-align: middle
     svg
-      height: 5px
-      position: absolute
-      left: -3px
-      top: 2px
-      .safari &
-        top: 3px
+      transform: scale(.5)
     &:hover
       color: darken(rgb(0, 192, 255),10)
   &__next
-    position: absolute
-    top: 7px
-    right: 0
     font-size: 10px
     color: rgb(0, 192, 255)
-    margin-right: 4px
+    margin-right: 5px
     text-decoration: none
+    vertical-align: middle
     svg
-      height: 5px
-      position: absolute
-      top: 2px
-      right: -3px
-      .safari &
-        top: 3px
+      transform: scale(-.5)
     &:hover
       color: darken(rgb(0, 192, 255),10)
 
@@ -430,8 +426,10 @@
     ~ *:nth-of-type(2)
       padding-top: 25px
   +r(768)
-    ~ *:nth-of-type(1)
-      margin-top: 23px
+    ~ a:nth-of-type(1)
+      margin-top: 30px
+    ~ div:nth-of-type(2)
+      padding-top: 30px
 
 // USER CREAT Window
 .dashboard-user
@@ -447,7 +445,7 @@
   &__create-topbar
     z-index: 101
     +r(768)
-      height: 113px
+      height: 100px
       align-items: flex-end
   &__create-bottombar
    +r(768)
@@ -469,7 +467,7 @@
       margin-left: auto
       +r(768)
         position: absolute
-        top: 30px
+        top: 35px
         right: 2px
       &-trigger
         min-width: 170px
@@ -658,6 +656,8 @@
     min-width: 100%
     padding: 16px
     overflow: auto
+    +r(768)
+      padding: 0 16px
     // Post
     &-post
       width: 100%
@@ -1113,15 +1113,16 @@
       background-color: #fff
     &-from
       border-radius: 4px 0 0 4px
-      height: 16px
+      height: 18px
       color: #9ca9b2
-      line-height: 17px
+      line-height: 18px
       color: white
       width: 22px
       display: inline-block
       text-align: center
       vertical-align: middle
       text-transform: uppercase
+      padding-left: 1px
       .selected &
         color: $selected-blue
     &-to
@@ -1134,7 +1135,6 @@
       text-align: center
       background: #fff
       vertical-align: middle
-      margin-top: 1px
       text-transform: uppercase
       .selected &
         background-color: $selected-blue
@@ -1230,6 +1230,7 @@
     .main > div 
       width: 100%
       height: 100%
+      overflow: auto
     +r(768)
       width: 100%
   .sidebar
@@ -1241,7 +1242,7 @@
       align-self: stretch
 
 
-// ASide Menu 
+// Aside Menu 
 .translator
   &-menu
     height: 100%
@@ -1311,7 +1312,7 @@
   top: 0
   left: 0
   width: 100%
-  height: 24px
+  height: 25px
   color: #1ea5fc
   background: #fff
   font-family: Roboto
@@ -1324,11 +1325,25 @@
   span
     color: $grey-light
     margin: auto
-  &__back
     position: absolute
+    width: 100%
+    right: 100%
+    left: 0
+    top: 6px
+    text-align: center
+    line-height: 14px
+    vertical-align: middle
+    z-index: 0
+  &__back
     color: rgb(0, 192, 255)
-    margin-left: 10px
+    font-size: 10px
+    margin-left: 5px
     margin-right: 4px
+    text-decoration: none
+    vertical-align: middle
+    z-index: 1
+    svg
+      transform: scale(.5)
     &:hover
       color: darken(rgb(0, 192, 255),10)
 
@@ -1342,6 +1357,7 @@
   text-decoration: none
   color: $selected-blue
   padding: 7px
+  flex-shrink: 0
   border-bottom: 1px $grey solid
   +nosel
   &:hover
@@ -1561,7 +1577,7 @@
       color: darken(rgb(0, 192, 255),10)
 
 .translator-feed__topline ~ *:nth-of-type(2)
-    margin-top: 40px
+    margin-top: 40px !important
 
 
 .translator
@@ -1578,9 +1594,10 @@
       width: 90%
       margin: 10px auto
       flex-direction: column
+      padding-top: 8px !important
       padding: 8px
       &:nth-of-type(2)
-        margin-top: 40px
+        margin-top: 40px !important
     &__avatar
       flex: 0 1 65px
       margin-right: 10px
@@ -1685,6 +1702,8 @@
       pointer-events: none
       transition: background-color 1s ease-out
       background-color: #fff
+      svg
+        margin: auto
       .can__get__more &
         cursor: pointer
         pointer-events: all
@@ -1891,6 +1910,7 @@
     .main > div 
       width: 100%
       height: 100%
+      overflow: auto
     +r(768)
       width: 100%
   .outer-main__full
@@ -1900,6 +1920,7 @@
     .main > div 
       width: 100%
       height: 100%
+      overflow: auto
   .sidebar
     position: relative
     background: #fff
