@@ -1007,7 +1007,7 @@ class FeedList extends React.Component {
                 />
               </div>
             </div>
-            <div className={"f f-align-2-2 translator-feed__constols"} onClick={this.confirm(feed.id, feed.index)}>
+            <button className={"f f-align-2-2 translator-feed__constols"} onClick={this.confirm(feed.id, feed.index)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="28"
@@ -1019,7 +1019,7 @@ class FeedList extends React.Component {
                   d="M26.22 0L8.64 20.74l-7.39-6.9L0 15.17l8.1 7.53.71.65.59-.71L27.59 1.16z"
                 />
               </svg>
-            </div>
+            </button>
           </div>
         ));
   }
