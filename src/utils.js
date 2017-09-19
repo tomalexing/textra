@@ -267,6 +267,8 @@ export class ScrollRestortion extends React.Component {
       if(scrollPos){
         let el = this.refs[this.scrollId];
         if( el ) el.scrollTop =  scrollPos || 0
+      }else{
+        if( el && this.props.scrollToEndByDefault ) el.scrollTop = el.scrollHeight;
       }
     }
   }
@@ -275,7 +277,11 @@ export class ScrollRestortion extends React.Component {
       if(typeof window !== "undefined" && this.scrollId){
         var scrollPos = window.sessionStorage.getItem(`ScrollRestortion${this.scrollId}`);
         let el = this.refs[this.scrollId];
-        if( el ) el.scrollTop =  scrollPos || 0
+        if(scrollPos){
+          if( el ) el.scrollTop =  scrollPos
+        }else{
+          if( el && this.props.scrollToEndByDefault ) el.scrollTop = el.scrollHeight;
+        }
       }
   }
 
@@ -284,7 +290,7 @@ export class ScrollRestortion extends React.Component {
   }
 
   render() {
-    let {scrollId, ...domProps} = this.props;
+    let {scrollId, scrollToEndByDefault,  ...domProps} = this.props;
     return React.createElement('div', {...domProps, ref: `${scrollId}`},this.props.children);
   }
 }

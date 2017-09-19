@@ -90,7 +90,7 @@ const RestorePassword = (props) => <Lazy {...props} load={() => import('./Restor
 class App extends React.Component {
   
    componentWillMount() {
-    //Auth.refreshToken();
+    Auth.refreshToken();
     Auth.init();
     TxRest.initSocket();
     TxRest.initLiqPay();

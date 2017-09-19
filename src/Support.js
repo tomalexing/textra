@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import Header from "./components/Header.js"
 import {Footer} from "./components/Footer.js"
 import formSerialize from 'form-serialize';
@@ -7,6 +7,9 @@ import 'react-select/dist/react-select.css';
 import Select from 'react-select';
 import icon_arrow from './assets/arrow-down.png';
 import {TxRest} from './services/Api.js';
+import TxInput from './components/TxInput.js';
+import TxForm from './components/TxForm.js';
+import Auth from './store/AuthStore.js';
 
 export default class Support extends React.Component {
   constructor(p){
@@ -15,9 +18,10 @@ export default class Support extends React.Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.onMessage = this.onMessage.bind(this);
     this._isMounted = false;
+    this.isAuthenticated =  Auth && Auth.isAuthenticated;
   }
   state={
-    value: 0,
+    value: undefined,
     options: [{
       value: 0,
       label: 'Стать переводчиком'
@@ -29,7 +33,7 @@ export default class Support extends React.Component {
       label: 'Прочее'
     }
     ],
-    comment: ''
+    redirectToReferrer: false
   }
   componentDidMount() {
     this._isMounted = true;
@@ -41,17 +45,17 @@ export default class Support extends React.Component {
     this.setState({value})
   }
 
-  onSubmit(e){
+  onSubmit(e, _ ,form){
+    debugger;
     e.preventDefault();
-    let {option, comment} = formSerialize(e.target, { hash: true, empty: true });
-    console.log(option, comment)
     let _self = this;
-
+    let {comment, option} = form;
     TxRest.putData('request',{
-      type: option.toString(),
-      message: comment
+      type: option && option.toString() || '2',
+      message: comment,
+//      email
     }).then(_ => {
-        _self.setState({value:0, comment: ''})
+        _self.setState({ redirectToReferrer: true})
     })
 
   }
@@ -73,33 +77,68 @@ export default class Support extends React.Component {
   }
 
   render() {
-    let {value, comment, options} = this.state;
+    let {value, clearComment, options, redirectToReferrer} = this.state;
+    const { from } = this.props.location.state || { from: { pathname: '/' } }    
     return (
+    (redirectToReferrer) ? <Redirect to={from} /> :
     <div className="page-layout f f-col">
         <Header currentRole={this.props.currentRole}/>
         <div className="container f-v-gap-2 f-gap-5 u-mt-10">
             <h1 className="h1-big u-my-5 u-text-center">Как мы можем помочь Вам?</h1>
             <h1 className="h2 text-header">Оставьте заявку или задайте нам вопрос</h1>
             <p>Если Вы желаете стать переводчиком нашего сервиса, то можете оставить заявку. Мы обязательно рассмотрим ее в кротчайшие сроки и свяжемся с Вами. Если же Вы хотите оставить отзыв или задать вопрос, то можете сделать это в поле ниже. Мы с радостью поможем Вам.</p>
-            <form onSubmit={this.onSubmit}>
-              <h3 className="h3  u-mt-4 u-mb-2">Выберите тип заявки * </h3>
-              <Select
-                name="option"
-                autofocus
-                options={options}
-                disabled={false}
-                simpleValue
-                value={value}
-                onChange={this.updateValue}
-                searchable={false}
-                autosize={true}
-                clearable={false}
-                arrowRenderer={this.arrowElementLangs} />
-                <h3 className="h3 u-mt-4 u-mb-2">Опишите детально Ваш вопрос *</h3>
-                <textarea name="comment" type="text" onChange={this.onMessage} value={comment} placeholder="Комментарий пользователя">
-                </textarea>
-                <input type="submit" value='Отправить'  style={{float: "right"}} className={'submit-post btn btn-primiry btn-mini'}/>
-              </form>
+            {this.isAuthenticated &&
+              <TxForm submit={this.onSubmit} innerErrorFielsType={true} formClass=""> 
+
+                <h3 className="h3 u-mt-4 u-mb-2">Выберите тип заявки *</h3>
+                <Select
+                  name="option"
+                  placeholder="Выбрать"
+                  autofocus
+                  options={options}
+                  disabled={false}
+                  simpleValue
+                  value={value}
+                  onChange={this.updateValue}
+                  searchable={false}
+                  autosize={true}
+                  clearable={false}
+                  arrowRenderer={this.arrowElementLangs} />
+
+                  <h3 className="h3 u-mt-4 u-mb-2">Опишите детально Ваш вопрос *</h3>
+                  {/* <textarea name="comment" type="text" onChange={this.onMessage} value={comment} placeholder="Комментарий пользователя">
+                  </textarea> */}
+                  <TxInput tag="textarea" type="text" name="comment" validate={[{'minLength':1},'required']}  className="field-block" placeholder="Комментарий пользователя"/>
+                
+                <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-mini'}/>
+              </TxForm>}
+
+            {!this.isAuthenticated &&
+              <TxForm submit={this.onSubmit} innerErrorFielsType={true} formClass=""> 
+
+                  <h3 className="h3 u-mt-4 u-mb-2">Выберите тип заявки *</h3>
+                  <Select
+                    name="option"
+                    placeholder="Выбрать"
+                    autofocus
+                    options={options}
+                    disabled={false}
+                    simpleValue
+                    value={value}
+                    onChange={this.updateValue}
+                    searchable={false}
+                    autosize={true}
+                    clearable={false}
+                    arrowRenderer={this.arrowElementLangs} />
+
+                  <h3 className="h3 u-mt-4 u-mb-2">Ваш email *</h3>
+                  <TxInput type="email" name="email" validate={['email', 'required']} className="field-block" placeholder="Email"/>
+                  
+                  <h3 className="h3 u-mt-4 u-mb-2">Опишите детально Ваш вопрос *</h3>
+                  <TxInput tag="textarea" type="text" name="comment" validate={[{'minLength':1},'required']} {...clearComment&&{value:''}}  className="field-block" placeholder="Комментарий пользователя"/>
+                  
+                  <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-mini'}/>
+                </TxForm>}
         </div>
         <Footer/>
     </div>)

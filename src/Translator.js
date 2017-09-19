@@ -359,7 +359,7 @@ class Translator extends React.Component {
                 ref={n => (this.mainScreen = n)}
                 style={{
                   display: `${!isTablet ? "flex" : mainScreen ? "flex" : "none"}`,
-                  background: `${typePage === 'feed' ? "#f5f5f5": "#fff"}`
+                  background: `${typePage === 'feed' || typePage === 'common' || typePage === 'personal' ? "#f5f5f5": "#fff"}`
                 }}
                 className={`f outer-main__expanded`}
                 ref={n => (this.toggleElem = n)}
@@ -875,7 +875,6 @@ class FeedList extends React.Component {
   }
 
   componentWillUnmount(){
-    console.log('Unmount')
     this.feedStore.stop();
     this.feedStore.removeListener('update', this.feedUpdateHandler);
     this.feedPros = null;
@@ -887,7 +886,6 @@ class FeedList extends React.Component {
     if( !deepEqual(this.state, nextState) || !deepEqual(this.props, nextProps) ){
       return true
     }
-    console.log('not rerender')
     return false
   }
 
@@ -963,7 +961,7 @@ class FeedList extends React.Component {
                 <img src={avatar} />
               </div>
               <div className={"f f-align-2-2 translator-feed__placeholder"}>
-                <span>Запросы на перевод {loaded} отсутствуют</span>
+                <span>Запросы на перевод отсутствуют</span>
               </div>
             </div>
         </div>
@@ -1505,7 +1503,7 @@ class HistoryList extends React.Component {
     currentData = currentData.reverse();
     this.lastCreatedDate = null;
     const renderCollection = renderItem => (
-     <ScrollRestortion scrollId={`history${this.id}`}  className={'f f-col dashboard-user__history'} >
+     <ScrollRestortion scrollId={`history${this.id}`} scrollToEndByDefault={true} className={'f f-col dashboard-user__history'} >
         <BreadCrumbs
             this={_self}
             isTablet={isTablet}

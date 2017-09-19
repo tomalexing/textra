@@ -407,16 +407,17 @@ class DashBoard extends React.Component {
           <div className="f outer-right" ref={n => this.toggleElem = n}  style={{display:`${!isTablet?'flex':mainScreen?'flex':'none'}`}}>
             <div className="main f f-col f-align-2-2">
               {this.state.isTablet?
-                <div className="f f-align-1-2 breadcrumbs">
+                <div className="f f-align-13-2 breadcrumbs">
                     <button onClick={() => { this.setState({mainScreen: false}) }} className="f f-align-2-2 btn btn-flat breadcrumbs__back" ><svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12"><path fill="#09f" d="M0 6l6-6 .76.82L1.6 6l5.15 5.18L6 12z" /></svg>Назад</button> 
                     <span>{typePage === 'create' ? 'создать запрос на перевод' : typePage === 'pending' ? 'ожидание переводчика' :  typePage === 'inwork' ? 'в работе' : typePage === 'history' ? `история ${translator.first_name} ${translator.last_name}`: ''}</span>
                 </div>
               :''}
               <Switch>
+                <RoutePassProps exact redirect="/dashboard/create" path="/dashboard" component={Create} translator={translator}  store={this.store} languages={language} store={this.store} translators={translators}/> 
                 <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language} store={this.store} translators={translators}/>
                 <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}/>
-                 <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
+                <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}  />
                 <RoutePassProps path="/dashboard/history/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}
                 languages={language} store={this.store} translator={translator}/>
@@ -430,12 +431,10 @@ class DashBoard extends React.Component {
 
 }
 
-const RoutePassProps = ({ component: Component, ...rest }) => (
-  <Route  {...rest} render={props => (
-    <Component  {...props} {...rest} />
-  )
-  } />
-)
+const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
+  (!redirect
+    ? <Route {...rest} render={props => <Component {...props} {...rest} />} />
+    : <Redirect to={`${redirect}`} />);
 
 
 class HistoryList extends React.Component { 
@@ -530,9 +529,8 @@ class HistoryList extends React.Component {
     if (!currentData.length)
       return(<div/>)
     currentData = currentData.reverse();
-    console.log(currentData);
     const renderCollection = renderItem => (
-      <ScrollRestortion scrollId={`history${this.props.id}`}  className={'f f-col dashboard-user__history'} >
+      <ScrollRestortion scrollId={`history${this.props.id}`}  scrollToEndByDefault={true} className={'f f-col dashboard-user__history'} >
         
         {/* ALl merged history */}
 
@@ -785,6 +783,15 @@ class Pending extends React.Component {
                 {created_at.getHours()}:{getFullTimeDigits(created_at.getMinutes())}
               </div>}
             </div>
+
+            <div className={'f f-align-2-2 dashboard-user__searching-info '}>
+              <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation '}>i</div>
+              <div className={'f f-align-2-2  dashboard-user__searching-info__message '}>{`
+                  Заказ отправлен переводчику, будет выполнен в течении ${humanReadableTime(duration)} и 
+                  для повышение качества перевода мы рекомендуем не закрывать это окно.
+                `}
+              </div>
+            </div>
           </div>
     )
   }
@@ -845,7 +852,7 @@ class Create extends React.Component {
   componentDidMount(){
     this._isMounted = true
     if(this.props.languages) this.updateHandler(this.props.languages);
-    if(this.props.location.state.translator)
+    if(this.props.location.state && this.props.location.state.translator)
       this.setState({valueTranslator:{
               label: this.props.location.state.translator.id,
               value: this.props.location.state.translator.first_name + ' ' + this.props.location.state.translator.last_name,

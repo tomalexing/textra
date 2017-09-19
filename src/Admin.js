@@ -1352,7 +1352,7 @@ class UserFullHistory extends React.Component {
 
 
     const renderCollection = renderItem => (
-      <ScrollRestortion scrollId={`history-${this.props.id}-${this.props.historyId}`}  className={'f f-col dashboard-user__history'} >
+      <ScrollRestortion scrollId={`history-${this.props.id}-${this.props.historyId}`} scrollToEndByDefault={true} className={'f f-col dashboard-user__history'} >
         
         {/* ALl merged history */}
 

@@ -144,7 +144,7 @@ const messages = {
     email: 'Не верный email',
     minLength: 'Это поле должно содержать минимум {n} символов',
     maxLength: 'Это поле должно содержать максимум {n} символов',
-    required: 'Ви не заполнили все поле',
+    required: 'Ви не заполнили все поля',
     number: 'Поле должно содержать только числа',
     listen: 'Поля должны совпадать',
     numbercontain: 'Это поле должно содержать хотя бы одну цифру',
@@ -322,6 +322,7 @@ export default class TxInput extends React.Component{
         errorElementOuter,
         getChildInstance,
         ukey,
+        tag,
         ...fieldAttr
       } = this.props;
       this.fieldAttr = fieldAttr;
@@ -412,6 +413,7 @@ export default class TxInput extends React.Component{
        */
       this._validate = (value) => {
         const errors = this.rules.reduce((acc, { name, fn, params = [] }) => {
+          params = !Array.isArray(params) ? [params]: params;
   
           const res = fn(value, ...params);
           // if valid
@@ -431,7 +433,7 @@ export default class TxInput extends React.Component{
 
     return(
         <div >
-          <input {...this.fieldAttr}
+          <this.props.tag {...this.fieldAttr}
           ref={n => this.input = n}
           />
           {!this.props.errorElementOuter  && <span className="field-error" ref={n => this.errorElement = n}></span>}
@@ -456,7 +458,8 @@ TxInput.defaultProps = {
   errorClass: 'fail',
   errorElementOuter: false,
   getChildInstance: null,
-  ukey: ''
+  ukey: '',
+  tag: 'input'
 };
 
 TxInput.propTypes = {
@@ -477,6 +480,7 @@ TxInput.propTypes = {
     PropTypes.object
   ]),
   getChildInstance: PropTypes.func,
-  ukey: PropTypes.string
+  ukey: PropTypes.string,
+  tag: PropTypes.oneOfType([PropTypes.node, PropTypes.func])  
 };
 

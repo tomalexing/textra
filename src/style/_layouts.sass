@@ -305,7 +305,7 @@
     max-width: 1170px
     margin: 100px auto 30px
     width: 100%
-    height: 100%
+    min-height: 100%
   p
     color: #6f6f6f
     font-weight: 400
@@ -325,7 +325,20 @@
     font-size: 16px
     padding: 10px
     min-height: 100px
-    margin-bottom: 10px 
+    margin-bottom: 10px
+    &.fail
+      border: 1px solid #E16666
+      box-shadow: 0 0 0px 1000px rgba(225, 102, 102, 0.1) inset
+  .field-error
+    display: block
+    border-radius: 4px
+    color: #6f6f6f
+    text-align: left
+    overflow: auto
+    margin-top: 10px
+    background: rgba(225, 102, 102, 0.1)
+    & > p
+      padding: 10px
 //
 // ALL USER DASHBOARD STYLES START HERE
 //
@@ -648,6 +661,26 @@
           margin-left: 2px
           margin-right: 4px
 
+      // Exclamation
+    &-info
+      width: 100%
+      border: 3px solid $bg-blue
+      border-radius: 5px
+      padding: 10px
+      &__exclamation
+        flex: 1 0 auto
+        position: relative
+        background: $selected-blue 
+        width: 50px
+        height: 50px
+        border-radius: 50%
+        overflow: hidden
+        border: 1px solid $grey
+        font-size: 35px
+        color: #fff
+      &__message
+        flex: 0 1 auto
+        padding-left: 20px
 
 // USER HISTORY Window
 .dashboard-user__history

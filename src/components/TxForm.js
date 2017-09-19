@@ -3,6 +3,17 @@ import PropTypes from 'prop-types';
 import { debounce, listener,call} from './../utils';
 import formSerialize from 'form-serialize';
 import './../polyfill.js';
+
+const _shouldAddAdditionalProp = (tag) => [
+  'button',
+  'input',
+  'select',
+  'textarea',
+  'optgroup',
+  'option',
+  'fieldset',
+].indexOf((tag + '').toLowerCase()) >= 0;
+
 export default class TxForm extends React.Component{
     constructor(props){
         super(props);
@@ -153,16 +164,21 @@ export default class TxForm extends React.Component{
     }
 
     render(){
-        let { children, getErrorField } = this.props;
+        let { children, getErrorField, innerErrorFielsType, formClass } = this.props;
         let { mounted } = this.state;
         return(
-             <form onSubmit={this._submitHandler.bind(this)} ref={(n) => this.element = n} className="registform-regist__inputs ">
+             <form onSubmit={this._submitHandler.bind(this)} ref={(n) => this.element = n} {...formClass&&{className:formClass}}>
                 {  !!mounted && 
                     Object.keys(children).map(e => children[e]).map((child, i) =>(
-                        React.cloneElement(child, {key: i, ...child.props, errorElementOuter: this.errorField, getChildInstance: this._getChildInstance})
+                       React.cloneElement(child, {
+                          key: i, 
+                          ...child.props, 
+                          ..._shouldAddAdditionalProp(child.props.tag)&&{errorElementOuter: this.errorField}, 
+                          ..._shouldAddAdditionalProp(child.props.tag)&&{getChildInstance: this._getChildInstance}
+                          })
                     ))
                 }
-              <div className={"field-error u-my-2"} ref={ (n) => {this.errorField = n; getErrorField(n); }} />
+              {!innerErrorFielsType && <div className={"field-error u-my-2"} ref={ (n) => {this.errorField = n; getErrorField(n); }} />}
              </form>
         )
 
@@ -174,10 +190,12 @@ TxForm.defaultProps = {
   loadingClass: 'form-loading',
   successClass: 'form-success', 
   errorClass: 'form-error',
+  formClass: 'registform-regist__inputs',
   autoValidate: true,
   onValid: () => {},
   onError: () => {},
-  getErrorField: () => {}
+  getErrorField: () => {},
+  innerErrorFielsType: false
 };
 
 TxForm.propTypes = {
