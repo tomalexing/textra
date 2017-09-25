@@ -783,15 +783,16 @@ class Pending extends React.Component {
                 {created_at.getHours()}:{getFullTimeDigits(created_at.getMinutes())}
               </div>}
             </div>
-
+          {currentData.status === '0' &&
             <div className={'f f-align-2-2 dashboard-user__searching-info '}>
               <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation '}>i</div>
-              <div className={'f f-align-2-2  dashboard-user__searching-info__message '}>{`
+              <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>{`
                   Заказ отправлен переводчику, будет выполнен в течении ${humanReadableTime(duration)} и 
                   для повышение качества перевода мы рекомендуем не закрывать это окно.
                 `}
               </div>
             </div>
+          }
           </div>
     )
   }
