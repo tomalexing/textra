@@ -150,7 +150,7 @@ export const TxRest = (() => {
                           'Accept': 'application/json',
                           'Authorization': `Bearer ${AuthStore.token ? AuthStore.token : ''}`
                         },
-              }).then(response => {
+              }).then( response => {
                 return response.json();
               }).then( async data => {
                 if(typeof cb === 'function'){

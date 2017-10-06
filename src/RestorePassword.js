@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import Header from "./components/Header.js"
 import {Footer} from "./components/Footer.js"
 import formSerialize from 'form-serialize';
@@ -14,7 +14,8 @@ export default class RestorePassword extends React.Component {
   }
 
   state={
-    email: ''
+    email: '',
+    redirectToReferrer: false
   }
 
   componentDidMount() {
@@ -29,7 +30,13 @@ export default class RestorePassword extends React.Component {
 
   onSubmit(e){
     e.preventDefault();
+    let _self = this;
+    let { email } = formSerialize(e.target, { hash: true, empty: true });
 
+    TxRest.getDataByID('resetPassword', {email})
+        .then(data => {
+          _self.setState({ redirectToReferrer: true})
+        })
   }
 
   componentWillUnmount(){
@@ -37,8 +44,10 @@ export default class RestorePassword extends React.Component {
   }
 
   render() {
-    let {email} = this.state;
+    let {email, redirectToReferrer} = this.state;
+    const { from } = this.props.location.state || { from: { pathname: '/' } }        
     return (
+    (redirectToReferrer) ? <Redirect to={from} /> :
     <div className="page-layout f f-col">
         <Header currentRole={this.props.currentRole}/>
         <div className="container f-v-gap-2 f-gap-5 u-mt-10">

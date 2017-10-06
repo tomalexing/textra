@@ -34,7 +34,7 @@ class Login extends React.Component {
   }
 
   componentWillMount(){
-    console.log( process.env )
+
   }
 
   state = {
@@ -201,7 +201,7 @@ class Login extends React.Component {
                   <TxInput type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
                 </TxForm>
 
-                <Link to={'/restorepassword'} className="f f-align-3-3 registform__forgotpassword">Забыли пароль?</Link>
+                <Link to={{pathname:'/restorepassword', state: { from: this.props.location } }} className="f f-align-3-3 registform__forgotpassword">Забыли пароль?</Link>
                 <div id="status"></div>
               </div>
           </div>

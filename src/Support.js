@@ -46,14 +46,14 @@ export default class Support extends React.Component {
   }
 
   onSubmit(e, _ ,form){
-    debugger;
+
     e.preventDefault();
     let _self = this;
-    let {comment, option} = form;
+    let {comment, option, email} = form;
     TxRest.putData('request',{
       type: option && option.toString() || '2',
       message: comment,
-//      email
+      email
     }).then(_ => {
         _self.setState({ redirectToReferrer: true})
     })
