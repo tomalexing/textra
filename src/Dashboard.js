@@ -1159,7 +1159,7 @@ class Create extends React.Component {
 
             <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * letterTime)} hint={'Длительность перевода'} />
             <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
-            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100).toFixed(2)}₴`} hint={'Стоимость перевода'} />
+            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100 + 10).toFixed(2)}₴`} hint={'Стоимость перевода'} />
 
           <input id="submit" type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
              
