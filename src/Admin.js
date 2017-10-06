@@ -496,6 +496,7 @@ class SideList extends React.PureComponent{
     let {user, pendingTabs, workingTabs, historyTabs} = this.state;
     let route = `/admin/${pageType}/${id}`;
     let activeTab = historyId;
+    console.log(activeTab);
     if(!user){
       return(<div className="f sidebar">
               <div className="admin-user-details">
@@ -662,7 +663,7 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
     : <Redirect to={`${redirect}`} />);
 
 
-
+// Means Table with users data
 class Users extends React.Component {
 
   constructor(p){
@@ -746,9 +747,9 @@ class Users extends React.Component {
     if(!this._isMounted) return
     let usersList = data.map(item => {
       return {
-        nickname: item.user ? item.user : 'Unregistered', 
+        nickname: item.user ? item.user.first_name + ' ' + item.user.last_name : 'Unregistered', 
         uuid: item.id,
-        email: item.user ? item.user : 'Unregistered', 
+        email: item.user ? item.user.email : 'Unregistered', 
         type: APPEALS(item.type), 
         registrationTime: item.created_at,
         status: 0,
@@ -1658,7 +1659,7 @@ class Pending extends React.Component {
                   }
                 {currentData.source_messages && currentData.source_messages.length > 0 &&
                   <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(duration)} hint={'Длительность перевода'} /> }
-                {currentData.updated_at &&  currentData.status === '1' &&
+                {currentData.updated_at && currentData.status === '1' &&
                   <Batch
                     flushCount={0}
                     flushInterval={150}

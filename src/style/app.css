@@ -1182,6 +1182,9 @@ input[type='submit']:focus {
       margin-bottom: 20px; } }
   .footer__social li {
     margin: 0 16px; }
+    .footer__social li a {
+      display: block;
+      line-height: 0; }
   .footer__social li:last-child {
     margin-right: 0px; }
 
