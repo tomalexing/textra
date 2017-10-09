@@ -610,9 +610,18 @@
           margin-bottom: 10px
     &-post__constols
       flex: 1 1 auto
+      align-self: flex-end
       +nosel
       +r(768)
-        margin-left: -13px
+        position: relative
+        margin-left: -39px
+        transform: translateX(38px)
+      button
+        +r(768)
+          font: 0/0 a
+        img
+          margin-left: 2px
+          margin-right: 4px
     &-post__date
       flex: 0 1 auto
       text-align: right
@@ -663,6 +672,7 @@
         img
           margin-left: 2px
           margin-right: 4px
+          
 
       // Exclamation
     &-info
@@ -670,10 +680,10 @@
       border: 1px solid $selected-blue 
       border-radius: 5px
       padding: 10px
+      margin-bottom: 10px
       &__exclamation
         flex: 0 0 50px
         position: relative
-        background: $selected-blue 
         width: 50px
         height: 50px
         border-radius: 50%
@@ -681,6 +691,10 @@
         border: 1px solid $grey
         font-size: 35px
         color: #fff
+        &.info__exclamation--info
+          background: $selected-blue 
+        &.info__exclamation--caution
+          background: #feca52
       &__message
         flex: 1 1 auto
         padding-left: 20px
@@ -1010,7 +1024,7 @@
       margin-top: -4px
       margin-bottom: 1px
       time
-        width: 30px
+        min-width: 30px
         height: 11px
         color: $grey-light
         font-size: 10px
@@ -1099,7 +1113,7 @@
       .dashboard-user__tab__history &
         opacity: .5
       time
-        width: 30px
+        min-width: 30px
         height: 11px
         color: $grey-light
         font-size: 10px
@@ -1206,10 +1220,10 @@
       border: 1px solid $selected-blue
       path
         fill: #fff
-    &-red
-      background: #E16666
+    &-yellow
+      background: $yellow
       & path
-          fill: #E16666 !important
+          fill: $yellow !important
 
 .DisplaySwitcher
   position: absolute
@@ -1453,7 +1467,7 @@
       margin-top: -4px
       margin-bottom: 1px
       time
-        width: 30px
+        min-width: 30px
         height: 11px
         color: $grey-light
         font-size: 10px
@@ -2118,7 +2132,7 @@
       background-color: #C8CED3 // grey
     &__typeC,
     &__typeG
-      background-color: #E16666 // red
+      background-color: $yellow // yellow
     &__typeT,
     &__typeP
       background-color: #268ED6 // blue
@@ -2212,7 +2226,7 @@
       margin-top: -4px
       margin-bottom: 1px
       time
-        width: 30px
+        min-width: 30px
         height: 11px
         color: $grey-light
         font-size: 10px

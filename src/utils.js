@@ -257,7 +257,6 @@ export class ScrollRestortion extends React.Component {
       let el = this.refs[this.scrollId];
       if(el){
         this.notListen = listener(el, "scroll", debounce((e) => {
-          console.log(e.target.scrollTop);
           if(typeof window !== "undefined"){
             window.sessionStorage.setItem(`ScrollRestortion${this.scrollId}`, e.target.scrollTop)
           }

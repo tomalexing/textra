@@ -945,27 +945,31 @@ class FeedList extends React.Component {
                 }
                 }}
             />
+            {/*<Breadcrumbs/> and next line is a breadcrums itself but first for mobile, second for desktop: need to be refactor) just test I think all be good without next line && shownOnDesktop: true*/}
             {!isTablet && <div className="f f-align-1-2 translator-feed__topline"><span>Запросы</span></div>}
+            
+            
+            {Object.entries(currentData).length === 0 && this._isMounted &&
+    
+              <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
+                  <div className={"translator-feed__avatar"}>
+                    <img src={avatar} />
+                  </div>
+                  <div className={"f f-align-2-2 translator-feed__placeholder"}>
+                    <span>Запросы на перевод отсутствуют</span>
+                  </div>
+                </div>
+            }
+
           {currentData.map((feedData, index) => {
             feedData.publishTime = new Date(feedData.created_at);
-            feedData.duration = feedData.source_messages.length>0 ? feedData.source_messages[0].letters_count * _self.getLangPropInObj({id: feedData.translate_language_id, slug:'letter_time'}) : 0
+            feedData.duration = feedData.source_messages && feedData.source_messages.length> 0 ? feedData.source_messages[0].letters_count * _self.getLangPropInObj({id: feedData.translate_language_id, slug:'letter_time'}) : 0
             return renderItem(feedData, index);
           })}
         </div>
       );
     };
-    return Object.entries(currentData).length === 0 && this._isMounted
-      ? <div>
-          <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
-              <div className={"translator-feed__avatar"}>
-                <img src={avatar} />
-              </div>
-              <div className={"f f-align-2-2 translator-feed__placeholder"}>
-                <span>Запросы на перевод отсутствуют</span>
-              </div>
-            </div>
-        </div>
-      : RenderCollection((feed, index) => (
+    return  RenderCollection((feed, index) => (
           <div key={index} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'can__get__more'} u-mx-3 u-my-2`}>
             <div className={"translator-feed__avatar"}>
               <img src={feed.user && feed.user.image || avatar} alt={feed.user.first_name} />

@@ -264,28 +264,34 @@ class Admin extends React.Component {
       page:{
         pageType: pageType ? pageType : 'users',
         id: /history/.test(pathname) ? pathname.split("/").filter(el => el !== '').splice(-3)[0] : pathname.split("/").filter(el => el !== '').splice(-1)[0],
-        historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
+        historyId: pathname.split("/")[activeTabA.length - 1],
       }
     })
   }
 
-  componentWillReceiveProps(props) {
-    const { mainScreen, secondScreen } = this.props.location.state || {
-      mainScreen: true,
-      secondScreen: false
-    };
-    this.setState({ mainScreen, secondScreen });
-  }
   
-  componentWillUpdate(nextProps, nextState){
-    let { location: { pathname, state: RouterState } } = this.props;
+  // componentWillUpdate(nextProps, nextState){
+  //   let { location: { pathname, state: RouterState } } = this.props;
+  //   let activeTabA = pathname.split("/");
+  //   let _self = this;
+  //   this.setState({
+  //     page:{
+  //       pageType: RouterState ? RouterState.pageType : 'users',
+  //       id: RouterState ? RouterState.id : undefined ,
+  //       historyId: pathname.split("/")[activeTabA.length - 1] ,
+  //     }
+  //   })
+  // }
+
+  componentWillReceiveProps(nextProps) {
+    let { location: { pathname, state : {pageType , id, historyId} = {pageType: 'users'}} } = nextProps;
     let activeTabA = pathname.split("/");
     let _self = this;
     this.setState({
       page:{
-        pageType: RouterState ? RouterState.pageType : 'users',
-        id: RouterState ? RouterState.id : undefined ,
-        historyId: /history/.test(pathname) ? pathname.split("/")[activeTabA.length - 1] : undefined,
+        pageType: pageType ? pageType : 'users',
+        id: id ? id : pathname.split("/").filter(el => el !== '').splice(-3)[0],
+        historyId: historyId ? historyId :  pathname.split("/")[activeTabA.length - 1],
       }
     })
   }
@@ -496,7 +502,6 @@ class SideList extends React.PureComponent{
     let {user, pendingTabs, workingTabs, historyTabs} = this.state;
     let route = `/admin/${pageType}/${id}`;
     let activeTab = historyId;
-    console.log(activeTab);
     if(!user){
       return(<div className="f sidebar">
               <div className="admin-user-details">
@@ -635,7 +640,7 @@ class SideList extends React.PureComponent{
       let finishShouldBe = new Date(+start + durationShouldBe*1000);
       let duration = (finishTime - start)/1000;
       return (
-        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${attachedUser.id}`, state:{pageType: 'user', id: user.uuid, historyId: attachedUser.id, attachedUser: attachedUser}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${tab.id === activeTab ? 'selected' : ''}`} >
+        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${attachedUser.id}`, state:{pageType: 'user', id: user.uuid, historyId: attachedUser.id, attachedUser: attachedUser}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${attachedUser.id === activeTab ? 'selected' : ''}`} >
           <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser.image || avatar} alt="Textra" /> </figure>
           <div className="f f-col f-align-1-1 dashboard-user__tab-details">
             <div className="dashboard-user__tab-title"> {attachedUser.first_name + ' ' +

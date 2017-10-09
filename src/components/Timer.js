@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Timer = ({ start, duration, isBig = false, isExpired = false, finish } = {}) => {
+const Timer = ({ start, duration, isBig = false, isExpired = false, finish, checkStatus = () => {} } = {}) => {
 
   if(finish === undefined){
     var percentage = ((new Date() - new Date(start))) / duration /1000 ; // duration in sec
@@ -27,6 +27,8 @@ const Timer = ({ start, duration, isBig = false, isExpired = false, finish } = {
     isExpired = true;
   }
 
+  checkStatus(isExpired);
+
   const START = Math.PI * 0.5;
   const TAU = Math.PI * 2;
   const radius = isBig ? 7 : 5;
@@ -49,7 +51,7 @@ const Timer = ({ start, duration, isBig = false, isExpired = false, finish } = {
   ];
 
   return (
-    <svg className={`Timer ${isBig ? 'Timer-big' : ''} ${isExpired ? 'Timer-red' : ''}`} xmlns="http://www.w3.org/2000/svg">
+    <svg className={`Timer ${isBig ? 'Timer-big' : ''} ${isExpired ? 'Timer-yellow' : ''}`} xmlns="http://www.w3.org/2000/svg">
       <path d={points.join(' ')} />
     </svg>
   )

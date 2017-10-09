@@ -15,6 +15,7 @@ import icon_letternum from './assets/letter-number.svg';
 import icon_search from './assets/search.svg';
 import sl from './assets/swap-lang.svg';
 import copy from './assets/icon-copy.svg';
+import cancel from './assets/icon-cancel.svg';
 import './polyfill';
 import  Auth from './store/AuthStore.js';
 import {
@@ -162,7 +163,7 @@ class DashBoard extends React.Component {
   updateHandler(data){
     if(!this._isMounted) return
     let _self = this;
-
+    // todo: need merge 
     this.setState({
       pendingTabs : data.list.filter(o => o.status === "0").map((item, idx) => {
           return {
@@ -660,20 +661,27 @@ class Pending extends React.Component {
     this.store = this.props.store;
     this.id = this.props.id;
     this._isMounted = false;
+    this.cancel = this.cancel.bind(this);
+    this.checkStatus = this.checkStatus.bind(this);
   }
 
   state= {
     currentData: this.props.data,
     languages:  this.props.languages,
     index: this.props.index,
-    stale: false
+    stale: false,
+    isExpired: false
   }
 
   componentDidMount(){
-    
     this._isMounted = true;
     if(this.id)
       this.startReceiveData();
+  }
+
+  checkStatus(status){
+    if(status != this.state.isExpired )
+      setTimeout( _ => this.setState({isExpired: status}) , 1000);
   }
 
   startReceiveData(){
@@ -685,6 +693,12 @@ class Pending extends React.Component {
         _self.setState({ currentData: data, stale : data.status === '2' });
         _self.store && _self.store.itemUpdated(data, _self.state.index);
     })
+  }
+
+  cancel(){
+    // TxRest.getData('cancel-translate',(data)={
+    //   console.log(data);
+    // })
   }
 
   componentWillReceiveProps({store, languages, id}){
@@ -732,6 +746,8 @@ class Pending extends React.Component {
       var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
     }
 
+    let isExpired = (new Date() - new Date(currentData.updated_at))/1000 > duration;
+
     return (
         <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
             {currentData.created_at && <div className={'data__delimiter'}>{created_at.getDate()} {getMonthName(created_at.getMonth())}, {created_at.getFullYear()} </div>}
@@ -761,13 +777,15 @@ class Pending extends React.Component {
                     render={()=> {
                       let value = ~~Math.abs(duration - (new Date - new Date(currentData.updated_at)) / 1000);
                       //console.log(value)
+
                       return(<Indicator
                         className={'f f-align-2-2'}
                         icon={
                           <Timer
                             start={currentData.updated_at}
                             duration={duration}
-                            isBig={true} />}
+                            isBig={true}
+                            checkStatus={this.checkStatus} />}
                         value={humanReadableTime(value)}
                         hint={'Оставшееся время'} />)
                     }}/>}
@@ -778,6 +796,12 @@ class Pending extends React.Component {
                 </div>
               </div>
               <div className={'dashboard-user__searching-post__constols'}>
+                {currentData.status === '0' &&
+                  <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.cancel}>
+                    <img src={cancel} alt="cancel" />
+                    <span>Отменить</span>
+                  </button>
+                }
               </div>
               {created_at && <div className={'dashboard-user__searching-post__date'}>
                 {created_at.getHours()}:{getFullTimeDigits(created_at.getMinutes())}
@@ -785,11 +809,27 @@ class Pending extends React.Component {
             </div>
           {currentData.status === '0' &&
             <div className={'f f-align-2-2 dashboard-user__searching-info '}>
-              <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation '}>i</div>
+              <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation info__exclamation--info'}>i</div>
               <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>{`
                   Заказ отправлен переводчику, будет выполнен в течении ${humanReadableTime(duration)} и 
                   для повышение качества перевода мы рекомендуем не закрывать это окно.
                 `}
+              </div>
+            </div>
+          }
+          {currentData.status === '1' &&
+            <div className={'f f-align-2-2 dashboard-user__searching-info '}>
+              <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation info__exclamation--info'}>i</div>
+              <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>
+                Ваш текст принят в работу
+              </div>
+            </div>
+          }
+          {currentData.status === '1' && isExpired &&
+            <div className={'f f-align-2-2 dashboard-user__searching-info '}>
+              <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation info__exclamation--caution'}>i</div>
+              <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>
+              Отведенное время на перевод Вашего текста вышло. Однако мы все еще работаем над переводом, дождитесь, пожалуйста, перевод. Если у Вас есть возражения или предложения по улучшению работы сервиса Textra, напишите нам.
               </div>
             </div>
           }
@@ -838,7 +878,8 @@ class Create extends React.Component {
     redirectToPending: false,
     newId: '',
     translators: this.props.translators,
-    translatorsOpt: []
+    translatorsOpt: [],
+    isNotExceedLetters: true
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -959,8 +1000,10 @@ class Create extends React.Component {
     if(!this._isMounted) return
 
     let currentNumberOfChar = value.replace(/\s/g,'').length;
-    let isEnoughMoney = Auth.user.balance  > currentNumberOfChar * this.state.letterPrice ;
-    this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value, isEnoughMoney })
+    let isEnoughMoney = Auth.user.balance  > currentNumberOfChar * this.state.letterPrice + 1000 ; // we start from 10₴    
+
+    let isNotExceedLetters = currentNumberOfChar <= 1800; // not more than 1800 symbols
+    this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value, isEnoughMoney, isNotExceedLetters })
   }
 
   updateValueLangFrom(valueLangFrom) {
@@ -1062,18 +1105,19 @@ class Create extends React.Component {
     const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
            valueTranslator, isSearchMenuTranslatorVisible, isBlocking, 
            translatorMessage, letterTime, letterPrice, isEnoughMoney, 
-           blockSubmit, redirectToPending, newId, translatorsOpt: translatorsPool } = this.state;
+           blockSubmit, redirectToPending, newId, translatorsOpt: translatorsPool,
+           isNotExceedLetters } = this.state;
 
     if( redirectToPending ){
      return <Redirect push={true} to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
     }
+    
     if(!isEnoughMoney || blockSubmit){
-      document.getElementById('submit').setAttribute('disabled','true');
-      this.disabled = true;
+        this.disabled = true;
     }
+    
     if((isEnoughMoney && this.disabled && !blockSubmit)){
-       document.getElementById('submit').removeAttribute('disabled');
-      this.disabled = false;
+        this.disabled = false;
     }
     return (
       <div ref={(n) => this.createFrom = n} className={'f f-col dashboard-user__create-forms'}>
@@ -1159,11 +1203,10 @@ class Create extends React.Component {
           <div className={'f f-align-1-2 f-row dashboard-user__create-bottombar f-gap-4'}>
 
             <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * letterTime)} hint={'Длительность перевода'} />
-            <Indicator className={'f f-align-2-2 '} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов'} />
-            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100 + 10).toFixed(2)}₴`} hint={'Стоимость перевода'} />
+            <Indicator className={`f f-align-2-2 ${isNotExceedLetters?'':'String-indicator__error'}`} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов(не более 1800)'} /> 
+            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100 + 10).toFixed(2)}₴`} hint={'Стоимость перевода'} />{/* we start from 10₴  */}
 
-          <input id="submit" type="submit" value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
-             
+          <input id="submit" type="submit" {...this.disabled && {disabled:'true'}}  value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
           </div>
       </form>
       </div>
