@@ -177,9 +177,12 @@
       &:hover
         text-decoration: underline
     .header-paymentwrapper
+      position: relative
+    .header-payment
       display: none
       position: absolute
-      right: 10px
+      width: 255px
+      right: -80px
       top: 100%
       background: #fff
       padding: 10px 20px
@@ -187,6 +190,11 @@
       box-shadow: 0 0 8px rgba(33, 143, 216, 0.3)
       h3
         font-weight: 100
+      .field-error p
+        background: rgba(225, 102, 102, 0.1)
+        font-size: 10px
+        padding: 5px
+
     .header-balance
       height: 21px
       margin-left: 20px

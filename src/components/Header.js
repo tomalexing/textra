@@ -4,7 +4,7 @@ import logo from './../assets/logo.png';
 import logo2x from './../assets/logo-2x.png';
 
 import avatar from './../assets/default-avatar.png';
-import {hasClass, addClass, removeClass, delegate} from './../utils';
+import {hasClass, addClass, removeClass, delegate, listener, debounce} from './../utils';
 import PropTypes from 'prop-types';
 import Auth from './../store/AuthStore.js';
 
@@ -31,15 +31,18 @@ class Header extends React.Component{
     this.openMobileMenu = this.openMobileMenu.bind(this);
     this.closeListener = null;
     this.logout = this.logout.bind(this);
+    this.listeners = [];
+    this.timeout = null;
   }
 
   
 
   state = {
     isMobileMenuOpened: false,
-    isMobilePaymentFormOpened: false,
+    isPaymentFormOpened: false,
     user: Auth.user,
-    redirect: false
+    redirect: false,
+    isTablet: false
   }
 
   componentDidMount(){
@@ -47,9 +50,18 @@ class Header extends React.Component{
     Auth.addListener('headerUpdate', ({user})=>{
       _self.setState({user});
     })
+
+    this.listeners.push(
+      listener(window, 'resize', debounce((e) => {
+        let isTablet = e.target.innerWidth <= 768 ? true : false;
+        if (this.state.isTablet !== isTablet) this.setState({ isTablet })
+      }, 200, false), false)
+    );
+ 
   }
 
   componentWillUnmount(){
+    this.listeners.forEach(removeEventListener => removeEventListener())
     Auth.removeListener('headerUpdate');
   }
 
@@ -72,8 +84,16 @@ class Header extends React.Component{
   }
 
   closeMobileMenu = (target, stateTag) => {
-    debugger;
     target.style.transition = 'opacity .3s';
+
+    if(target.style.display === 'none'){
+      //something goes wrong, so make state correction
+      let obj = {};
+      obj[stateTag] = false
+      this.setState(obj)
+      return;
+    }
+
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
@@ -90,7 +110,7 @@ class Header extends React.Component{
       });
   }
 
-  openMobileMenu = (target, stateTag) => {
+  openMobileMenu = (target, stateTag, type) => {
     target.style.transition = 'opacity .1s';
     target.style.opacity = 0;
     target.style.display = 'flex';
@@ -104,29 +124,49 @@ class Header extends React.Component{
       .then( _ => {
         let obj = {};
         obj[stateTag] = true
+        console.log(type)
         this.setState(obj,()=>
-           this.closeListener = delegate(window, 'touchend click', '.h100', this.closeMobileMenu.bind(this,target, stateTag), false, true)
+           this.closeListener = delegate(window, type, '.h100', this.closeMobileMenu.bind(this,target, stateTag), false, true)
         )
       });
   }
 
   toggleMobileMenu = (e) =>  {
-    debugger;
-    !this.state.isMobileMenuOpened
-    ?this.openMobileMenu(this.mobile_menu, 'isMobileMenuOpened')
-    :this.closeMobileMenu(this.mobile_menu, 'isMobileMenuOpened');
-    
-    let menuWrapper = e.currentTarget.parentElement;
-    hasClass(menuWrapper,'opened')?removeClass(menuWrapper,'opened'):addClass(menuWrapper,'opened');
+    e.preventDefault();
+    e.stopPropagation();
+    let currentTarget =  e.currentTarget,
+    type = e.type;
+
+    clearTimeout(this.timeout);
+
+    this.timeout = setTimeout( _ => {
+      !this.state.isMobileMenuOpened
+      ?this.openMobileMenu(this.mobile_menu, 'isMobileMenuOpened', type)
+      :this.closeMobileMenu(this.mobile_menu, 'isMobileMenuOpened', type);
+      
+      let menuWrapper = currentTarget.parentElement;
+      hasClass(menuWrapper,'opened')?removeClass(menuWrapper,'opened'):addClass(menuWrapper,'opened');
+    }, 200)
   }
 
   togglePayment = (e) => {
-    debugger;
-    !this.state.isMobilePaymentFormOpened
-      ?this.openMobileMenu(this.payment_form, 'isMobilePaymentFormOpened')
-      :this.closeMobileMenu(this.payment_form, 'isMobilePaymentFormOpened');
-    let menuWrapper = e.currentTarget.parentElement;
-    hasClass(menuWrapper,'opened')?removeClass(menuWrapper,'opened'):addClass(menuWrapper,'opened');
+    e.preventDefault();
+    e.stopPropagation();
+    let currentTarget =  e.currentTarget,
+        type = e.type;
+    
+    clearTimeout(this.timeout);
+
+    this.timeout = setTimeout( _ => {
+      if(!this.state.isPaymentFormOpened){
+        this.openMobileMenu(this.payment_form, 'isPaymentFormOpened', type)
+        this.payment_form.childNodes[0][0].focus();
+      }else{
+        this.closeMobileMenu(this.payment_form, 'isPaymentFormOpened', type);
+      }
+      let menuWrapper = currentTarget.parentElement;
+      hasClass(menuWrapper,'opened')?removeClass(menuWrapper,'opened'):addClass(menuWrapper,'opened');
+    }, 200)
   }
 
   logout(){
@@ -137,7 +177,7 @@ class Header extends React.Component{
   }
 
   render(){
-    let { user, redirect } = this.state;
+    let { user, redirect, isTablet } = this.state;
     if(redirect) return(
       <Redirect to={'/'}/>
     ) 
@@ -170,16 +210,21 @@ class Header extends React.Component{
                     <div className="header-email">{user.email}</div>
                     <div className="header-details__more">
                       {
-                        this.props.currentRole === 'user' && <div>
-                          <button onClick={this.togglePayment} className="header-replenish" >пополнить</button>
-                          <div className="header-paymentwrapper" ref={n => this.payment_form = n}> 
+                        this.props.currentRole === 'user' && <div className="header-paymentwrapper">
+                          <button 
+                            {...isTablet &&{onTouchEnd:this.togglePayment}} 
+                            {...!isTablet &&{onClick:this.togglePayment}} 
+                            className="header-replenish" >
+                              пополнить
+                          </button>
+                          <div className="header-payment" ref={n => this.payment_form = n}> 
                             <TxForm submit={this.payment} innerErrorFielsType={true} formClass=""> 
                             
                                 <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
 
-                                <TxInput tag="input" type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block u-mb-2" placeholder="Сумма, грн"/>
+                                <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block u-mb-2" placeholder="Сумма, грн"/>
                                 
-                                <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal'}/>
+                                <TxInput type="submit" autoValidate={false}  value='Пополнить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal u-mt-2'}/>
                               </TxForm> 
                             </div>
                           </div>

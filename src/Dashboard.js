@@ -1148,7 +1148,6 @@ class Create extends React.Component {
             <Select
               ref={(n) => this.createLangFrom = n}
               name="create[from]"
-              autofocus
               options={optionsLang}
               disabled={false}
               simpleValue
@@ -1157,12 +1156,12 @@ class Create extends React.Component {
               searchable={false}
               autosize={true}
               clearable={false}
-              arrowRenderer={this.arrowElementLangs} />
+              arrowRenderer={this.arrowElementLangs}
+              tabIndex={"1"} />
             <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} /></div>
             <Select
               ref={(n) => this.createLangTo = n}
               name="create[to]"
-              autofocus
               options={optionsLang}
               simpleValue
               disabled={false}
@@ -1172,6 +1171,7 @@ class Create extends React.Component {
               autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs}
+              tabIndex={"1"}
             />
             <div className={'dashboard-user__create-topbar__chooser'}  >
               <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
@@ -1183,7 +1183,6 @@ class Create extends React.Component {
                 <Select
                   ref={(n) => this.createTranslatorMenu = n}
                   name="create[translator]"
-                  autofocus
                   disabled={false}
                   value={valueTranslator}
                   onChange={this.updateValueTranslator}
@@ -1201,7 +1200,7 @@ class Create extends React.Component {
                   options={translatorsPool}
                   onBlur={this.makeSearchMenuTranslatorUnnisible}
                   onValueClick={this.makeSearchMenuTranslatorUnnisible}
-
+                  tabIndex={"1"}
                 />
               </div>
             </div>
@@ -1209,7 +1208,7 @@ class Create extends React.Component {
           <div className={'dashboard-user__create-posteditor'}>
             <textarea
               type="text"
-              tabIndex={1} 
+              tabIndex={"1"} 
               name="create[message]"
               value={translatorMessage}
               placeholder={'Ваш запрос на перевод...'}
