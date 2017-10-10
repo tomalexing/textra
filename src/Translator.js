@@ -815,9 +815,7 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
     : <Redirect to={`${redirect}`} />);
 
 
-
 const lcMatch = (q, s) => s && s.toLowerCase().indexOf(q.toLowerCase()) >= 0;
-
 
 class FeedList extends React.Component {
 

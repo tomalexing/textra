@@ -74,6 +74,7 @@ class DashBoard extends React.Component {
     this.updateLanguageHandler = this.updateLanguageHandler.bind(this);
     this.updateTranslatorHandler = this.updateTranslatorHandler.bind(this);
     this.getLangPropInObj = this.getLangPropInObj.bind(this);
+    this.visitedIndex = this.visitedIndex.bind(this);
     this.store = null;
     this.languageStore = null;
     this.translatorStore = null;
@@ -163,7 +164,8 @@ class DashBoard extends React.Component {
   updateHandler(data){
     if(!this._isMounted) return
     let _self = this;
-    // todo: need merge 
+    
+    let uniqueHistoryIds = [];
     this.setState({
       pendingTabs : data.list.filter(o => o.status === "0").map((item, idx) => {
           return {
@@ -177,13 +179,20 @@ class DashBoard extends React.Component {
             index: idx
           }
       }),
-      historyTabs : data.list.filter(o => o.status === "2").map((item, idx) => {
-          return {
-            ...item,
-            avatar: avatar, 
-            index: idx
+      historyTabs : data.list.filter(o => o.status === "2").reduce((acc, item, idx) => {
+          if( uniqueHistoryIds.includes(item.translator_id) ){
+            acc.filter(o => o.translator_id === item.translator_id).map(o => o['notSeen'] = true);
           }
-      })
+          if( ! uniqueHistoryIds.includes(item.translator_id) ){
+            uniqueHistoryIds.push( item.translator_id );
+            acc.push({
+              ...item,
+              avatar: avatar, 
+              index: idx,
+            })
+          }
+          return acc;
+      },[])
     })
   }
 
@@ -251,6 +260,11 @@ class DashBoard extends React.Component {
   updateLanguageHandler({list}){
     if(!this._isMounted) return
     this.setState({language: list})
+  }
+
+  visitedIndex(visitedIdx){
+
+    console.log(visitedIdx)
   }
 
   componentWillUnmount() {
@@ -322,7 +336,6 @@ class DashBoard extends React.Component {
               {/* PENDINGS TABs */} 
               { pendingTabs.map(tab => {
                 
-
                 return (
                   <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId ? 'selected' : ''}`} key={tab.index} >
                     <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={animatedAvatar} alt="Textra" /> </figure>
@@ -331,7 +344,7 @@ class DashBoard extends React.Component {
                       > 
                       {tab.translator? `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`: 'Поиск переводчика'} 
                       </div>
-                      <div className="dashboard-user__searchtab-content" title={`${tab.source_messages.length > 0 &&tab.source_messages[0].content}`}> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
+                      <div className="dashboard-user__searchtab-content" title={`${tab.source_messages.length > 0 && tab.source_messages[0].content}`}> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__searchtab-info">
                     </div>
@@ -394,7 +407,8 @@ class DashBoard extends React.Component {
                     </div>
                     <div className="f f-col f-align-2-3 dashboard-user__tab-info">
                       <div className="dashboard-user__tab-info__time">
-                        <Timer start={start} duration={duration} finish={finishShouldBe}/>
+                        { /* Show only when not been seen yet.*/ 
+                          tab.notSeen && <Timer start={new Date() - 990} duration={1}/>}
                         <time>{`${outputPublishTime}`}</time>
                       </div>
                       <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId} />
@@ -421,7 +435,7 @@ class DashBoard extends React.Component {
                 <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}  />
                 <RoutePassProps path="/dashboard/history/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}
-                languages={language} store={this.store} translator={translator}/>
+                languages={language} store={this.store} translator={translator} visitedIndex={this.visitedIndex}/>
               </Switch>
             </div>
           </div>
@@ -460,8 +474,10 @@ class HistoryList extends React.Component {
 
   componentWillMount(){
     this.messageStore = new MessageStore('translated-topic/user', this.id);
-    if(this.id)
-    this.setState({currentData: MessageStore.getMessages('translated-topic/user', this.id) })
+    if(this.id){
+      this.setState({currentData: MessageStore.getMessages('translated-topic/user', this.id) })
+      this.props.visitedIndex(this.id)
+    }
   }
 
   componentDidMount(){

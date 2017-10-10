@@ -8,6 +8,10 @@ import {hasClass, addClass, removeClass, delegate} from './../utils';
 import PropTypes from 'prop-types';
 import Auth from './../store/AuthStore.js';
 
+import {TxRest} from './../services/Api.js';
+import TxInput from './TxInput.js';
+import TxForm from './TxForm.js';
+
 const isActive = (match, location,to) => {
   return ['/translator','/dashboard','/admin'].some(str => location.pathname.includes(str) )
 }
@@ -22,6 +26,7 @@ class Header extends React.Component{
   constructor(props){
     super(props);
     this.toggleMobileMenu =  this.toggleMobileMenu.bind(this);
+    this.togglePayment =  this.togglePayment.bind(this);
     this.closeMobileMenu = this.closeMobileMenu.bind(this);
     this.openMobileMenu = this.openMobileMenu.bind(this);
     this.closeListener = null;
@@ -32,6 +37,7 @@ class Header extends React.Component{
 
   state = {
     isMobileMenuOpened: false,
+    isMobilePaymentFormOpened: false,
     user: Auth.user,
     redirect: false
   }
@@ -65,44 +71,60 @@ class Header extends React.Component{
   
   }
 
-  closeMobileMenu = () => {
-    
-    this.mobile_menu.style.transition = 'opacity .3s';
-    if(this.closeListener) this.closeListener();
+  closeMobileMenu = (target, stateTag) => {
+    debugger;
+    target.style.transition = 'opacity .3s';
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
-          if(!this.mobile_menu) return
-          this.mobile_menu.style.opacity = 0;
-          return transitionEndPromise(this.mobile_menu);
+          if(!target) return
+          target.style.opacity = 0;
+          return transitionEndPromise(target);
       })
       .then( _ => {
-        if(!this.mobile_menu) return
-        this.mobile_menu.style.display =  'none';
-        this.setState({isMobileMenuOpened: false})
+        if(!target) return
+        target.style.display = 'none';
+        let obj = {};
+        obj[stateTag] = false
+        this.setState(obj)
       });
   }
 
-  openMobileMenu = () => {
-    this.mobile_menu.style.transition = 'opacity .1s';
-    this.mobile_menu.style.opacity = 0;
-    this.mobile_menu.style.display = 'flex';
+  openMobileMenu = (target, stateTag) => {
+    target.style.transition = 'opacity .1s';
+    target.style.opacity = 0;
+    target.style.display = 'flex';
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
-          if(!this.mobile_menu) return
-          this.mobile_menu.style.opacity = 1;
-          return transitionEndPromise(this.mobile_menu);
+          if(!target) return
+          target.style.opacity = 1;
+          return transitionEndPromise(target);
       })
       .then( _ => {
-        this.setState({isMobileMenuOpened: true},()=>{
-           this.closeListener = delegate(window, 'touchend', 'body', this.closeMobileMenu, false, true)
-        })
+        let obj = {};
+        obj[stateTag] = true
+        this.setState(obj,()=>
+           this.closeListener = delegate(window, 'touchend click', '.h100', this.closeMobileMenu.bind(this,target, stateTag), false, true)
+        )
       });
   }
 
   toggleMobileMenu = (e) =>  {
-    !this.state.isMobileMenuOpened?this.openMobileMenu():this.closeMobileMenu();
+    debugger;
+    !this.state.isMobileMenuOpened
+    ?this.openMobileMenu(this.mobile_menu, 'isMobileMenuOpened')
+    :this.closeMobileMenu(this.mobile_menu, 'isMobileMenuOpened');
+    
+    let menuWrapper = e.currentTarget.parentElement;
+    hasClass(menuWrapper,'opened')?removeClass(menuWrapper,'opened'):addClass(menuWrapper,'opened');
+  }
+
+  togglePayment = (e) => {
+    debugger;
+    !this.state.isMobilePaymentFormOpened
+      ?this.openMobileMenu(this.payment_form, 'isMobilePaymentFormOpened')
+      :this.closeMobileMenu(this.payment_form, 'isMobilePaymentFormOpened');
     let menuWrapper = e.currentTarget.parentElement;
     hasClass(menuWrapper,'opened')?removeClass(menuWrapper,'opened'):addClass(menuWrapper,'opened');
   }
@@ -124,7 +146,7 @@ class Header extends React.Component{
                   <Link to={'/'} ><img src={logo} srcSet={`${logo} 1x, ${logo2x} 2x`} alt="Textra" /> </Link>
                 </div>
                 <div className="f f-align-2-2 header-menu__mobile">
-                  <button  ref={n => this.mobile_btn = n} className="f f-col f-align-2-2 header-menu__mobile__btn" onTouchEnd={this.toggleMobileMenu}>
+                  <button  className="f f-col f-align-2-2 header-menu__mobile__btn" onTouchEnd={this.toggleMobileMenu}>
                       <span></span>
                       <span></span>
                       <span></span>
@@ -147,7 +169,21 @@ class Header extends React.Component{
                   { Auth.isAuthenticated &&  <div className="f f-col f-align-1-3 header-details">
                     <div className="header-email">{user.email}</div>
                     <div className="header-details__more">
-                      {this.props.currentRole === 'user' && <span id="liqpay_checkout" onClick={this.payment}className="header-replenish">пополнить</span>}
+                      {
+                        this.props.currentRole === 'user' && <div>
+                          <button onClick={this.togglePayment} className="header-replenish" >пополнить</button>
+                          <div className="header-paymentwrapper" ref={n => this.payment_form = n}> 
+                            <TxForm submit={this.payment} innerErrorFielsType={true} formClass=""> 
+                            
+                                <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
+
+                                <TxInput tag="input" type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block u-mb-2" placeholder="Сумма, грн"/>
+                                
+                                <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal'}/>
+                              </TxForm> 
+                            </div>
+                          </div>
+                      }
                       {this.props.currentRole === 'user' && 
                       <span className="header-balance">{`${Number(user.balance/100).toFixed(2)} ₴`}</span>}
                       

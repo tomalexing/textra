@@ -103,12 +103,12 @@ const Roles = [
   {
     text: 'Контроллер',
     value: 'c', // consroller
-    icon: { name: 'circle', color: 'red', size: 'small' },
+    icon: { name: 'circle', color: 'yellow', size: 'small' },
   },
   {
     text: 'Администратор',
     value: 'd', // consroller
-    icon: { name: 'circle', color: 'black', size: 'small' },
+    icon: { name: 'circle', color: 'red', size: 'small' },
   },
   {
     text: 'Переводчик',
