@@ -1,12 +1,6 @@
 import React from 'react';
-import Select from 'react-select-plus';
 import Timer from './components/Timer';
-import {sleep} from './utils';
 export default class Test extends React.Component {
-    constructor() {
-      super()
-
-    }
   
     render() {
       return (<div>

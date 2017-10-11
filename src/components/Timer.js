@@ -1,9 +1,10 @@
 import React from 'react';
 
 const Timer = ({ start, duration, isBig = false, isExpired = false, finish, checkStatus = () => {} } = {}) => {
+  let percentage;
 
   if(finish === undefined){
-    var percentage = ((new Date() - new Date(start))) / duration /1000 ; // duration in sec
+    percentage = ((new Date() - new Date(start))) / duration /1000 ; // duration in sec
     if(percentage < 0) percentage = 0;
     if((new Date() - new Date(start))/1000 > duration) {
       // expired
@@ -12,7 +13,7 @@ const Timer = ({ start, duration, isBig = false, isExpired = false, finish, chec
     }
   }
   if(finish instanceof Date){
-    var percentage = duration / ((new Date(finish) - new Date(start))) * 1000 ; // duration in sec
+    percentage = duration / ((new Date(finish) - new Date(start))) * 1000 ; // duration in sec
     if(percentage < 0) percentage = 0;
     if((new Date(finish) - new Date(start))/1000 < duration) {
       // expired

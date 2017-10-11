@@ -4,18 +4,19 @@ body, html
   padding: 0
   height: 100%
   width: 100%
-  ::-webkit-scrollbar
-    all: unset
-    width: 7px 
-    height: 10px
-    background: 
-  ::-webkit-scrollbar-track
-    -webkit-box-shadow: unset 
-    -webkit-border-radius: unset 
-    border-radius: unset 
-    background: rgba(0,0,0,.1)
-  ::-webkit-scrollbar-thumb
-    -webkit-border-radius: unset 
-    border-radius: unset 
-    background: rgba(0,0,0,.25);
-    -webkit-box-shadow: unset
+  @media only screen and (min-width: 769px)
+    ::-webkit-scrollbar
+      all: unset
+      width: 7px 
+      height: 10px
+      background: 
+    ::-webkit-scrollbar-track
+      -webkit-box-shadow: unset 
+      -webkit-border-radius: unset 
+      border-radius: unset 
+      background: rgba(0,0,0,.1)
+    ::-webkit-scrollbar-thumb
+      -webkit-border-radius: unset 
+      border-radius: unset 
+      background: rgba(0,0,0,.25)
+      -webkit-box-shadow: unset

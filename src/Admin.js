@@ -1,16 +1,10 @@
-import React, { Component } from "react";
-import ReactDOM from "react-dom";
-import ReactCSSTransitionGroup from "react-addons-css-transition-group";
+import React from "react";
 import "./style/app.css";
 import "./style/index.css";
-import logo from "./assets/logo.png";
 import avatar from "./assets/default-avatar.png";
-import icon_arrow from "./assets/arrow-down.png";
 import icon_cost from "./assets/cost-of-translation.svg";
 import icon_dur from "./assets/duration-of-translation.svg";
 import icon_letternum from "./assets/letter-number.svg";
-import icon_search from "./assets/search.svg";
-import sl from "./assets/swap-lang.svg";
 import copy from "./assets/icon-copy.svg";
 import users from "./assets/users.svg";
 import appeals from "./assets/appeals.svg";
@@ -19,27 +13,19 @@ import deleteIcon from './assets/delete.svg';
 import "./polyfill";
 import  Auth from './store/AuthStore.js';
 import {
-  BrowserRouter as Router,
-  Route,
   Link,
+  Route,
   Redirect,
   withRouter,
   Switch
 } from "react-router-dom";
-import { createBrowserHistory } from "history";
 import {
   getUniqueKey,
-  addClass,
-  hasClass,
-  removeClass,
   debounce,
-  listener,
   delegate,
-  sleep,
   humanReadableTime,
   getMonthName,
   getFullTimeDigits,
-  dump,
   quickSort,
   getTabTime,
   ScrollRestortion
@@ -49,14 +35,13 @@ import Batch from "./components/Batch";
 
 import Header, { NavLink } from "./components/Header";
 
-import Test from "./Test";
 import Timer from "./components/Timer";
 import LangLabel from "./components/LangLabel";
-import StatefulEditor from "./components/StatefulEditor";
 import Indicator from "./components/Indicator";
+import TabDelimiter from "./components/TabDelimiter";
 import deepEqual from 'deep-equal';
 
-import { Button, Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
+import { Checkbox, Icon, Table, Dropdown, Input } from 'semantic-ui-react'
 
 import Store  from './store/Store.js';
 import UserStore  from './store/UserStore.js';
@@ -163,7 +148,7 @@ const GETINITIALROLE = (num) => {
 };
 
 
-const findIcon = (objs, id, prop = 'icon') => Object.values(objs).find(o => o.value == id)[prop];
+const findIcon = (objs, id, prop = 'icon') => Object.values(objs).find(o => o.value === id)[prop];
 
 
     // Types of user:
@@ -214,8 +199,6 @@ class Admin extends React.Component {
     this.addStyleSeheet();
 
     let { location: { pathname, state: RouterState } } = this.props;
-    let activeTabA = pathname.split("/");
-    let _self = this;
     if(!RouterState && pathname !== '/admin/users' ){
       if(pathname !== '/admin')
         this.setState({redirectToMain:true});
@@ -256,20 +239,6 @@ class Admin extends React.Component {
     this.languageStore.addListener('update', this.updateLanguageHandler);
   }
   
-  componentWillReceiveProps(nextProps){
-    let { location: { pathname, state: {pageType} } } = nextProps;
-    let activeTabA = pathname.split("/");
-    let _self = this;
-    this.setState({
-      page:{
-        pageType: pageType ? pageType : 'users',
-        id: /history/.test(pathname) ? pathname.split("/").filter(el => el !== '').splice(-3)[0] : pathname.split("/").filter(el => el !== '').splice(-1)[0],
-        historyId: pathname.split("/")[activeTabA.length - 1],
-      }
-    })
-  }
-
-  
   // componentWillUpdate(nextProps, nextState){
   //   let { location: { pathname, state: RouterState } } = this.props;
   //   let activeTabA = pathname.split("/");
@@ -286,7 +255,6 @@ class Admin extends React.Component {
   componentWillReceiveProps(nextProps) {
     let { location: { pathname, state : {pageType , id, historyId} = {pageType: 'users'}} } = nextProps;
     let activeTabA = pathname.split("/");
-    let _self = this;
     this.setState({
       page:{
         pageType: pageType ? pageType : 'users',
@@ -322,9 +290,7 @@ class Admin extends React.Component {
 
 
   render() {
-    const find = (objs, id) => Object.values(objs).find(o => o.uuid == id);
-    let currentDate, user, allUsers = false;
-    let { sidebar, secondScreen, mainScreen, languages, attachedUser , item , redirectToMain, usersList, usersListFetched, page:{pageType, id, historyId}, usedRoles} = this.state;
+    let {languages, attachedUser , item , redirectToMain, page:{ id }} = this.state;
 
     if(redirectToMain) {
       return(<Redirect to={'/admin/users'} />) 
@@ -345,7 +311,7 @@ class Admin extends React.Component {
                     state: { pageType: "users" }
                   }}
                 >
-                  <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={users} /></span>
+                  <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={users} alt='user' /></span>
                   <span>Пользователи</span>
                 </NavLink>
                 <div className="admin-menu__delimiter" />
@@ -356,7 +322,7 @@ class Admin extends React.Component {
                     state: { pageType: "appeals"}
                   }}
                 >
-                  <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={appeals} /></span>
+                  <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={appeals} alt={"appeals"}/></span>
                   <span>Запросы</span>
                 </NavLink>
                 <div className="admin-menu__delimiter" />
@@ -386,9 +352,7 @@ class Admin extends React.Component {
             render={({ match }) => (
               <div
                 ref={n => (this.mainScreen = n)}
-                style={{background: `${allUsers ? "#f5f5f5": "#fff"}`}}
                 className={`f outer-main__full`}
-                ref={n => (this.toggleElem = n)}
               >
                 <div className="main f f-col f-align-1-2">
                   <Switch>
@@ -452,7 +416,7 @@ class Admin extends React.Component {
 class SideList extends React.PureComponent{
   constructor(p){
     super(p);
-    let {user, page: {pageType, id}} = this.props;
+    let {page: {id}} = this.props;
     this.userId = id;
     this.updateHandler = this.updateHandler.bind(this);
     this._isMounted =  false;
@@ -507,7 +471,7 @@ class SideList extends React.PureComponent{
               <div className="admin-user-details">
                   <div className="admin-user-details__topArea">
                     <figure className="f f-align-2-2 admin-user-details__avatar">
-                      <img src={user && user.image || avatar} alt="Textra" />
+                      <img src={(user && user.image) || avatar} alt="Textra" />
                     </figure>
                     <div className="f f-col f-align-1-1 admin-user-details__personalInfo">
                       <div className="admin-user-details__personalInfo__title">Загрузка</div>
@@ -543,121 +507,90 @@ class SideList extends React.PureComponent{
               <div className="f f-align-13-2 admin-user-details__serviceInfo__balance"><span>Баланс:</span><data>{user.role === "3" ?  `${(user.balance/100).toFixed(2)}₴` : `${(user.earnBalance/100).toFixed(2)}₴`}</data></div>
             </div>  
         </div>
-       {/* {list.map((tab, index) => {
-        let publishTime = new Date(tab.publishTime);
-        return (
-          <Link
-            to={{pathname: `${route}/history/${tab.uuid}`, state:{pageType: 'user', id: user.uuid, historyId: tab.uuid}}}
-            className={`f f-align-1-2 admin-tab ${tab.uuid === activeTab ? "selected" : ""}`}
-            key={index}
-          >
-            <figure className="f f-align-2-2 admin-tab-avatar">
-              <img src={avatar} alt="Textra" />
-            </figure>
-            <div className="f f-col f-align-1-1 admin-tab-details">
-              <div className="admin-tab-title">{tab.title} </div>
-              <div className="admin-tab-content">
-                {tab.content}
+       {/* PENDINGS TABs */} 
+        { pendingTabs.map(tab => {
+          return (
+            <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
+              <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.user && tab.user.image ||avatar } alt="Textra" /> </figure>
+              <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+                <div className="dashboard-user__tab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
+                > 
+                {tab.translator? `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`: 'Поиск переводчика'} 
+                </div>
+                <div className="dashboard-user__tab-content" title={`${tab.source_messages.length > 0 &&tab.source_messages[0].content}`}> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
               </div>
-            </div>
-            <div className="f f-col f-align-2-3 admin-tab-info">
-              <div className="admin-tab-info__time">
-                <time>{`${publishTime.getHours()}:${publishTime.getMinutes()}`}</time>
+              <div className="f f-col f-align-2-3 dashboard-user__tab-info">
               </div>
-              <LangLabel
-                from={tab.from}
-                to={tab.to}
-                selected={tab.uuid === activeTab}
-              />
-              <div className="admin-tab-info__duration">
-                {humanReadableTime(tab.duration)}
-              </div>
-            </div>
-          </Link>
-        );
-      })} */}
-     {/* PENDINGS TABs */} 
-    { pendingTabs.map(tab => {
-      return (
-        <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.user && tab.user.image ||avatar } alt="Textra" /> </figure>
-          <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
-            > 
-            {tab.translator? `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`: 'Поиск переводчика'} 
-            </div>
-            <div className="dashboard-user__tab-content" title={`${tab.source_messages.length > 0 &&tab.source_messages[0].content}`}> {tab.source_messages.length > 0 &&  tab.source_messages[0].content}</div>
-          </div>
-          <div className="f f-col f-align-2-3 dashboard-user__tab-info">
-          </div>
-        </Link>
-      )
-    })}
+            </Link>
+          )
+        })}
+        {/* INWORK TABs */}
+        { workingTabs.map(tab => {
+          let publishTime = new Date(tab.created_at);
+          let outputPublishTime = getTabTime(publishTime);
+          let attachedUser = tab.translator || tab.user; 
 
-    {/* INWORK TABs */}
-    { workingTabs.map(tab => {
-      let publishTime = new Date(tab.created_at);
-      let outputPublishTime = getTabTime(publishTime);
-      let attachedUser = tab.translator || tab.user; 
-
-      return (
-        <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser && attachedUser.image||avatar} alt="Textra" /> </figure>
-          <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title">{ attachedUser.first_name + ' ' + attachedUser.last_name}</div>
-            <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
-          </div>
-          <div className="f f-col f-align-2-3 dashboard-user__tab-info">
-              <div className="dashboard-user__tab-info__time">
-              <Batch
-                flushCount={0}
-                flushInterval={200} 
-                count={1}
-                debug={false}
-                render={(()=> {
-                  let start = tab['updated_at'];
-                  let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
-                  //console.log(value)
-                  return <Timer start={start} duration={duration} />
-                }).bind(this)}/>
-              <time>{`${outputPublishTime}`}</time>
+          return (
+            <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
+              <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser && attachedUser.image||avatar} alt="Textra" /> </figure>
+              <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+                <div className="dashboard-user__tab-title">{ attachedUser.first_name + ' ' + attachedUser.last_name}</div>
+                <div className="dashboard-user__tab-content"> {tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].content}</div>
               </div>
-              <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
-            <div className="dashboard-user__tab-info__money">{(tab.price/100).toFixed(2)}₴</div>
-          </div>
-        </Link>
-      )
-    })}
-    
-    {/* History TABs */}
-    {this.state.historyTabs.map((tab, index) => {
-      let attachedUser = tab.translator || tab.user;
-      Object.assign(attachedUser, {role: tab.user  ? 'translator' : 'user'});
-      let finishTime = new Date(tab.translated_at);
-      let outputPublishTime = getTabTime(finishTime);
-      let start = new Date(tab['started_at']);
-      let durationShouldBe = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
-      let finishShouldBe = new Date(+start + durationShouldBe*1000);
-      let duration = (finishTime - start)/1000;
-      return (
-        <Link key={getUniqueKey()} to={{pathname: `${route}/history/${attachedUser.id}`, state:{pageType: 'user', id: user.uuid, historyId: attachedUser.id, attachedUser: attachedUser}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${attachedUser.id === activeTab ? 'selected' : ''}`} >
-          <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser.image || avatar} alt="Textra" /> </figure>
-          <div className="f f-col f-align-1-1 dashboard-user__tab-details">
-            <div className="dashboard-user__tab-title"> {attachedUser.first_name + ' ' +
-            attachedUser.last_name} </div>
-            <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
-          </div>
-          <div className="f f-col f-align-2-3 dashboard-user__tab-info">
-            <div className="dashboard-user__tab-info__time">
-              <Timer start={start} duration={duration} finish={finishShouldBe}/>
-              <time>{`${outputPublishTime}`}</time>
-            </div>
-            <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
-            <div className="dashboard-user__tab-info__money">{(tab.price/100)}₴</div>
-          </div>
-        </Link>
-      )
-    })}
+              <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+                  <div className="dashboard-user__tab-info__time">
+                  <Batch
+                    flushCount={0}
+                    flushInterval={200} 
+                    count={1}
+                    debug={false}
+                    render={(()=> {
+                      let start = tab['updated_at'];
+                      let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+                      //console.log(value)
+                      return <Timer start={start} duration={duration} />
+                    }).bind(this)}/>
+                  <time>{`${outputPublishTime}`}</time>
+                  </div>
+                  <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
+                <div className="dashboard-user__tab-info__money">{(tab.price/100).toFixed(2)}₴</div>
+              </div>
+            </Link>
+          )
+        })}
+        
+         {/* delimiter */}
+        <TabDelimiter title={'История'}/>
+
+        {/* History TABs */}
+        {historyTabs.map((tab, index) => {
+          let attachedUser = tab.translator || tab.user;
+          Object.assign(attachedUser, {role: tab.user  ? 'translator' : 'user'});
+          let finishTime = new Date(tab.translated_at);
+          let outputPublishTime = getTabTime(finishTime);
+          let start = new Date(tab['started_at']);
+          let durationShouldBe = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
+          let finishShouldBe = new Date(+start + durationShouldBe*1000);
+          let duration = (finishTime - start)/1000;
+          return (
+            <Link key={getUniqueKey()} to={{pathname: `${route}/history/${attachedUser.id}`, state:{pageType: 'user', id: user.uuid, historyId: attachedUser.id, attachedUser: attachedUser}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${attachedUser.id === activeTab ? 'selected' : ''}`} >
+              <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser.image || avatar} alt="Textra" /> </figure>
+              <div className="f f-col f-align-1-1 dashboard-user__tab-details">
+                <div className="dashboard-user__tab-title"> {attachedUser.first_name + ' ' +
+                attachedUser.last_name} </div>
+                <div className="dashboard-user__tab-content"> {tab.translate_messages.length > 0 &&  tab.translate_messages[tab.translate_messages.length - 1].content}</div>
+              </div>
+              <div className="f f-col f-align-2-3 dashboard-user__tab-info">
+                <div className="dashboard-user__tab-info__time">
+                  <Timer start={start} duration={duration} finish={finishShouldBe}/>
+                  <time>{`${outputPublishTime}`}</time>
+                </div>
+                <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
+                <div className="dashboard-user__tab-info__money">{(tab.price/100)}₴</div>
+              </div>
+            </Link>
+          )
+        })}
     </ScrollRestortion>
   )}
 };
@@ -1217,7 +1150,7 @@ class UserFullHistory extends React.Component {
       var userId = historyId;
       var translatorId = id;
     }
-
+    // we should do this mess, coz the request to server  
     this.massageStore = new MessageStore(`translated-topic/user/${userId}/translator`, translatorId );
     this.massageStore.start();
     this.massageStore.addListener('updateMessage', this.updateHandler)
@@ -1353,8 +1286,16 @@ class UserFullHistory extends React.Component {
     if (!list.length)
       return(<div/>)
     list = list.reverse();
+    
 
+    // based on info stored at sidebar
     this.userInfo = UserStore.getUser(this.props.page.id);
+    
+    // fix avatar, coz the attached user is always not beyong to page but for the cases we have the possition is different.
+    if(this.attachedUser){
+      var avatar1 = this.attachedUser && this.attachedUser['role'] === 'translator' ? this.attachedUser : this.userInfo;
+      var avatar2 = this.attachedUser && this.attachedUser['role'] !== 'translator' ? this.attachedUser : this.userInfo ;
+    }
 
 
     const renderCollection = renderItem => (
@@ -1391,7 +1332,7 @@ class UserFullHistory extends React.Component {
           { showHeaderDate && <div className={'data__delimiter'}>{translated_at.getDate()} {getMonthName(translated_at.getMonth())}, {translated_at.getFullYear()} </div>}
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-post '}>
             <div className={'dashboard-user__history-post__avatar'}>
-              <img src={this.userInfo && this.userInfo.image || avatar} alt={this.userInfo.first_name} />
+              <img src={(avatar1 && avatar1.image ) || avatar} alt={(avatar1 && avatar1.first_name)} />
             </div>
             <div className={'dashboard-user__history-post__content'}>
               <div className={'dashboard-user__history-post__content__text'}>
@@ -1440,7 +1381,7 @@ class UserFullHistory extends React.Component {
 
           <div className={'f f-align-1-1 f-gap-2 dashboard-user__history-reply'}>
             <div className={'dashboard-user__history-reply__avatar'}>
-              <img src={attachedUser.image || avatar} alt={attachedUser.nickname} />
+              <img src={(avatar2 && avatar2.image) || avatar} alt={(avatar2 && avatar2.nickname)} />
             </div>
             <div className={'dashboard-user__history-reply__content'}>
               <textarea ref={ (() => {let start = 50, ref, isTablet = _self.props.isTablet ; return (node) => {
@@ -1670,7 +1611,7 @@ class Pending extends React.Component {
                     flushInterval={150}
                     count={1}
                     debug={false}
-                    render={()=> {
+                    render={() => {
                       let value = ~~Math.abs(duration - (new Date - new Date(currentData.updated_at)) / 1000);
                       //console.log(value)
                       return(<Indicator

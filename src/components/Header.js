@@ -222,7 +222,7 @@ class Header extends React.Component{
                             
                                 <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
 
-                                <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block u-mb-2" placeholder="Сумма, грн"/>
+                                <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block " placeholder="Сумма, грн"/>
                                 
                                 <TxInput type="submit" autoValidate={false}  value='Пополнить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal u-mt-2'}/>
                               </TxForm> 

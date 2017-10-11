@@ -652,8 +652,8 @@ class SideList extends React.Component{
   updateWorkingList(data){
     if(!this._isMounted) return
 
-    // use for block get more than 3 works at one time
-    if(data.list.length === 3){
+    // uses to block the getting more than 1 work at one time, thanx to custumer's stuped business logic
+    if(data.list.length >= 1){
       this.props.refresh('feedExcess', true);
     }else{
       this.props.refresh('feedExcess', false);
@@ -918,6 +918,8 @@ class FeedList extends React.Component {
     let { currentData, isfeedExcess, loaded } = this.state;
     let _self = this;
 
+    currentData = currentData.reverse();
+
     const RenderCollection = renderItem => {
       return (
         <div>
@@ -968,7 +970,8 @@ class FeedList extends React.Component {
       );
     };
     return  RenderCollection((feed, index) => (
-          <div key={index} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'can__get__more'} u-mx-3 u-my-2`}>
+          <div key={index} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'canGetMore'} u-mx-3 u-my-2`}>
+              {/* feed entry start */}
             <div className={"translator-feed__avatar"}>
               <img src={feed.user && feed.user.image || avatar} alt={feed.user.first_name} />
               {currentData.isTablet &&
@@ -1044,7 +1047,7 @@ class FeedList extends React.Component {
               </div>
             </div>
             <button className={"f f-align-2-2 translator-feed__constols"} onClick={this.confirm(feed.id, feed.index)}>
-              <svg
+              <svg // ✔️
                 xmlns="http://www.w3.org/2000/svg"
                 width="28"
                 height="24"
@@ -1056,6 +1059,7 @@ class FeedList extends React.Component {
                 />
               </svg>
             </button>
+            {/* feed entry end*/}
           </div>
         ));
   }
@@ -1636,138 +1640,6 @@ class HistoryList extends React.Component {
     })
     )
   }
-  // render() {
-  //   let { isTablet, _self,  } = this.props;
-  //   let {currentData } = this.state;
-  //   debugger;
-  //   const RenderCollection = renderItem => {
-  //     return (
-  //       <div>
-  //           <BreadCrumbs
-  //               this={_self}
-  //               isTablet={isTablet}
-  //               Title={{
-  //                   title:  currentData[Object.keys(currentData)[0]].uuid,  // we get [0] because the very first item in thread can be only from user
-  //                   shownOnDesktop: false
-  //               }}
-  //               Left={{
-  //                   leftBtn: true,
-  //                   leftBtnName: "Меню",
-  //                   newLeftBtnState: { mainScreen: true, sidebar: true }
-  //                   }}
-  //               Right={{
-  //               rightBtn: true,
-  //               rightBtnName: "История",
-  //               newRightBtnState: {
-  //                   mainScreen: false,
-  //                   secondScreen: true,
-  //                   sidebar: false
-  //               }
-  //               }}
-  //           />
-  //         {Object.values(currentData).map((data, index) => {
-  //           let publishTime = new Date(data.publishTime);
-  //           return renderItem(data, index, publishTime);
-  //         })}
-  //       </div>
-  //     );
-  //   };
-  //   return (Object.entries(currentData).length === 0
-  //           ? <div className={"f f-align-2-33 translator-feed u-mx-3 u-my-2"}>
-  //               <div className={"translator-feed__avatar"}>
-  //                   <img src={avatar} />
-  //               </div>
-  //               <div className={"f f-align-2-2 translator-feed__placeholder"}>
-  //                   <span>История отсутствуют</span>
-  //               </div>
-  //             </div>
-  //           : RenderCollection((currentData, index, publishTime) => (
-  //               <div key={index} className={"f f-col f-align-1-1 translator-history"}>
-  //                   <div className={"data__delimiter"}>
-  //                   {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())}
-  //                   ,
-  //                   {" "}{publishTime.getFullYear()}{" "}
-  //                   </div>
-  //                   <div className={"f f-align-1-1 f-gap-2 translator-history-post "}>
-  //                   <div className={"translator-history-post__avatar"}>
-  //                       <img src={currentData.avatar} alt={currentData.nickname} />
-  //                   </div>
-  //                   <div className={"translator-history-post__content"}>
-  //                       <div className={"translator-history-post__content__text"}>
-  //                       {currentData.content}
-  //                       </div>
-  //                       <div className={"f f-align-1-2 f-gap-4 translator-history-post__content__bottombar"}>
-  //                       <LangLabel from={currentData.from} to={currentData.to} />
-  //                       <Indicator
-  //                           className={"f f-align-2-2"}
-  //                           icon={icon_dur}
-  //                           value={humanReadableTime(currentData.duration)}
-  //                           hint={"Длительность перевода"}
-  //                       />
-  //                       <Indicator
-  //                           className={"f f-align-2-2"}
-  //                           icon={
-  //                           <Timer
-  //                               start={currentData.startWorkingTime}
-  //                               duration={currentData.duration}
-  //                               isBig={true}
-  //                           />
-  //                           }
-  //                           value={humanReadableTime(
-  //                           currentData.duration -
-  //                               (new Date() - new Date(currentData.startWorkingTime)) / 1000
-  //                           )}
-  //                           hint={"Оставшееся время"}
-  //                       />
-  //                       <Indicator
-  //                           className={"f f-align-2-2"}
-  //                           icon={icon_letternum}
-  //                           value={currentData.letterNumber}
-  //                           hint={"Количество символов"}
-  //                       />
-  //                       <Indicator
-  //                           className={"f f-align-2-2"}
-  //                           icon={icon_cost}
-  //                           value={currentData.cost}
-  //                           hint={"Стоимость"}
-  //                       />
-
-  //                       </div>
-  //                   </div>
-  //                   <div className={"translator-history-post__constols"} />
-  //                   <div className={"translator-history-post__date"}>
-  //                       {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-  //                   </div>
-  //                   </div>
-
-  //                   <div className={"f f-align-1-1 f-gap-2 translator-history-reply"}>
-  //                   <div className={"translator-history-reply__avatar"}>
-  //                       <img src={currentData.avatar} alt={currentData.nickname} />
-  //                   </div>
-  //                   <div className={"translator-history-reply__content"}>
-  //                       <textarea
-  //                       className={"translator-history-reply__content__text"}
-  //                       disabled
-  //                       value={currentData.content}
-  //                       />
-  //                   </div>
-  //                   <div className={"translator-history-reply__constols"}>
-  //                       <button
-  //                       className={"btn btn-primiry btn-mini f f-align-2-2"}
-  //                       onClick={this.copy}
-  //                       >
-  //                       <img src={copy} alt="copy" />
-  //                       <span>Копировать</span>
-
-  //                       </button>
-  //                   </div>
-  //                   </div>
-                    
-
-  //               </div>
-  //               ))
-  //   );
-  // }
 }
 
 export default withRouter(Translator);

@@ -1,7 +1,6 @@
 import React from 'react';
-import { getUniqueKey, addClass, hasClass, removeClass, debounce, listener, sleep } from './../utils';
+import { debounce } from './../utils';
 import RichTextEditor from 'react-rte';
-import PropTypes from 'prop-types';
 // Be sure to include styles at some point, probably during your bootstrapping
 import 'react-select-plus/dist/react-select-plus.css';
 

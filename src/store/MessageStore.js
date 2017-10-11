@@ -18,7 +18,7 @@ var showList = Object.create(null);
  */
 
   function populateMessages(type, id) {
-    showList[type][id] = messagesByUserIdCache[type] && messagesByUserIdCache[type][id] || null
+    showList[type][id] = (messagesByUserIdCache[type] && messagesByUserIdCache[type][id]) || null
   }
 
   function parseJSON(json, defaultValue) {
@@ -32,7 +32,7 @@ var showList = Object.create(null);
      * Get an massage by userId and type from the cache.
      */
     static getMessages(type, id) {
-        return  messagesByUserIdCache[type] && messagesByUserIdCache[type][id] || []
+        return  (messagesByUserIdCache[type] && messagesByUserIdCache[type][id]) || []
     } 
       
     /**

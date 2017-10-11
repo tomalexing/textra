@@ -54,6 +54,7 @@ import Header from './components/Header';
 import Indicator from './components/Indicator';
 import Timer from './components/Timer';
 import LangLabel from './components/LangLabel';
+import TabDelimiter from './components/TabDelimiter';
 import StatefulEditor from './components/StatefulEditor';
 import deepEqual from 'deep-equal';
 
@@ -385,6 +386,9 @@ class DashBoard extends React.Component {
                   </Link>
                 )
               })}
+
+              {/* delimiter */}
+              <TabDelimiter title={'История'}/>
               
               {/* History TABs */}
               {this.state.historyTabs.map((historyFromOneUser, index) => {
@@ -1157,7 +1161,7 @@ class Create extends React.Component {
               autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs}
-              tabIndex={"1"} />
+              tabIndex={"-1"} />
             <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} /></div>
             <Select
               ref={(n) => this.createLangTo = n}
@@ -1171,7 +1175,7 @@ class Create extends React.Component {
               autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs}
-              tabIndex={"1"}
+              tabIndex={"-1"}
             />
             <div className={'dashboard-user__create-topbar__chooser'}  >
               <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
@@ -1200,7 +1204,7 @@ class Create extends React.Component {
                   options={translatorsPool}
                   onBlur={this.makeSearchMenuTranslatorUnnisible}
                   onValueClick={this.makeSearchMenuTranslatorUnnisible}
-                  tabIndex={"1"}
+                  tabIndex={"-1"}
                 />
               </div>
             </div>
