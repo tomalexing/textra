@@ -421,9 +421,14 @@
     margin-left: 5px
     margin-right: 4px
     text-decoration: none
+    line-height: 31px
     vertical-align: middle
+    display: inline-block
     svg
+      display: inline-block
       transform: scale(.5)
+      line-height: 31px
+      vertical-align: middle
     &:hover
       color: darken(rgb(0, 192, 255),10)
   &__next
@@ -431,9 +436,14 @@
     color: rgb(0, 192, 255)
     margin-right: 5px
     text-decoration: none
+    line-height: 31px
     vertical-align: middle
+    display: inline-block
     svg
       transform: scale(-.5)
+      display: inline-block
+      line-height: 31px
+      vertical-align: middle
     &:hover
       color: darken(rgb(0, 192, 255),10)
 
@@ -1232,19 +1242,22 @@
 
 
 .TabDelimiter
-    height: 15px
-    width: 100%
-    background: $bg-blue
-    flex: 0 0 auto
-    color: $grey-light
-    font-size: 8px
-    font-weight: bold
-    letter-spacing: 1px
-    text-transform: uppercase
-    border-bottom: 1px $grey solid
-    +nosel()
-    span
-      line-height: 0
+  height: 15px
+  width: 100%
+  background: $bg-blue
+  flex: 0 0 auto
+  color: $grey-light
+  font-size: 8px
+  font-weight: bold
+  letter-spacing: 1px
+  text-transform: uppercase
+  border-bottom: 1px $grey solid
+  line-height: 15px
+  vertical-align: middle
+  +nosel()
+  span
+    line-height: 15px
+    vertical-align: middle
 
 //
 // Shared Element END
