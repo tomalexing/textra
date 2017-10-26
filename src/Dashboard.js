@@ -748,7 +748,7 @@ class Pending extends React.Component {
 
   componentWillReceiveProps({store, languages, id}){
     this.store = store;
-    if(id && !this.id){
+    if(id){ // need to upadate data when it comes from socket
       this.id = id;
       this.startReceiveData();
     }
@@ -781,7 +781,7 @@ class Pending extends React.Component {
     
     if(!currentData)
         return <div/>
-
+      
     if(currentData.status === '2'){
        return <Redirect to={{pathname:`/dashboard/history/${currentData.translator_id}`,state:{page:{typePage:'history', id: currentData.translator_id},translator: currentData.translator}}} />
     }
@@ -859,8 +859,7 @@ class Pending extends React.Component {
             <div className={'f f-align-2-2 dashboard-user__searching-info '}>
               <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation info__exclamation--info'}>i</div>
               <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>{`
-                  Заказ отправлен переводчику, будет выполнен в течении ${humanReadableTime(duration)} и 
-                  для повышение качества перевода мы рекомендуем не закрывать это окно.
+                  Ваш запрос создан. После того, как преводчик возмет заказ в работу, ориентировочное время на перевод составит ${humanReadableTime(duration)}. Для повышение качества перевода мы рекомендуем не закрывать это окно.
                 `}
               </div>
             </div>
@@ -877,7 +876,7 @@ class Pending extends React.Component {
             <div className={'f f-align-2-2 dashboard-user__searching-info '}>
               <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation info__exclamation--caution'}>i</div>
               <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>
-              Отведенное время на перевод Вашего текста вышло. Однако мы все еще работаем над переводом, дождитесь, пожалуйста, перевод. Если у Вас есть возражения или предложения по улучшению работы сервиса Textra, напишите нам.
+              Отведенное время на перевод Вашего текста вышло. Однако мы все еще работаем над переводом, дождитесь, пожалуйста, перевод. Если у Вас есть возражения или предложения по улучшению работы сервиса Textra, обратитесь в нашу поддержку.
               </div>
             </div>
           }

@@ -8,7 +8,7 @@ import {hasClass, addClass, removeClass, delegate, listener, debounce,
   requestAnimationFramePromise, transitionEndPromise} from './../utils';
 import PropTypes from 'prop-types';
 import Auth from './../store/AuthStore.js';
-
+import tail_spin from './../assets/tail-spin.svg';
 import {TxRest} from './../services/Api.js';
 import TxInput from './TxInput.js';
 import TxForm from './TxForm.js';
@@ -41,7 +41,8 @@ class Header extends React.Component{
     isLiqpayPopupOpen: false,
     user: Auth.user,
     redirect: false,
-    isTablet: false
+    isTablet: false,
+    loadingLiqpay: false
   }
 
   componentDidMount(){
@@ -74,11 +75,17 @@ class Header extends React.Component{
     let {amount} = formSerialize(e.target, { hash: true, empty: true });
     amount = Number(amount);
 
+
     clearTimeout(_self.timeout);
     _self.timeout = setTimeout( _ => {
+      _self.setState({loadingLiqpay:true});
       TxRest.getDataByID('encodePayment',{amount})
         .then(liqpay => {
             document.querySelector('#liqpay_checkout').innerHTML = '';
+
+            if(_self._isMounted)
+            _self.setState({loadingLiqpay:false});
+
             window.LiqPayCheckout && window.LiqPayCheckout.init({
               data: liqpay.data,
               signature: liqpay.signature,
@@ -218,7 +225,7 @@ class Header extends React.Component{
   }
 
   render(){
-    let { user, redirect, isTablet } = this.state;
+    let { user, redirect, isTablet, loadingLiqpay } = this.state;
     if(redirect) return(
       <Redirect to={'/'}/>
     ) 
@@ -264,12 +271,14 @@ class Header extends React.Component{
                                 <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
 
                                 <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block " placeholder="Сумма, грн"/>
+
+                                <img className={`${loadingLiqpay?'show':''} header-payment__loading`} src={tail_spin}/>
                                 
                                 <TxInput type="submit" autoValidate={false}  value='Пополнить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal u-mt-2'}/>
                               </TxForm> 
-                              <div className="popup-liqpay__out">
+                              <div className="popup-liqpay__out"><div className="popup-liqpay__wrapper">
                                 <div id="liqpay_checkout" className="popup-liqpay"></div>
-                              </div>
+                              </div></div>
                             </div>
                            
                           </div>

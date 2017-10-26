@@ -199,6 +199,13 @@
         margin-top: 12px
         border-top-left-radius: 4px
         border-top-right-radius: 4px
+      &__loading
+        display: none
+        position: absolute
+        right: 110px
+        bottom: 16px
+        &.show
+          display: block
     .header-balance
       height: 21px
       margin-left: 20px
@@ -262,6 +269,21 @@
   border-radius: 2px
   box-shadow: 0 0 8px rgba(33, 143, 216, 0.3)
   +tr(opacity 0.5s)
+  +r(400)
+    position: static !important
+    left: 0
+    margin-left: 0
+    overflow: visible
+    max-width: 400px
+  &__wrapper
+    +r(400)
+      width: 320px
+      margin: 35px 0
+      position: fixed
+      overflow: auto
+      height: 80%
+      left: 50%
+      margin-left: -160px
   .popup-opened &
     display: flex !important
     position: fixed

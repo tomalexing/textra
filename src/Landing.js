@@ -48,7 +48,7 @@ export default class Landing extends React.Component {
         <div className="intro2-block">
               <div className="container f f-col f-align-2-2 stuff">
                   <div className="text-center">
-                    <h1 className="h1 text-header"><span className="text-highLight">Зарабатывайте</span> с Textra!</h1>
+                    <h2 className="h1 text-header"><span className="text-highLight">Зарабатывайте</span> с Textra!</h2>
                     <p className="text-subheader">Профессиональный переводчик, гибкий работы и стабильный доход – это про Вас? Будем рады рассмотреть Вашу кандидатуру для участия в нашей команде.</p>
                   </div>
                   <div className="intro2-block__featurePic">
@@ -60,8 +60,8 @@ export default class Landing extends React.Component {
             <div className="container f f-row f-align-2-2">
               <div className="f f-align-2-2 f-col service-block__description">
                     <div className="text-moduleCenter">  
-                      <h1 className="h1 text-header"><span className="text-highLight">Удобный</span> кросс-браузерный адаптивный интерфейс </h1>
-                      <p className="text-subheader">Зарабатывай в системе с любого места на планете. Все, что для этого нужно – смартфон или компьютер с доступом в интернет.</p>
+                      <h2 className="h1 text-header u-text-right"><span className="text-highLight">Удобный</span> кросс-браузерный адаптивный интерфейс </h2>
+                      <p className="text-subheader u-text-right">Зарабатывай в системе с любого места на планете. Все, что для этого нужно – смартфон или компьютер с доступом в интернет.</p>
                     </div>
               </div>
               <div className="f f-align-2-2  service-block__featurePic">

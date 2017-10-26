@@ -766,29 +766,31 @@ class SideList extends React.Component{
               </div>
               <div className="f f-col f-align-2-3 translator-tab-info">
                 <div className="translator-tab-info__time">
+                { this.props.page.typePage !== 'history' &&
                   <Batch
                     flushCount={0}
                     flushInterval={300} 
                     count={1}
                     debug={false}
                     render={(()=> {
-                       if(this.props.page.typePage !== 'history'){
+                       if(this.props.page.typePage !== 'history'){ // inwork
                         let start = tab['started_at'];
                         let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
 
                         return <Timer start={start} duration={duration} />
 
-                      }else{
-                        let created_at = new Date(tab.created_at);
-                        let translated_at = new Date(tab.translated_at);
-                        let started_at = new Date(tab.started_at);
-                        let durationShouldBe = tab.translate_messages.length > 0 ? tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
-                        let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
-                        let duration =  (translated_at - started_at)/1000 ; //sec
-                        return <Timer start={started_at} duration={duration} finish={finishShouldBe}/>
-                      }
+                         }else{ // history
+                      //   let created_at = new Date(tab.created_at);
+                      //   let translated_at = new Date(tab.translated_at);
+                      //   let started_at = new Date(tab.started_at);
+                      //   let durationShouldBe = tab.translate_messages.length > 0 ? tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+                      //   let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
+                      //   let duration =  (translated_at - started_at)/1000 ; //sec
+                      //   return <Timer start={started_at} duration={duration} finish={finishShouldBe}/>
+                       }
                       //console.log(value)
                     }).bind(this)}/>
+                  }
                   <time>{outputPublishTime}</time>
                 </div>
                 {tab.source_language_id && tab.translate_language_id &&  

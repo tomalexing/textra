@@ -582,7 +582,7 @@ class SideList extends React.PureComponent{
               </div>
               <div className="f f-col f-align-2-3 dashboard-user__tab-info">
                 <div className="dashboard-user__tab-info__time">
-                  <Timer start={start} duration={duration} finish={finishShouldBe}/>
+                  {  /* <Timer start={start} duration={duration} finish={finishShouldBe}/> */ }
                   <time>{`${outputPublishTime}`}</time>
                 </div>
                 <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
@@ -1191,92 +1191,6 @@ class UserFullHistory extends React.Component {
     }
   }
 
-  // render() {
-  //   let { _self  } = this.props;
-  //   let { list } = this.state;
-  //   if(!list){
-  //     return(
-  //       <div/>
-  //     )
-
-  //   }
-
-  //   const RenderCollection = renderItem => {
-  //     return (
-  //       <div>
-  //         {
-  //           Object.values(list).map( (item ,index) => {
-  //               return renderItem(item, index, new Date(item.publishTime))
-  //           })
-  //         }
-          
-  //       </div>
-  //     );
-  //   };
-  //   return (Object.entries(list).length === 0
-  //           ? <div className={"f f-align-2-33 admin-historypost u-mx-3 u-my-2"}>
-  //               <div className={"admin-historypost__avatar"}>
-  //                   <img src={avatar} />
-  //               </div>
-  //               <div className={"f f-align-2-2 admin-historypost__placeholder"}>
-  //                   <span>История отсутствуют</span>
-  //               </div>
-  //             </div>
-  //           : RenderCollection((currentDate, index, publishTime) => (
-  //           <div key={index} className={"f f-col f-align-1-1 admin-historypost"}>
-  //               {currentDate.postType === 'post' &&<div className={"data__delimiter"}>
-  //                 {publishTime.getDate()}{" "}{getMonthName(publishTime.getMonth())},{" "}{publishTime.getFullYear()}{" "}
-  //               </div>}
-  //               <div className={`f f-align-1-1 admin-historypost-${currentDate.postType}`}>
-  //               <div className={`admin-historypost-${currentDate.postType}__content`}>
-  //                   <div className={`admin-historypost-${currentDate.postType}__content__text`}>
-  //                   {currentDate.content}
-  //                   </div>
-  //                   {currentDate.postType === 'post' && <div className={`f f-align-1-2 f-gap-4 admin-historypost-${currentDate.postType}__content__bottombar`}>
-  //                     <LangLabel from={currentDate.from} to={currentDate.to} />
-  //                     <Indicator
-  //                         className={"f f-align-2-2"}
-  //                         icon={icon_dur}
-  //                         value={humanReadableTime(currentDate.duration)}
-  //                         hint={"Длительность перевода"}
-  //                     />
-  //                     <Indicator
-  //                         className={"f f-align-2-2"}
-  //                         icon={
-  //                         <Timer
-  //                             start={currentDate.startWorkingTime}
-  //                             duration={currentDate.duration}
-  //                             isBig={true}
-  //                         />
-  //                         }
-  //                         value={humanReadableTime(
-  //                         currentDate.duration -
-  //                             (new Date() - new Date(currentDate.startWorkingTime)) / 1000
-  //                         )}
-  //                         hint={"Оставшееся время"}
-  //                     />
-  //                     <Indicator
-  //                         className={"f f-align-2-2"}
-  //                         icon={icon_letternum}
-  //                         value={currentDate.letterNumber}
-  //                         hint={"Количество символов"}
-  //                     />
-  //                     <Indicator
-  //                         className={"f f-align-2-2"}
-  //                         icon={icon_cost}
-  //                         value={currentDate.cost}
-  //                         hint={"Стоимость"}
-  //                     />
-
-  //                   </div>}
-  //               </div>
-  //               <div className={`admin-historypost-${currentDate.postType}__date`}>
-  //                   {publishTime.getHours()}:{getFullTimeDigits(publishTime.getMinutes())}
-  //               </div>
-  //               </div>
-  //           </div>)
-  //   ));
-  //}
 
   render() {
     let { list, attachedUser } = this.state || {list: []},
