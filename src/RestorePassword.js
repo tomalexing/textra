@@ -15,7 +15,10 @@ export default class RestorePassword extends React.Component {
 
   state={
     email: '',
-    redirectToReferrer: false
+    redirectToReferrer: false,
+    showOk: false,
+    showNotOf : false,
+    notOkMessage: ''
   }
 
   componentDidMount() {
@@ -32,10 +35,16 @@ export default class RestorePassword extends React.Component {
     e.preventDefault();
     let _self = this;
     let { email } = formSerialize(e.target, { hash: true, empty: true });
-
     TxRest.getDataByID('resetPassword', {email})
         .then(data => {
-          _self.setState({ redirectToReferrer: true})
+
+          if(data.message)
+            _self.setState({ showOk: false, showNotOk: true, notOkMessage: data.message});
+
+          if(!data.message) {
+            _self.setState({ showOk: true, showNotOk: false});
+            setTimeout(() => _self.setState({ redirectToReferrer: true}), 5000);
+          }
         })
   }
 
@@ -44,7 +53,7 @@ export default class RestorePassword extends React.Component {
   }
 
   render() {
-    let {email, redirectToReferrer} = this.state;
+    let {email, redirectToReferrer, showOk, showNotOk, notOkMessage} = this.state;
     const { from } = this.props.location.state || { from: { pathname: '/' } }        
     return (
     (redirectToReferrer) ? <Redirect to={from} /> :
@@ -59,6 +68,21 @@ export default class RestorePassword extends React.Component {
               <input type="submit" value='Восстановить' style={{float: "right"}} className={'submit-post btn btn-primiry  u-my-4  btn-mini'}/>
               </form>
         </div>
+        { showOk && 
+            <div className={'f f-align-2-2 u-mx-2 page-layout-info '}>
+              <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--info'}>i</div>
+              <div className={'f f-align-1-2  page-layout-info__message '}>{`
+                  Вам отправлено письмо с новым паролем на указаный Вами email.
+                `}
+              </div>
+            </div>
+        }
+        { showNotOk &&
+          <div className={'f f-align-2-2  u-mx-2 page-layout-info '}>
+            <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--caution'}>i</div>
+            <div className={'f f-align-1-2 page-layout-info__message '}>{`${notOkMessage}`}</div>
+          </div>
+        }
         <Footer/>
     </div>)
   }

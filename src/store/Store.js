@@ -122,6 +122,17 @@ export default class Store extends EventEmitter {
     itemCache[this.type + item.id] = item
   }
 
+  itemDelete(id) {
+    let idx;
+    showLists[this.type].map((o,i) => { if(o.id==id) idx = i;  return o});
+    showLists[this.type].splice(idx,1);
+
+    idCache[this.type].map((o,i) => { if(this.type + o.id == this.type + id) idx = i;  return o});
+    idCache[this.type].splice(idx,1);
+
+    delete itemCache[this.type + id]
+  }
+
   /**
    * Emit an item id event if a storage key corresponding to an item in the
    * cache has changed.

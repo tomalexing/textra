@@ -357,7 +357,17 @@ export const getTabTime = (time) => {
     return outputPublishTime
 }
 
+
+export const requestAnimationFramePromise = _ => new Promise(requestAnimationFrame);
+export const transitionEndPromise = elem => new Promise(resolve => {
+  elem.addEventListener('transitionend', resolve, {capture: false});
+});
+
+
+
 util.listener = listener
+util.requestAnimationFramePromise = requestAnimationFramePromise
+util.transitionEndPromise = transitionEndPromise
 util.delegate = delegate
 util.removeClass = removeClass
 util.hasClass = hasClass

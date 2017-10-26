@@ -96,6 +96,13 @@ export default class Store extends EventEmitter {
     window.sessionStorage.itemFeedCache = JSON.stringify(itemFeedCache)
   }
 
+  static updateScore(score) {
+    feedCommon = score.feedCommon;
+    feedPerson = score.feedPerson;
+    window.sessionStorage.feedCommon = score.feedCommon
+    window.sessionStorage.feedPerson = score.feedPerson
+  }
+
   constructor(type, typePage = false) {
     super()
 
@@ -151,8 +158,10 @@ export default class Store extends EventEmitter {
     itemFeedCache[this.type + item.id] = item
   }
 
-  deleteItem(index){
+  deleteItem(index, _, score){
     idFeedCache[this.type].splice(index,1);
+    showFeedLists[this.type].splice(index,1);
+    Store.updateScore(score);
   }
 
   /**
@@ -195,7 +204,7 @@ export default class Store extends EventEmitter {
       if( data.translator_id && AuthStore.user.id !== data.translator_id) return // not for this user personal feed
 
       if(idFeedCache[this.type].indexOf(this.type + data.id) === -1 ) 
-        idFeedCache[this.type].unshift(this.type + data.id);
+        idFeedCache[this.type].push(this.type + data.id);
 
       itemFeedCache[this.type + data.id] = Object.assign({}, itemFeedCache[this.type + data.id],  data);
     }

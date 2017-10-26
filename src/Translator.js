@@ -41,7 +41,9 @@ import {
   getFullTimeDigits,
   getDayName,
   call,
-  ScrollRestortion
+  ScrollRestortion,
+  requestAnimationFramePromise,
+  transitionEndPromise
 } from "./utils";
 
 import Batch from "./components/Batch";
@@ -832,7 +834,8 @@ class FeedList extends React.Component {
     currentData: [],
     languages: [],
     isfeedExcess: false,
-    loaded: false
+    loaded: false,
+    error: null
   }
 
   componentDidMount(){
@@ -859,7 +862,7 @@ class FeedList extends React.Component {
 
   feedUpdateHandler(data){
     if(!this._isMounted || !data) return;
-
+    //data.list = data.list.reverse();
     let indexedList = data.list.map((item, idx) => {
       item.index = idx;
       return item
@@ -894,8 +897,13 @@ class FeedList extends React.Component {
   confirm(id, index) {
     let _self = this;
     return function(e){
-        TxRest.getDataByID(`join-topic/${id}`,{}).then(data => {
-          if(data.message) return  // TODO: handle error
+        TxRest.getDataByID(`join-topic/${id}`,{}).then( async data => {
+          if(!_self._isMounted) return
+          if(data.message){
+              _self.setState({error:{message:data.message, index, id}})
+              _self.forceUpdate();
+              await sleep(3000) // hack I should find better way
+          }
           let {allFeed, feedCommon, feedPerson} = _self.feedStore.getState();
           allFeed--; 
           if( !!_self.state.currentData[index]['translated_id']){
@@ -905,21 +913,18 @@ class FeedList extends React.Component {
             feedCommon--;
             _self.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
           }
-          _self.feedStore.deleteItem(index, id);
+          _self.feedStore.deleteItem(index, id, {feedCommon:feedCommon, feedPerson:feedPerson});
           _self.state.currentData.splice(index,1);
+           _self.props.refresh('inwork');
           _self.forceUpdate();
-          _self.props.refresh('inwork');
         })
     }
   }
 
   render() {
     let { location: { pathname }, isTablet, _self: parentThis, page: {typePage, id} } = this.props;
-    let { currentData, isfeedExcess, loaded } = this.state;
+    let { currentData, isfeedExcess, loaded, error } = this.state;
     let _self = this;
-
-    currentData = currentData.reverse();
-
     const RenderCollection = renderItem => {
       return (
         <div>
@@ -970,8 +975,13 @@ class FeedList extends React.Component {
       );
     };
     return  RenderCollection((feed, index) => (
-          <div key={index} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'canGetMore'} u-mx-3 u-my-2`}>
+          <div key={index} data-msgid={feed.id} className={`f f-align-1-33 translator-feed ${isfeedExcess ? '': 'canGetMore'} ${error && error.id === feed.id? 'isRemoving':''} u-mx-3 u-my-2`}>
               {/* feed entry start */}
+            {error &&  error.id === feed.id && 
+              <div className="f f-align-2-2 translator-feed__overlay">
+                {error.message}
+              </div>
+            }
             <div className={"translator-feed__avatar"}>
               <img src={feed.user && feed.user.image || avatar} alt={feed.user.first_name} />
               {currentData.isTablet &&
@@ -1046,7 +1056,7 @@ class FeedList extends React.Component {
                 />
               </div>
             </div>
-            <button className={"f f-align-2-2 translator-feed__constols"} onClick={this.confirm(feed.id, feed.index)}>
+            <button className={"f f-align-2-2 translator-feed__constols"} onClick={this.confirm(feed.id, index)}>
               <svg // ✔️
                 xmlns="http://www.w3.org/2000/svg"
                 width="28"

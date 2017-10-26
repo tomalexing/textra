@@ -687,7 +687,7 @@ class Users extends React.Component {
       return {
         nickname: item.user ? item.user.first_name + ' ' + item.user.last_name : 'Unregistered', 
         uuid: item.id,
-        email: item.user ? item.user.email : 'Unregistered', 
+        email: item.user ? item.user.email : item.email, 
         type: APPEALS(item.type), 
         registrationTime: item.created_at,
         status: 0,
@@ -888,7 +888,7 @@ class Users extends React.Component {
       }
     }))
     let newStatus = (checked) ? "2" : "0";
-  
+      
     return TxRest.getDataByID(`user/${uuid}/status`, {"status": newStatus})
               .then(data => {
                 if(!_self._isMounted) return 
@@ -1516,7 +1516,6 @@ class Pending extends React.Component {
     this.id = this.props.id;
     this.userId = this.props.usedId;
     this._isMounted = false;
-    
   }
 
   state = {

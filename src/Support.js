@@ -48,9 +48,12 @@ export default class Support extends React.Component {
   onSubmit(e, _ ,form){
 
     e.preventDefault();
-    let _self = this;
+    let _self = this, additionalRoute = '';
     let {comment, option, email} = form;
-    TxRest.putData('request',{
+
+    if(email) additionalRoute = '/unauthorized';
+
+    TxRest.putData(`request${additionalRoute}`, {
       type: option && option.toString() || '2',
       message: comment,
       email

@@ -36,10 +36,10 @@ export const TxRest = (() => {
               AuthStore.alreadyInitSocket = true
               AuthStore.update(); 
               window.io.socket.on('connect', function(socket) {
-                console.log('connection!');
+                //console.log('connection!');
                 window.io.socket.get(AuthStore.socketPath);
                 window.io.socket.on('disconnect', function() {
-                    console.log('Got disconnect!');
+                    // console.log('Got disconnect!');
                     reInitilizeSocket();
                 });
               });
@@ -71,7 +71,6 @@ export const TxRest = (() => {
     }
 
     function initLiqPay(){
-
         if(window.LiqPayCheckoutCallback ) return
         if(!AuthStore.isAuthenticated || AuthStore.role !== 'user'  ) return
 
@@ -157,7 +156,7 @@ export const TxRest = (() => {
                   cb(data);
                 }
                 resolve(data);
-              })
+              }).catch(err => console.log(err));
             } catch (err) {
               console.trace(err.stack);
               reject(err);

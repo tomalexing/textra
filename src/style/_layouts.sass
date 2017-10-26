@@ -342,6 +342,30 @@
     background: rgba(225, 102, 102, 0.1)
     & > p
       padding: 10px
+  &-info
+    width: auto
+    max-width: 100%
+    border: 1px solid $selected-blue 
+    border-radius: 5px
+    padding: 10px
+    margin-bottom: 10px
+    &__exclamation
+      flex: 0 0 50px
+      position: relative
+      width: 50px
+      height: 50px
+      border-radius: 50%
+      overflow: hidden
+      border: 1px solid $grey
+      font-size: 35px
+      color: #fff
+      &.info__exclamation--info
+        background: $selected-blue 
+      &.info__exclamation--caution
+        background: #feca52
+    &__message
+      flex: 1 1 auto
+      padding-left: 20px
 //
 // ALL USER DASHBOARD STYLES START HERE
 //
@@ -1158,6 +1182,7 @@
 //
 // LangLabel Element
 .LangLabel
+    position: relative
     width: 51px
     height: 17px
     border-radius: 4px
@@ -1186,8 +1211,10 @@
       .selected &
         color: $selected-blue
     &-to
+      position: absolute
+      top: 1px
+      bottom: 1px
       border-radius: 0 4px 4px 0
-      height: 15px
       color: #9ca9b2
       line-height: 16px
       width: 27px
@@ -1667,6 +1694,7 @@
 
 .translator
   &-feed
+    position: relative
     width: auto
     box-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.15)
     border-radius: 2px
@@ -1678,6 +1706,9 @@
       opacity: 1
     &:hover
         box-shadow: 0 2px 10px 1px rgba(#228fd8, 0.15)
+    &.isRemoving
+      transform: translateX(-200%) !important
+      transition: transform 1s ease-out 2s !important
     +r(768)
       width: 90%
       margin: 10px auto
@@ -1805,6 +1836,14 @@
         width: 100%
         border: none
         border: 1px solid #d5e0e9
+    &__overlay
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      z-index: 1
+      background: rgba(255,255,255,0.6)
     &__placeholder
       opacity: 0.6
       color: #414141

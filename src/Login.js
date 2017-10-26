@@ -127,7 +127,7 @@ class Login extends React.Component {
                 email,
                 first_name,
                 last_name: '' + arrayLastName,
-                image: 'https://graph.facebook.com/' + userID + '/picture?type=large'};
+                image: 'https://graph.facebook.com/' + userID + '/picture'};
     let data = await TxRest.getDataByID('signInFacebook', form);
     if(data.message){
       let errors = `<p><img src=${warningMark} alt='warning'/> ${data.message}</p>`;

@@ -4,23 +4,19 @@ import logo from './../assets/logo.png';
 import logo2x from './../assets/logo-2x.png';
 
 import avatar from './../assets/default-avatar.png';
-import {hasClass, addClass, removeClass, delegate, listener, debounce} from './../utils';
+import {hasClass, addClass, removeClass, delegate, listener, debounce,
+  requestAnimationFramePromise, transitionEndPromise} from './../utils';
 import PropTypes from 'prop-types';
 import Auth from './../store/AuthStore.js';
 
 import {TxRest} from './../services/Api.js';
 import TxInput from './TxInput.js';
 import TxForm from './TxForm.js';
+import formSerialize from 'form-serialize';
 
 const isActive = (match, location,to) => {
   return ['/translator','/dashboard','/admin'].some(str => location.pathname.includes(str) )
 }
-
-const requestAnimationFramePromise = _ => new Promise(requestAnimationFrame);
-const transitionEndPromise = elem => new Promise(resolve => {
-  elem.addEventListener('transitionend', resolve, {once: true});
-});
-
 
 class Header extends React.Component{
   constructor(props){
@@ -29,10 +25,12 @@ class Header extends React.Component{
     this.togglePayment =  this.togglePayment.bind(this);
     this.closeMobileMenu = this.closeMobileMenu.bind(this);
     this.openMobileMenu = this.openMobileMenu.bind(this);
+    this.payment = this.payment.bind(this);
     this.closeListener = null;
     this.logout = this.logout.bind(this);
     this.listeners = [];
     this.timeout = null;
+    this.timeoutLP = null;
   }
 
   
@@ -40,6 +38,7 @@ class Header extends React.Component{
   state = {
     isMobileMenuOpened: false,
     isPaymentFormOpened: false,
+    isLiqpayPopupOpen: false,
     user: Auth.user,
     redirect: false,
     isTablet: false
@@ -47,49 +46,91 @@ class Header extends React.Component{
 
   componentDidMount(){
     let _self = this;
+    this._isMounted = true;
     Auth.addListener('headerUpdate', ({user})=>{
+      if(_self._isMounted)
       _self.setState({user});
     })
 
     this.listeners.push(
       listener(window, 'resize', debounce((e) => {
         let isTablet = e.target.innerWidth <= 768 ? true : false;
-        if (this.state.isTablet !== isTablet) this.setState({ isTablet })
+        if (this.state.isTablet !== isTablet  && this._isMounted) this.setState({ isTablet })
       }, 200, false), false)
     );
  
   }
 
   componentWillUnmount(){
+    this._isMounted = false;
     this.listeners.forEach(removeEventListener => removeEventListener())
     Auth.removeListener('headerUpdate');
   }
 
-  payment(){
- 
-      window.LiqPayCheckout && window.LiqPayCheckout.init({
-          data:"eyAidmVyc2lvbiIgOiAzLCAicHVibGljX2tleSIgOiAiaTc1ODg1NDg4ODY4IiwgImFjdGlvbiIg"+"OiAicGF5IiwgImFtb3VudCIgOiAxLCAiY3VycmVuY3kiIDogIlVTRCIsICJkZXNjcmlwdGlvbiIg"+"OiAiZGVzY3JpcHRpb24gdGV4dCIsICJvcmRlcl9pZCIgOiAib3JkZXJfaWRfMSIgfQ==",
-          signature: "M9kSUvyIcDvnT8qaZNiYrbgGb4Y=",
-          embedTo: "#liqpay_checkout",
-          mode: "popup" // embed || popup,
-          }).on("liqpay.callback", function(data){
-            console.log(data.status);
-            console.log(data);
-          }).on("liqpay.ready", function(data){
-            console.log('ready');// ready
-          }).on("liqpay.close", function(data){
-            console.log('close');// close
-          });
-  
+  payment(e){
+    e.preventDefault();
+    let _self = this,
+        type = this.state.isTablet?'touchend':'click';
+    let {amount} = formSerialize(e.target, { hash: true, empty: true });
+    amount = Number(amount);
+
+    clearTimeout(_self.timeout);
+    _self.timeout = setTimeout( _ => {
+      TxRest.getDataByID('encodePayment',{amount})
+        .then(liqpay => {
+            document.querySelector('#liqpay_checkout').innerHTML = '';
+            window.LiqPayCheckout && window.LiqPayCheckout.init({
+              data: liqpay.data,
+              signature: liqpay.signature,
+              embedTo: "#liqpay_checkout",
+              language: "ru",
+              mode: "embed" // embed || popup
+            }).on("liqpay.callback", function(data){
+              console.log(data.status)
+              console.log("liqpay.callback")
+            }).on("liqpay.ready", function(data){
+              clearTimeout(_self.timeoutLP);
+              _self.timeoutLP = setTimeout( _ => {
+                if(!_self.state.isLiqpayPopupOpen){
+                 
+                  _self.openMobileMenu(
+                  document.querySelector('#liqpay_checkout'),
+                  'isLiqpayPopupOpen',
+                  type,
+                  {'closeTarget':'.popup-liqpay__out', 
+                  'cb': () => { 
+                                  document.querySelector('#liqpay_checkout').innerHTML = '';
+                                  removeClass( document.querySelector('#payment_form'), 'popup-opened') 
+                              }
+                  });
+                  addClass( document.querySelector('#payment_form'), 'popup-opened')
+                }else{
+                  if(_self._isMounted)
+                  _self.setState({isLiqpayPopupOpen: false})
+                  // document.querySelector('#liqpay_checkout').innerHTML = '';
+                  // removeClass(_self.payment_form, 'popup-opened');
+                  // _self.setState({isLiqpayPopupOpen: false})
+                  // _self.closeMobileMenu( document.querySelector('#liqpay_checkout'), 'isLiqpayPopupOpen', type);
+                }
+
+              }, 200)
+              
+            }).on("liqpay.close", function(data){
+              console.log("liqpay.close")
+            })
+      })
+    }, 200)
   }
 
-  closeMobileMenu = (target, stateTag) => {
+  closeMobileMenu = (target, stateTag, cb = ()=>{}) => {
+    if(!target) return
     target.style.transition = 'opacity .3s';
 
     if(target.style.display === 'none'){
       //something goes wrong, so make state correction
       let obj = {};
       obj[stateTag] = false
+      if(this._isMounted)
       this.setState(obj)
       return;
     }
@@ -97,7 +138,6 @@ class Header extends React.Component{
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
-          if(!target) return
           target.style.opacity = 0;
           return transitionEndPromise(target);
       })
@@ -106,11 +146,12 @@ class Header extends React.Component{
         target.style.display = 'none';
         let obj = {};
         obj[stateTag] = false
+        if(this._isMounted)
         this.setState(obj)
-      });
+      }).then(cb);
   }
 
-  openMobileMenu = (target, stateTag, type) => {
+  openMobileMenu = (target, stateTag, type, optObj = {'closeTarget':'.h100','cb':()=>{}}) => {
     target.style.transition = 'opacity .1s';
     target.style.opacity = 0;
     target.style.display = 'flex';
@@ -124,9 +165,9 @@ class Header extends React.Component{
       .then( _ => {
         let obj = {};
         obj[stateTag] = true
-        console.log(type)
+        if(this._isMounted)
         this.setState(obj,()=>
-           this.closeListener = delegate(window, type, '.h100', this.closeMobileMenu.bind(this,target, stateTag), false, true)
+           this.closeListener = delegate(window, type, optObj['closeTarget'], this.closeMobileMenu.bind(this,target, stateTag, optObj['cb']), false, true)
         )
       });
   }
@@ -217,7 +258,7 @@ class Header extends React.Component{
                             className="header-replenish" >
                               пополнить
                           </button>
-                          <div className="header-payment" ref={n => this.payment_form = n}> 
+                          <div id="payment_form" className="header-payment" ref={n => this.payment_form = n}> 
                             <TxForm submit={this.payment} innerErrorFielsType={true} formClass=""> 
                             
                                 <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
@@ -226,7 +267,11 @@ class Header extends React.Component{
                                 
                                 <TxInput type="submit" autoValidate={false}  value='Пополнить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal u-mt-2'}/>
                               </TxForm> 
+                              <div className="popup-liqpay__out">
+                                <div id="liqpay_checkout" className="popup-liqpay"></div>
+                              </div>
                             </div>
+                           
                           </div>
                       }
                       {this.props.currentRole === 'user' && 
