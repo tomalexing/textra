@@ -1689,7 +1689,9 @@
     margin-top: 40px !important
 
 
-.canGetMore:nth-of-type(2)
+.canGetMore:nth-of-type(2),
+.canGetMore:nth-of-type(3),
+.canGetMore:nth-of-type(4)
   opacity: 1
 
 .translator
@@ -1829,7 +1831,9 @@
       border-bottom-right-radius: 2px
       svg
         margin: auto
-      .canGetMore:nth-of-type(2) &
+      .canGetMore:nth-of-type(2) &,
+      .canGetMore:nth-of-type(3) &,
+      .canGetMore:nth-of-type(4) &
         cursor: pointer
         pointer-events: all
         +rmin(768)

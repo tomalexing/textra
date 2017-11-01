@@ -683,6 +683,11 @@ class Users extends React.Component {
 
   requestUpdateHandler(data){
     if(!this._isMounted) return
+    if(data.message){// todo: handle errror
+      console.error(data.message)
+      this.setState({usersList: [], usersListFetched: []})
+      return
+    }
     let usersList = data.map(item => {
       return {
         nickname: item.user ? item.user.first_name + ' ' + item.user.last_name : 'Unregistered', 
@@ -702,12 +707,17 @@ class Users extends React.Component {
 
   updateHandler(data){
     if(!this._isMounted) return
+    if(data.message){ // todo: handle errror
+      console.error(data.message)
+      this.setState({usersList: [], usersListFetched: []})
+      return
+    }
     let usersList = data.map(item => {
       return {
         nickname: item.first_name + ' ' + item.last_name, 
         uuid: item.id,
-        email: item.email, 
-        type: ROLES(item.role), 
+        email: item.email,
+        type: ROLES(item.role),
         registrationTime: item.created_at,
         status: item.status,
         role: item.role

@@ -92,6 +92,7 @@ class App extends React.Component {
    componentWillMount() {
     Auth.refreshToken();
     Auth.init();
+    TxRest.updateStatus({immediately:true});
     TxRest.initSocket();
     TxRest.initLiqPay();
 

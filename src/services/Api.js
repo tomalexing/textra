@@ -5,7 +5,7 @@ export const TxRest = (() => {
     const host = 'http://138.68.95.226' //'http://api-textra.iondigi.com';
     const socketHost = 'ws://138.68.95.226' //'http://api-textra.iondigi.com';
     const port = ':8080';
-
+    let timerLiqpay = null;
     function initSocket(){
         
           if(!AuthStore.isAuthenticated || AuthStore.alreadyInitSocket || !AuthStore.socketPath ) return
@@ -68,6 +68,24 @@ export const TxRest = (() => {
 
     function connectSocketRoom(){
 
+    }
+
+    function updateStatus({infinite = false, immediately = false}={}){
+      clearTimeout(timerLiqpay);
+      timerLiqpay = setTimeout( _ => {
+        console.log('timerLiqpay');
+        TxRest.getData(`profile`)
+          .then((data, err) => {
+
+            if(!data.message && !data.err) {
+              if(AuthStore.user.balance === data.balance){
+                if(infinite) updateStatus({infinite: true});
+                return
+              }
+              AuthStore.update(data);
+            }
+          })
+      }, immediately ? 10 : 20000)
     }
 
     function initLiqPay(){
@@ -243,6 +261,7 @@ export const TxRest = (() => {
       initSocket,
       reInitilizeSocket,
       deleteData,
-      initLiqPay
+      initLiqPay,
+      updateStatus
     }
 })()

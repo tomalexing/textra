@@ -75,10 +75,10 @@ class Header extends React.Component{
     let {amount} = formSerialize(e.target, { hash: true, empty: true });
     amount = Number(amount);
 
+    _self.setState({loadingLiqpay:true});
 
     clearTimeout(_self.timeout);
     _self.timeout = setTimeout( _ => {
-      _self.setState({loadingLiqpay:true});
       TxRest.getDataByID('encodePayment',{amount})
         .then(liqpay => {
             document.querySelector('#liqpay_checkout').innerHTML = '';
@@ -92,9 +92,6 @@ class Header extends React.Component{
               embedTo: "#liqpay_checkout",
               language: "ru",
               mode: "embed" // embed || popup
-            }).on("liqpay.callback", function(data){
-              console.log(data.status)
-              console.log("liqpay.callback")
             }).on("liqpay.ready", function(data){
               clearTimeout(_self.timeoutLP);
               _self.timeoutLP = setTimeout( _ => {
@@ -119,11 +116,10 @@ class Header extends React.Component{
                   // _self.setState({isLiqpayPopupOpen: false})
                   // _self.closeMobileMenu( document.querySelector('#liqpay_checkout'), 'isLiqpayPopupOpen', type);
                 }
+                TxRest.updateStatus({infinite:true});
 
               }, 200)
               
-            }).on("liqpay.close", function(data){
-              console.log("liqpay.close")
             })
       })
     }, 200)
@@ -270,7 +266,7 @@ class Header extends React.Component{
                             
                                 <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
 
-                                <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} className="field-block " placeholder="Сумма, грн"/>
+                                <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} customValidator={v => Number(v) > 0 || "Сумма должна быть больше нуля"}className="field-block " placeholder="Сумма, грн"/>
 
                                 <img className={`${loadingLiqpay?'show':''} header-payment__loading`} src={tail_spin}/>
                                 

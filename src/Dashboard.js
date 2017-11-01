@@ -79,7 +79,6 @@ class DashBoard extends React.Component {
     this.store = null;
     this.languageStore = null;
     this.translatorStore = null;
-
   }
 
   state = {
@@ -730,7 +729,7 @@ class Pending extends React.Component {
     TxRest.deleteData(`topic/${id}`, data => {
       if(data === 200){// means ok 
         if(Auth.user && Auth.user.id){ // updata money
-          TxRest.getData(`user/${Auth.user.id}`).then((user, err) => {
+          TxRest.getData(`profile`).then((user, err) => {
     
             if(!this._isMounted) return
             if(!data.message && !data.err) {
