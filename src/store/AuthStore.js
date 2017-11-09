@@ -40,7 +40,7 @@ const  Auth = {
   listeners: {},
   loadSession: false,
   update(user){
-    if(user){
+    if( user ){
       this.role = ROLES(user.role);
       this.user = user;
       window.localStorage.setItem('user', JSON.stringify(this.user));
@@ -121,11 +121,14 @@ const  Auth = {
     this.role = this.user ? ROLES(this.user.role) : undefined;
     this.socketPath = this.user ? SOCKETPATH(this.user.role) : undefined; 
   },
+
   refreshToken(){
     let self = this;
+    console.log('refreshToken pre')
     if( typeof window === 'undefined' ) return 
-    if( this.token ) 
-      TxRest.getData('refreshToken').then(data => {
+    if( this.isAuthenticated )
+      return TxRest.getData('refreshToken').then(data => {
+        console.log('refreshToken')
         self.token = data.token;
         window.localStorage.setItem('token', self.token);
       })

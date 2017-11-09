@@ -42,6 +42,13 @@ var showList = Object.create(null);
       if (typeof window === 'undefined') return
       messagesByUserIdCache = parseJSON(window.sessionStorage.messagesByUserIdCache, {})  
     }
+
+    static clearSession(){
+      if (typeof window === 'undefined') return
+      window.sessionStorage.clear(messagesByUserIdCache);
+      messagesByUserIdCache = {};
+      showList = {};
+    }
   
     /**
      * Serialise caches to sessionStorage as JSON.

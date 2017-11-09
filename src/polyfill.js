@@ -1,7 +1,7 @@
 import 'whatwg-fetch';
 // matches polyfill
 
-this.Element && function(ElementPrototype) {
+Element && function(ElementPrototype) {
     ElementPrototype.matches = ElementPrototype.matches ||
     ElementPrototype.matchesSelector ||
     ElementPrototype.webkitMatchesSelector ||
@@ -14,7 +14,7 @@ this.Element && function(ElementPrototype) {
 }(Element.prototype);
 
 // closest polyfill
-this.Element && function(ElementPrototype) {
+Element && function(ElementPrototype) {
     ElementPrototype.closest = ElementPrototype.closest ||
     function(selector) {
         var el = this;

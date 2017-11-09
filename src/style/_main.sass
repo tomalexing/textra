@@ -218,10 +218,12 @@
     .header-avatar
       position: relative
       +tr(opacity .5s)
-      &:hover .header-avatar__in
+      &:hover .header-avatar__in,
+      &:focus .header-avatar__in
         +tr(opacity .5s)
         opacity: .3
-      &:hover .header-logout
+      &:hover .header-logout,
+      &:focus .header-logout
         visibility: visible
         opacity: 1
         +tr(opacity .5s)

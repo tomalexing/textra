@@ -323,7 +323,7 @@ class Admin extends React.Component {
                   }}
                 >
                   <span className={"f f-align-2-2 admin-menu__item__icon"}><img src={appeals} alt={"appeals"}/></span>
-                  <span>Запросы</span>
+                  <span>Поддержка</span>
                 </NavLink>
                 <div className="admin-menu__delimiter" />
               </ul>

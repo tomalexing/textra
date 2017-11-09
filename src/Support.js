@@ -33,7 +33,8 @@ export default class Support extends React.Component {
       label: 'Прочее'
     }
     ],
-    redirectToReferrer: false
+    redirectToReferrer: false,
+    showOk: false
   }
   componentDidMount() {
     this._isMounted = true;
@@ -58,7 +59,8 @@ export default class Support extends React.Component {
       message: comment,
       email
     }).then(_ => {
-        _self.setState({ redirectToReferrer: true})
+        _self.setState({ showOk: true});
+        setTimeout(() => _self.setState({ redirectToReferrer: true}), 5000);
     })
 
   }
@@ -80,7 +82,7 @@ export default class Support extends React.Component {
   }
 
   render() {
-    let {value, clearComment, options, redirectToReferrer} = this.state;
+    let {value, clearComment, options, redirectToReferrer, showOk} = this.state;
     const { from } = this.props.location.state || { from: { pathname: '/' } }    
     return (
     (redirectToReferrer) ? <Redirect to={from} /> :
@@ -140,8 +142,18 @@ export default class Support extends React.Component {
                   <h3 className="h3 u-mt-4 u-mb-2">Опишите детально Ваш вопрос *</h3>
                   <TxInput tag="textarea" type="text" name="comment" validate={[{'minLength':1},'required']} {...clearComment&&{value:''}}  className="field-block" placeholder="Комментарий пользователя"/>
                   
-                  <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-mini'}/>
+                  <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry u-my-4 btn-mini'}/>
                 </TxForm>}
+  
+          { showOk && 
+              <div className={'f f-align-2-2 u-mx-2 page-layout-info '}>
+                <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--info'}>i</div>
+                <div className={'f f-align-1-2  page-layout-info__message '}>{`
+                    Ваше сообщение отправлено и будет рассмотрено службой поддержки "Textra" в течении 24 часов.
+                  `}
+                </div>
+              </div>
+          }
         </div>
         <Footer/>
     </div>)

@@ -128,10 +128,10 @@ class SignUp extends React.Component {
             <div className="f f-col main-regist__form">
               <p className="h3 u-mb-3" >Регистрация</p>
               <p className="u-mb-4">У Вас уже есть аккаунт?{(
-                    <Link to="/login" className="btn btn-flat">Войти</Link>
+                    <Link tabIndex="1" to="/login" className="btn btn-flat">Войти</Link>
               )}</p>
               <div className="f f-gap-2 registform-regist__social">
-                                  <FacebookLogin
+                  <FacebookLogin
                     appId={ process.env.NODE_ENV == 'development' ? "761774717317607" : "495884620782080" }  // for localhost and textra.iondigi.com
                     autoLoad={false}
                     fields="name,email,picture"
@@ -168,7 +168,7 @@ class SignUp extends React.Component {
                   <TxInput tabIndex='1' type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Зарегистрироваться"/>
                 </TxForm>
 
-              <div className="registform-textlink">Регистрируясь, вы принимаете <Link to='/' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>
+              <div className="registform-textlink">Регистрируясь, вы принимаете <Link tabIndex="1" to='/' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>
             </div>
         </div>
       </div>

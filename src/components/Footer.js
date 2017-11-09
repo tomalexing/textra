@@ -11,10 +11,8 @@ export const Footer = () => {
         <p >© 2017 Textra. Все права защищены. <Link className="text-highLight" to="/private">Политика конфиденциальности</Link> и  <Link className="text-highLight"  to="/term-of-use">Правила использования.</Link></p>
         </div>
         <ul className="footer__social f f-align-3-2">
-        <li><a href="http://facebook.com" rel="noopener noreferrer" target="_blank"><img src={f} alt="facebook"/></a></li>
-        <li><a href="http://twitter.com" rel="noopener noreferrer" target="_blank"><img src={tw} alt="twitter"/></a></li>
-        <li><a href="http://linkedin.com" rel="noopener noreferrer" target="_blank"><img src={ln} alt="linkedin"/></a></li>
-        <li><a href="http://instagram.com" rel="noopener noreferrer" target="_blank"><img src={insta} alt="instagram"/></a></li>
+        <li><a href="https://www.facebook.com/textra.io/" rel="noopener noreferrer" target="_blank"><img src={f} alt="facebook"/></a></li>
+        <li><a href="https://www.instagram.com/textra.io/" rel="noopener noreferrer" target="_blank"><img src={insta} alt="instagram"/></a></li>
         </ul>
     </div>)
 }

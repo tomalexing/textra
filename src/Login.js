@@ -2,6 +2,7 @@ import React from 'react';
 import Auth from './store/AuthStore.js';
 import mainbg from './assets/main.png';
 import logo from './assets/logo.png';
+import logo2x from './assets/logo-2x.png';
 import fb from './assets/fb.svg';
 import google from './assets/google.svg';
 import warningMark  from './assets/warning.svg';
@@ -157,11 +158,11 @@ class Login extends React.Component {
         <div className="f f-align-2-2 outer-left">
           <div className="f sidebar">
               <div className="f f-align-2-2 sidebar-regist__logo">
-                <Link to={'/'} ><img src={logo} alt="Textra"/> </Link>
+                <Link to={'/'} ><img src={logo} srcSet={`${logo2x} 2x, ${logo} 1x`} alt="Textra"/> </Link>
               </div>
               <div className="f f-col registform">
                 <h3 className="h1 u-mb-5 u-text-center" >Войти</h3>
-                <p className="u-mb-4"> Нужен акакаунт? {(
+                <p className="u-mb-4"> Нужен аккаунт? {(
                     <Link to="/signup" className="btn btn-flat"> Создать аккаунт</Link>
                 )}</p>
                 <div className="f f-gap-2 registform-regist__social"> 
@@ -198,16 +199,16 @@ class Login extends React.Component {
                 <TxForm submit={this.login} getErrorField={this._getErrorField}>
                   <TxInput ref='name' tabIndex='1' setFocusToInput={true} type="email" name="email" validate={['email', 'required']}   className="field-block u-mb-3" placeholder="Email"/>
                   <TxInput type="password" tabIndex='1' name="password" validate={[{'minLength':6}, 'required']}  className="field-block  u-my-3" placeholder="Пароль"/>
-                  <TxInput type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
+                  <TxInput tabIndex='1' type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Войти"/>
                 </TxForm>
 
-                <Link to={{pathname:'/restorepassword', state: { from: this.props.location } }} className="f f-align-3-3 registform__forgotpassword">Забыли пароль?</Link>
+                <Link tabIndex='1' to={{pathname:'/restorepassword', state: { from: this.props.location } }} className="f f-align-3-3 registform__forgotpassword">Забыли пароль?</Link>
                 <div id="status"></div>
               </div>
           </div>
         </div>
         <div className="f outer-right" ref={n => this.toggleElem = n}>
-          <Link to={'/signup'} className="main f f-col f-fill f-align-2-2 u-text-undecor"  style={bgPic}>
+          <Link tabIndex='-1' to={'/signup'} className="main f f-col f-fill f-align-2-2 u-text-undecor"  style={bgPic}>
             <div className="main-toregister">
                   <div className="main-regist__mini" >
                     <h1 className="h3 u-mb-2" >

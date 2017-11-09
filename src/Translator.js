@@ -246,6 +246,7 @@ class Translator extends React.Component {
             <div className="f sidebar sidebar__menu"> 
               <ul className="f f-align-1-1 f-col translator-menu">
                 <NavLink
+                  tabIndex='1'
                   className={"f f-align-1-2 translator-menu__item translator-menu__item__level-1"}
                   to={{
                     pathname: Routes["feed"].path,
@@ -261,6 +262,7 @@ class Translator extends React.Component {
                   </span>}
                 </NavLink>
                 <NavLink
+                  tabIndex='1'
                   className={"f f-align-1-2 translator-menu__item translator-menu__item__level-2" }
                   to={{
                     pathname: Routes["common"].path,
@@ -275,6 +277,7 @@ class Translator extends React.Component {
                     </span>}
                 </NavLink>
                 <NavLink
+                  tabIndex='1'
                   className={ "f f-align-1-2 translator-menu__item translator-menu__item__level-2" }
                   to={{
                     pathname: Routes["personal"].path,
@@ -288,6 +291,7 @@ class Translator extends React.Component {
                   </span> }
                 </NavLink>
                 <NavLink
+                  tabIndex='1'
                   className={ "f f-align-1-2 translator-menu__item translator-menu__item__level-1" }
                   to={{
                     pathname: Routes["history"].path,
@@ -830,6 +834,7 @@ class FeedList extends React.Component {
     this.getLangPropInObj = this.getLangPropInObj.bind(this);
     this.confirm = this.confirm.bind(this);
     this._isMounted = false;
+    this.redirectToReply ={do: false, replyId: undefined};
   }
 
   state = {
@@ -904,11 +909,11 @@ class FeedList extends React.Component {
           if(data.message){
               _self.setState({error:{message:data.message, index, id}})
               _self.forceUpdate();
-              await sleep(3000) // hack I should find better way
+              await sleep(4000) // hack I should find better way
           }
           let {allFeed, feedCommon, feedPerson} = _self.feedStore.getState();
           allFeed--; 
-          if( !!_self.state.currentData[index]['translated_id']){
+          if( !!_self.state.currentData[index]['translator_id']){
             feedPerson--;
             _self.props.refresh('amountFeed', {allFeed, feedCommon, feedPerson})
           }else{
@@ -917,13 +922,21 @@ class FeedList extends React.Component {
           }
           _self.feedStore.deleteItem(index, id, {feedCommon:feedCommon, feedPerson:feedPerson});
           _self.state.currentData.splice(index,1);
-           _self.props.refresh('inwork');
+          _self.props.refresh('inwork');
+          _self.redirectToReply = {do: true, replyId: id};
           _self.forceUpdate();
         })
     }
   }
 
   render() {
+
+
+    if( this.redirectToReply && this.redirectToReply.replyId){
+      return <Redirect 
+      to={{pathname: Routes['reply'].path + '/' + this.redirectToReply.replyId, state: {page:{typePage:'reply', id: this.redirectToReply.replyId}, historyUser: '', secondScreen: false, mainScreen: true}}} />
+    }
+    
     let { location: { pathname }, isTablet, _self: parentThis, page: {typePage, id} } = this.props;
     let { currentData, isfeedExcess, loaded, error } = this.state;
     let _self = this;
@@ -1372,7 +1385,7 @@ class Reply extends React.Component {
                     onChange={this.currentNumberOfChar.bind(this)}
                     />
                 <div className={"translator-reply__sent u-ml-3 u-mt-3"}>
-                    <button className={"btn btn-mini btn-primiry"} onClick={this.sendTranslaton}>Отправить</button>
+                    <button  tabIndex={1} className={"btn btn-mini btn-primiry"} onClick={this.sendTranslaton}>Отправить</button>
                 </div>
                 </div>
             </div>)

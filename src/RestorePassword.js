@@ -67,22 +67,23 @@ export default class RestorePassword extends React.Component {
               <input name="email" type="text" style={{width: "100%"}} onChange={this.onInput} value={email} placeholder="Введите email в формате name@textra.com" />
               <input type="submit" value='Восстановить' style={{float: "right"}} className={'submit-post btn btn-primiry  u-my-4  btn-mini'}/>
               </form>
-        </div>
-        { showOk && 
-            <div className={'f f-align-2-2 u-mx-2 page-layout-info '}>
-              <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--info'}>i</div>
-              <div className={'f f-align-1-2  page-layout-info__message '}>{`
-                  Вам отправлено письмо с новым паролем на указаный Вами email.
-                `}
+        
+          { showOk && 
+              <div className={'f f-align-2-2 u-mx-2 page-layout-info '}>
+                <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--info'}>i</div>
+                <div className={'f f-align-1-2  page-layout-info__message '}>{`
+                    Вам отправлено письмо с новым паролем на указаный Вами email.
+                  `}
+                </div>
               </div>
+          }
+          { showNotOk &&
+            <div className={'f f-align-2-2  u-mx-2 page-layout-info '}>
+              <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--caution'}>i</div>
+              <div className={'f f-align-1-2 page-layout-info__message '}>{`${notOkMessage}`}</div>
             </div>
-        }
-        { showNotOk &&
-          <div className={'f f-align-2-2  u-mx-2 page-layout-info '}>
-            <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--caution'}>i</div>
-            <div className={'f f-align-1-2 page-layout-info__message '}>{`${notOkMessage}`}</div>
-          </div>
-        }
+          }
+        </div>
         <Footer/>
     </div>)
   }

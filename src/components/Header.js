@@ -59,7 +59,8 @@ class Header extends React.Component{
         if (this.state.isTablet !== isTablet  && this._isMounted) this.setState({ isTablet })
       }, 200, false), false)
     );
- 
+
+    window.dispatchEvent(new Event('resize'));
   }
 
   componentWillUnmount(){
@@ -83,9 +84,6 @@ class Header extends React.Component{
         .then(liqpay => {
             document.querySelector('#liqpay_checkout').innerHTML = '';
 
-            if(_self._isMounted)
-            _self.setState({loadingLiqpay:false});
-
             window.LiqPayCheckout && window.LiqPayCheckout.init({
               data: liqpay.data,
               signature: liqpay.signature,
@@ -95,8 +93,11 @@ class Header extends React.Component{
             }).on("liqpay.ready", function(data){
               clearTimeout(_self.timeoutLP);
               _self.timeoutLP = setTimeout( _ => {
+                if(_self._isMounted)
+                  _self.setState({loadingLiqpay:false});
+
                 if(!_self.state.isLiqpayPopupOpen){
-                 
+                  
                   _self.openMobileMenu(
                   document.querySelector('#liqpay_checkout'),
                   'isLiqpayPopupOpen',
@@ -126,6 +127,7 @@ class Header extends React.Component{
   }
 
   closeMobileMenu = (target, stateTag, cb = ()=>{}) => {
+
     if(!target) return
     target.style.transition = 'opacity .3s';
 
@@ -158,6 +160,7 @@ class Header extends React.Component{
     target.style.transition = 'opacity .1s';
     target.style.opacity = 0;
     target.style.display = 'flex';
+
     requestAnimationFramePromise()
       .then( _ => requestAnimationFramePromise())
       .then( _ => {
@@ -169,7 +172,7 @@ class Header extends React.Component{
         let obj = {};
         obj[stateTag] = true
         if(this._isMounted)
-        this.setState(obj,()=>
+        this.setState(obj,() =>
            this.closeListener = delegate(window, type, optObj['closeTarget'], this.closeMobileMenu.bind(this,target, stateTag, optObj['cb']), false, true)
         )
       });
@@ -180,7 +183,6 @@ class Header extends React.Component{
     e.stopPropagation();
     let currentTarget =  e.currentTarget,
     type = e.type;
-
     clearTimeout(this.timeout);
 
     this.timeout = setTimeout( _ => {
@@ -194,11 +196,12 @@ class Header extends React.Component{
   }
 
   togglePayment = (e) => {
+
     e.preventDefault();
     e.stopPropagation();
     let currentTarget =  e.currentTarget,
         type = e.type;
-    
+
     clearTimeout(this.timeout);
 
     this.timeout = setTimeout( _ => {
@@ -213,7 +216,8 @@ class Header extends React.Component{
     }, 200)
   }
 
-  logout(){
+  logout(e){
+    e.preventDefault();
     let _self = this;
     Auth.signout().then((res , rej) => {
         _self.setState({redirect: true});
@@ -227,27 +231,27 @@ class Header extends React.Component{
     ) 
     return(  <header className="f main__header">
                 <div className="f f-align-2-2 header-logo">
-                  <Link to={'/'} ><img src={logo} srcSet={`${logo} 1x, ${logo2x} 2x`} alt="Textra" /> </Link>
+                  <Link tabIndex='1' to={'/'} ><img src={logo} srcSet={`${logo2x} 2x, ${logo} 1x`} alt="Textra" /> </Link>
                 </div>
                 <div className="f f-align-2-2 header-menu__mobile">
-                  <button  className="f f-col f-align-2-2 header-menu__mobile__btn" onTouchEnd={this.toggleMobileMenu}>
+                  <button aria-label="Menu Button" className="f f-col f-align-2-2 header-menu__mobile__btn" onTouchEnd={this.toggleMobileMenu}>
                       <span></span>
                       <span></span>
-                      <span></span>
+                      <span></span> 
                   </button>
                   <ul ref={n => this.mobile_menu = n} className="f f-col f-align-2-2 header-menu__mobile__in">
-                    <NavLink to={'/'} comp={isActive}>Рабочий стол</NavLink>
+                    <NavLink tabIndex='1' to={'/'} comp={isActive}>Рабочий стол</NavLink>
                     {/* <NavLink to={'/about'}>О нас</NavLink> */}
-                    <NavLink to={'/help'}>Поддержка</NavLink>
+                    <NavLink tabIndex='1' to={'/help'}>Поддержка</NavLink>
                   </ul>
                 </div>
                  <div className="f f-align-2-2 header-logo__mobile">
                   <Link to={'/'} ><img srcSet={`${logo} 1x, ${logo2x} 2x`}  src={logo} alt="Textra" /></Link>
                 </div>
                 <ul className="f f-align-1-2 header-menu">
-                  { Auth.isAuthenticated && <NavLink to={'/translator'} comp={isActive}>Рабочий стол</NavLink>}
+                  { Auth.isAuthenticated && <NavLink to={'/translator'} tabIndex='1' comp={isActive}>Рабочий стол</NavLink>}
                   {/* <NavLink to={'/about'}>О нас</NavLink> */}
-                  <NavLink to={'/help'}>Поддержка</NavLink>
+                  <NavLink tabIndex='1' to={'/help'}>Поддержка</NavLink>
                 </ul>
                 <div className="f f-align-2-2 header-account">
                   { Auth.isAuthenticated &&  <div className="f f-col f-align-1-3 header-details">
@@ -256,9 +260,9 @@ class Header extends React.Component{
                       {
                         this.props.currentRole === 'user' && <div className="header-paymentwrapper">
                           <button 
-                            {...isTablet &&{onTouchEnd:this.togglePayment}} 
-                            {...!isTablet &&{onClick:this.togglePayment}} 
-                            className="header-replenish" >
+                            {...isTablet && {onTouchEnd:this.togglePayment}} 
+                            {...!isTablet && {onClick:this.togglePayment}} 
+                            className="header-replenish" tabIndex={1}>
                               пополнить
                           </button>
                           <div id="payment_form" className="header-payment" ref={n => this.payment_form = n}> 
@@ -270,7 +274,7 @@ class Header extends React.Component{
 
                                 <img className={`${loadingLiqpay?'show':''} header-payment__loading`} src={tail_spin}/>
                                 
-                                <TxInput type="submit" autoValidate={false}  value='Пополнить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal u-mt-2'}/>
+                                <TxInput tabIndex='1' type="submit" autoValidate={false}  value='Пополнить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-normal u-mt-2'}/>
                               </TxForm> 
                               <div className="popup-liqpay__out"><div className="popup-liqpay__wrapper">
                                 <div id="liqpay_checkout" className="popup-liqpay"></div>
@@ -289,13 +293,13 @@ class Header extends React.Component{
                       {this.props.currentRole === 'controller' && <span className="header-balance">{`Welcome, ${Auth.user.first_name} ${Auth.user.last_name}`}</span>}
                     </div>
                   </div>}
-                   { Auth.isAuthenticated && <div className="f f-align-2-2 header-avatar">
+                   { Auth.isAuthenticated && <div tabIndex='1' className="f f-align-2-2 header-avatar">
                     <figure className="f f-align-2-2 header-avatar__in"> <img src={user.image || avatar} alt="Textra" /> </figure>
-                    <div className="header-logout" onClick={this.logout}>Выйти</div>
+                    <button tabIndex='2' className="header-logout" onClick={this.logout}>Выйти</button>
                   </div>}
                   { !Auth.isAuthenticated && <div className="f f-gap-2 stuff__bottom">
-                      <Link className={`btn btn-flat2 btn-${ window && window.innerWidth > 768 ? 'normal' : 'mini' }`} to={{pathname:"/signup", state:{from:'/'}}} >Зарегистрироваться</Link>
-                      <Link className={`btn u-px-2 btn-primiry btn-${ window && window.innerWidth > 768 ? 'normal' : 'mini' }`} to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
+                      <Link tabIndex='1' className={`btn btn-flat2 btn-${ window && window.innerWidth > 768 ? 'normal' : 'mini' }`} to={{pathname:"/signup", state:{from:'/'}}} >Зарегистрироваться</Link>
+                      <Link tabIndex='1'  className={`btn u-px-2 btn-primiry btn-${ window && window.innerWidth > 768 ? 'normal' : 'mini' }`} to={{pathname:"/login", state:{from:'/'}}} >Войти</Link>
                   </div>}
                 </div>  
             </header>

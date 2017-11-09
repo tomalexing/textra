@@ -62,6 +62,9 @@ import Store from './store/Store.js';
 import MessageStore from './store/MessageStore.js';
 import {TxRest} from './services/Api.js';
 
+function parseJSON(json, defaultValue) {
+  return (json ? JSON.parse(json) : defaultValue)
+}
 
 class DashBoard extends React.Component {
 
@@ -79,6 +82,8 @@ class DashBoard extends React.Component {
     this.store = null;
     this.languageStore = null;
     this.translatorStore = null;
+
+    this.viewedHistoryTabs = parseJSON(window.sessionStorage.viewedHistoryTabs, {});
   }
 
   state = {
@@ -94,12 +99,12 @@ class DashBoard extends React.Component {
     },
     language: [],
     translator: {},
-    translators: []
+    translators: [],
+    notShowWellcome: JSON.parse(window.localStorage.getItem('notShowWellcome'))
   }
 
   componentWillMount() {
-    let { location: { state: { page: {typePage, id: pageTypeId}, mainScreen,  translator }  = {page : {typePage : '', id :  ''}, translator: ''}  }} = this.props ; // holly shit
-
+    let { location: { state: { page: {typePage, id: pageTypeId}, mainScreen,  translator }  = {page : {typePage : '', id :  ''}, translator: '' }  }} = this.props ; // holly shit
     this.setState({page:{typePage, id: pageTypeId}, translator, mainScreen});
   } 
 
@@ -172,18 +177,31 @@ class DashBoard extends React.Component {
             index: idx
           }
       }),
+
       workingTabs : data.list.filter(o => o.status === "1").map((item, idx) => {
           return {
             ...item,
             index: idx
           }
       }),
+
       historyTabs : data.list.filter(o => o.status === "2").reduce((acc, item, idx) => {
-          if( uniqueHistoryIds.includes(item.translator_id) ){
-            acc.filter(o => o.translator_id === item.translator_id).map(o => o['notSeen'] = true);
-          }
           if( ! uniqueHistoryIds.includes(item.translator_id) ){
             uniqueHistoryIds.push( item.translator_id );
+            Object.entries( _self.viewedHistoryTabs ).map(o => {
+              
+              if(o[0] ==  item.translator_id){
+
+                TxRest.patchData(`topic/${item.id}/status/viewed`).
+                  then(data => {
+                    if(!data.message)
+                      item.viewed = true
+                      window.sessionStorage.removeItem('viewedHistoryTabs')
+                  })
+
+                
+              }
+            })
             acc.push({
               ...item,
               avatar: avatar, 
@@ -261,9 +279,10 @@ class DashBoard extends React.Component {
     this.setState({language: list})
   }
 
-  visitedIndex(visitedIdx){
-
-    console.log(visitedIdx)
+  visitedIndex(visitedTranslatorId){
+    let _self = this;
+    this.viewedHistoryTabs[visitedTranslatorId] = true;
+    window.sessionStorage.viewedHistoryTabs = JSON.stringify(this.viewedHistoryTabs)
   }
 
   componentWillUnmount() {
@@ -313,17 +332,20 @@ class DashBoard extends React.Component {
   }
 
   render() {
-    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator, translators } = this.state;
+    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator, translators, notShowWellcome } = this.state;
 
+    console.log(notShowWellcome)
     return (
       <div className="f f-col outer dashboard-user">
         <Header currentRole={this.props.currentRole}/>
         
+        {!notShowWellcome ? <Wellcome /> :
         <div className="f h100">
+          
           <div className="f f-align-2-2 outer-left"  style={{display:`${!isTablet?'flex':mainScreen?'none':'flex'}`}}>
             <ScrollRestortion scrollId={`sidebarUserDb`}  className={'f sidebar'} >
               {/* CREATE TAB */}
-              <Link to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__create-tab" >
+              <Link tabIndex={"1"} to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__create-tab" >
                 <div className="dashboard-user__create-tab-plus">
                 </div>
                 <div className="dashboard-user__create-tab-content">Создать запрос на перевод
@@ -335,7 +357,7 @@ class DashBoard extends React.Component {
               { pendingTabs.map(tab => {
                
                 return (
-                  <Link  to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId && typePage === 'pending' ? 'selected' : ''}`} key={tab.index} >
+                  <Link  tabIndex={"2"} to={{pathname:`/dashboard/pending/${tab.id}`,state: {mainScreen: true, page:{typePage: 'pending', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__searchtab ${tab.id === pageTypeId && typePage === 'pending' ? 'selected' : ''}`} key={tab.index} >
                     <figure className="f f-align-2-2 dashboard-user__searchtab-avatar"> <img src={animatedAvatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__searchtab-details">
                       <div className="dashboard-user__searchtab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
@@ -356,7 +378,7 @@ class DashBoard extends React.Component {
                 let outputPublishTime = getTabTime(publishTime);
                 let translator = tab.translator; 
                 return (
-                  <Link key={getUniqueKey()} to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId && typePage === 'inwork' ? 'selected' : ''}`} key={tab.index}>
+                  <Link key={getUniqueKey()}  tabIndex={"2"}  to={{pathname:`/dashboard/inwork/${tab.id}`,state: {mainScreen: true, page:{typePage: 'inwork', id: tab.id}}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === pageTypeId && typePage === 'inwork' ? 'selected' : ''}`} key={tab.index}>
                     <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={translator.image || avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                       <div className="dashboard-user__tab-title">{ translator.first_name + ' ' + translator.last_name}</div>
@@ -399,7 +421,7 @@ class DashBoard extends React.Component {
                 let finishShouldBe = new Date(+start + durationShouldBe*1000);
                 let duration = (finishTime - start)/1000;
                 return (
-                  <Link to={{pathname:`/dashboard/history/${translator.id}`, state: {mainScreen: true,  translator, page:{typePage: 'history', id: translator.id}}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${translator.id === pageTypeId  && typePage === 'history' ? 'selected' : ''}`} key={index} >
+                  <Link  tabIndex={"2"} to={{pathname:`/dashboard/history/${translator.id}`, state: {mainScreen: true,  translator, page:{typePage: 'history', id: translator.id}}}}  className={`f f-align-1-2 dashboard-user__tab dashboard-user__tab__history ${translator.id === pageTypeId  && typePage === 'history' ? 'selected' : ''}`} key={index} >
                     <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={translator.image || avatar} alt="Textra" /> </figure>
                     <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                       <div className="dashboard-user__tab-title"> {translator.first_name + ' ' +
@@ -409,7 +431,7 @@ class DashBoard extends React.Component {
                     <div className="f f-col f-align-2-3 dashboard-user__tab-info">
                       <div className="dashboard-user__tab-info__time">
                         { /* Show only when not been seen yet.*/ 
-                          tab.notSeen && <Timer start={new Date() - 990} duration={1}/>}
+                          !tab.viewed && <Timer start={new Date() - 990} duration={1}/>}
                         <time>{`${outputPublishTime}`}</time>
                       </div>
                       <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId && typePage === 'history'} />
@@ -430,7 +452,7 @@ class DashBoard extends React.Component {
               :''}
               <Switch>
                 <RoutePassProps exact redirect="/dashboard/create" path="/dashboard" component={Create} translator={translator}  store={this.store} languages={language} store={this.store} translators={translators}/> 
-                <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language} store={this.store} translators={translators}/>
+                <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language} store={this.store} translators={translators} isTablet={this.state.isTablet}/>
                 <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
                  data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}/>
                 <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
@@ -440,7 +462,8 @@ class DashBoard extends React.Component {
               </Switch>
             </div>
           </div>
-        </div>
+          </div>
+        }
       </div>
     )
   }
@@ -452,6 +475,32 @@ const RoutePassProps = ({ component: Component, redirect, ...rest }) =>
     ? <Route {...rest} render={props => <Component {...props} {...rest} />} />
     : <Redirect to={`${redirect}`} />);
 
+
+
+class Wellcome extends React.Component{
+
+  setShowWellcome(e){
+    window.localStorage.setItem('notShowWellcome', JSON.stringify(true));
+  }
+
+  render(){
+
+    return <div className="main__welcome">
+            <p>1. Спасибо за регистрацию на сервисе ручных переводов Taxtra. 
+            В знак благодарности мы предоставляем Вам на счет бонусные 50 грн для Ваших первых переводов. 
+            Чтобы создать запрос на первый перевод жмите кнопку:</p>
+            <p>2. Спасибо за регистрацию на сервисе ручных переводов Taxtra. 
+            В знак благодарности мы предоставляем Вам на счет бонусные 50 грн для Ваших первых переводов. 
+            Чтобы создать запрос на первый перевод жмите кнопку:</p>
+            <Link tabIndex={"1"} to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-2-2 main__welcome-button dashboard-user__create-tab" onClick={this.setShowWellcome}>
+                <div className="dashboard-user__create-tab-plus">
+                </div>
+                <div className="dashboard-user__create-tab-content">Создать запрос на перевод
+                </div>
+            </Link>
+          </div>
+  }
+}
 
 class HistoryList extends React.Component { 
   
@@ -474,10 +523,11 @@ class HistoryList extends React.Component {
 
 
   componentWillMount(){
+    let _self = this;
     this.messageStore = new MessageStore('translated-topic/user', this.id);
     if(this.id){
-      this.setState({currentData: MessageStore.getMessages('translated-topic/user', this.id) })
-      this.props.visitedIndex(this.id)
+      let currentData = MessageStore.getMessages('translated-topic/user', this.id)
+      this.setState({ currentData });
     }
   }
 
@@ -495,9 +545,11 @@ class HistoryList extends React.Component {
   componentWillReceiveProps({languages, id, translator}){
     let _self = this;
     if(!_self._isMounted) return 
-    if(id)
-      this.setState({currentData: MessageStore.getMessages('translated-topic/user', id)})
+    if(id){
+      let currentData = MessageStore.getMessages('translated-topic/user', this.id)
+      this.setState({currentData})
 
+    }
     this.setState({languages, translator});
 
   }
@@ -542,6 +594,10 @@ class HistoryList extends React.Component {
   render() {
     let { currentData, translator } = this.state || {currentData: []},
       _self = this; 
+
+    if( currentData[0] && currentData[0].id ){
+        _self.props.visitedIndex(currentData[0].translator_id)
+    }
 
     this.lastCreatedDate = null;
     if (!currentData.length)
@@ -858,7 +914,7 @@ class Pending extends React.Component {
             <div className={'f f-align-2-2 dashboard-user__searching-info '}>
               <div className={'f f-align-2-2 dashboard-user__searching-info__exclamation info__exclamation--info'}>i</div>
               <div className={'f f-align-1-2  dashboard-user__searching-info__message '}>{`
-                  Ваш запрос создан. После того, как преводчик возмет заказ в работу, ориентировочное время на перевод составит ${humanReadableTime(duration)}. Для повышение качества перевода мы рекомендуем не закрывать это окно.
+                  Ваш запрос создан. После того, как переводчик возьмет заказ в работу, ориентировочное время на перевод составит ${humanReadableTime(duration)}. Для повышения качества перевода мы рекомендуем не закрывать это окно.
                 `}
               </div>
             </div>
@@ -925,7 +981,8 @@ class Create extends React.Component {
     newId: '',
     translators: this.props.translators,
     translatorsOpt: [],
-    isNotExceedLetters: true
+    isNotExceedLetters: true,
+    isTablet: this.props.isTablet
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -951,7 +1008,7 @@ class Create extends React.Component {
 
   componentWillReceiveProps(newProps){
     if(!this._isMounted) return
-      let {languages, store, translator, translators} = newProps;
+      let {languages, store, translator, translators, isTablet} = newProps;
     if(languages) this.updateHandler(languages);
     if(store) this.store = store;
     if(translator)
@@ -962,6 +1019,10 @@ class Create extends React.Component {
             }})
     if(translators){
         this.setState({translators})
+    }
+
+    if(isTablet !== null){
+      this.setState({isTablet})
     }
     this.getTranslators(translators);
 
@@ -1152,7 +1213,7 @@ class Create extends React.Component {
            valueTranslator, isSearchMenuTranslatorVisible, isBlocking, 
            translatorMessage, letterTime, letterPrice, isEnoughMoney, 
            blockSubmit, redirectToPending, newId, translatorsOpt: translatorsPool,
-           isNotExceedLetters } = this.state;
+           isNotExceedLetters, isTablet } = this.state;
 
     if( redirectToPending ){
      return <Redirect push={true} to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
@@ -1187,7 +1248,7 @@ class Create extends React.Component {
               autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs}
-              tabIndex={"-1"} />
+              tabIndex={"1"} />
             <div className={'u-my-1 dashboard-user__create-swaplang'} onClick={this.swapLang} ><img src={sl} /></div>
             <Select
               ref={(n) => this.createLangTo = n}
@@ -1201,7 +1262,7 @@ class Create extends React.Component {
               autosize={true}
               clearable={false}
               arrowRenderer={this.arrowElementLangs}
-              tabIndex={"-1"}
+              tabIndex={"1"}
             />
             <div className={'dashboard-user__create-topbar__chooser'}  >
               <div className={'f f-align-2-2 dashboard-user__create-topbar__chooser-trigger'} onClick={this.callTranslatorSearchNenu} >
@@ -1230,7 +1291,7 @@ class Create extends React.Component {
                   options={translatorsPool}
                   onBlur={this.makeSearchMenuTranslatorUnnisible}
                   onValueClick={this.makeSearchMenuTranslatorUnnisible}
-                  tabIndex={"-1"}
+                  tabIndex={"1"}
                 />
               </div>
             </div>
@@ -1250,8 +1311,8 @@ class Create extends React.Component {
             <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * letterTime)} hint={'Длительность перевода'} />
             <Indicator className={`f f-align-2-2 ${isNotExceedLetters?'':'String-indicator__error'}`} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов(не более 1800)'} /> 
             <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100 + 10).toFixed(2)}₴`} hint={'Стоимость перевода'} />{/* we start from 10₴  */}
-
-          <input id="submit" type="submit" {...this.disabled && {disabled:'true'}}  value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
+            {!isEnoughMoney && !isTablet && <p>Недостаточно денежных средств.</p>}
+          <input tabIndex={"1"} id="submit" type="submit" {...this.disabled && {disabled:'true'}}  value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
           </div>
       </form>
       </div>

@@ -17,6 +17,7 @@ import  { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
 import UserStore from './store/UserStore.js';
 import FeedStore from './store/FeedStore.js';
+import MessageStore from './store/MessageStore.js';
 import Auth from './store/AuthStore.js';
 import {TxRest} from './services/Api.js';
 import './polyfill';
@@ -89,22 +90,25 @@ const RestorePassword = (props) => <Lazy {...props} load={() => import('./Restor
 
 class App extends React.Component {
   
-   componentWillMount() {
-    Auth.refreshToken();
+   async componentWillMount() {
+    
     Auth.init();
-    TxRest.updateStatus({immediately:true});
+    await Auth.refreshToken();
     TxRest.initSocket();
-    TxRest.initLiqPay();
+    await TxRest.initLiqPay();
 
     if(!Auth.isAuthenticated){
-      if( Auth.loadSession){
+      if( Auth.loadSession ){
         Store.loadSession()
         FeedStore.loadSession()
         UserStore.loadSession()
+        MessageStore.loadSession()
+        await TxRest.updateStatus({immediately:true});        
       }else{
         Store.clearSession()
         UserStore.clearSession()
         FeedStore.clearSession()
+        MessageStore.clearSession()
       }
     }
 
@@ -121,6 +125,7 @@ class App extends React.Component {
     Store.saveSession();
     UserStore.saveSession();
     FeedStore.saveSession();
+    MessageStore.saveSession();
   }
 
   render(){

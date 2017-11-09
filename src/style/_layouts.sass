@@ -212,6 +212,10 @@
     height: 630px
     padding-top: 70px
     background: #00eaf8 linear-gradient(143deg, #00eaf8 0%, #6d42ef 100%) center/cover no-repeat
+    +rmin(768)
+      background: #00eaf8 url('./../assets/background_landing.png') center/cover no-repeat
+      & .text-center
+        margin: 160px auto 140px;
     +r(767)
       height: auto
       padding: 80px 0
@@ -219,7 +223,7 @@
       width: 750px
       height: 442px
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2)
-      margin-bottom: -70px
+      margin-bottom: -300px
       +r(767)
         margin-bottom: -20px
         width: auto
@@ -230,6 +234,10 @@
         +r(767)
           width: 350px
           height: 209px
+    + .service-block
+      +rmin(768)
+        padding-top: 420px
+        height: 900px
   .intro2-block
     height: 570px
     background-color: #f2faff
@@ -349,6 +357,7 @@
     border-radius: 5px
     padding: 10px
     margin-bottom: 10px
+    clear: both
     &__exclamation
       flex: 0 0 50px
       position: relative
@@ -382,6 +391,17 @@
     height: 100%
   .outer-right
     width: calc(100% -  334px)
+  .main__welcome
+    width: 80%
+    margin: auto
+    p
+      margin-bottom: 10px 
+    &-button
+      border: 1px #eaeaea solid
+      border-radius: 8px
+      min-width: 300px
+      width: 60%
+      margin: 35px auto
 .dashboard-user .outer-right
   top: 66px
 .data__delimiter
@@ -949,6 +969,7 @@
         &__text
           margin-left: 15px 
           color: $selected-blue
+          white-space: pre-line
         &:hover
           background-color: darken($bg-blue,5)
 
@@ -962,7 +983,8 @@
   border-bottom: 1px $grey solid
   flex-shrink: 0
   +nosel
-  &:hover
+  &:hover,
+  &:focus
     background: darken($bg-blue, 10%)
   &-plus
     position: relative
@@ -1002,7 +1024,8 @@
   background: $bg-blue
   border-bottom: 1px $grey solid
   +nosel
-  &:hover
+  &:hover,
+  &:focus
     background: darken($bg-blue, 10%)
   &.selected
     background: $selected-blue
@@ -1090,7 +1113,8 @@
   border-bottom: 1px $grey solid
   flex-shrink: 0
   +nosel
-  &:hover
+  &:hover,
+  &:focus
     background: $bg-blue
   &.selected
     background: $selected-blue
@@ -1246,21 +1270,29 @@
     margin-bottom: -2px
     border-radius: 50%
     border: 1px solid #fff
+    .dashboard-user__tab__history &
+        background: $selected-blue
     &-big
       height: 15px
       width: 15px
       margin-bottom: 0px
     path
       fill: $selected-blue
+      .dashboard-user__tab__history &
+        fill: $selected-blue  
     .selected &
       background: $grey
-      border: 1px solid $selected-blue
+      border: 1px solid $selected-blue 
+      .dashboard-user__tab__history &
+        background: $selected-blue  
+        border: 1px solid $selected-blue  
       path
         fill: #fff
     &-yellow
       background: $yellow
       & path
-          fill: $yellow !important
+        fill: $yellow
+        
 
 .DisplaySwitcher
   position: absolute
@@ -1387,9 +1419,10 @@
       &__level-1
         background-color: #353846
         li.active &
-          background-color: darken(#353846,7)
-        &:hover
-          background-color: darken(#353846,1)
+          background-color: darken(#0499ff,7)
+        &:hover,
+        &:focus
+          background-color: darken(#0499ff,1)
           color: rgba(#fff,.9)
         .translator-menu__item__info
           background-color: #fff
@@ -1397,10 +1430,17 @@
       &__level-2
         background-color: #262b3a
         li.active &
-          background-color: darken(#262b3a,3)
-        &:hover
-          background-color: darken(#262b3a,1)
+          background-color: darken(#0499ff,3)
+          .translator-menu__item__info
+            background-color: #fff
+            color: #262b3a
+        &:hover,
+        &:focus
+          background-color: darken(#0499ff,1)
           color: rgba(#fff,.9)
+          & .translator-menu__item__info
+            background-color: #fff
+            color: #262b3a
         .translator-menu__item__info
           background-color: #0099ff
           color: #fff
@@ -1467,7 +1507,8 @@
   flex-shrink: 0
   border-bottom: 1px $grey solid
   +nosel
-  &:hover
+  &:hover,
+  &:focus
     background: $bg-blue
   &.selected
     background: $selected-blue
@@ -1682,7 +1723,8 @@
     color: rgb(0, 192, 255)
     margin-left: 10px
     margin-right: 4px
-    &:hover
+    &:hover,
+    &:focus
       color: darken(rgb(0, 192, 255),10)
 
 .translator-feed__topline ~ *:nth-of-type(2)
@@ -1708,11 +1750,12 @@
     &:first-of-type
       opacity: 1
       pointer-events: auto
-    &:hover
+    &:hover,
+    &:focus
         box-shadow: 0 2px 10px 1px rgba(#228fd8, 0.15)
     &.isRemoving
       transform: translateX(-200%) !important
-      transition: transform 1s ease-out 2s !important
+      transition: transform 1s ease-out 3s !important
     +r(768)
       width: 90%
       margin: 10px auto
@@ -1806,6 +1849,7 @@
         overflow: hidden
         text-overflow: ellipsis
         letter-spacing: -0.05px
+        white-space: pre-line
         +r(768)
           margin-top: 10px 
       &__bottombar
@@ -1829,8 +1873,6 @@
       border-bottom-left-radius: 0
       border-top-right-radius: 2px
       border-bottom-right-radius: 2px
-      svg
-        margin: auto
       .canGetMore:nth-of-type(2) &,
       .canGetMore:nth-of-type(3) &,
       .canGetMore:nth-of-type(4) &
@@ -1916,6 +1958,7 @@
       letter-spacing: -0.06px
       line-height: 20px
       font-size: 14px
+      white-space: pre-line
     &__bottombar
       +nosel
       color: $text-dark
@@ -1985,6 +2028,7 @@
       letter-spacing: -0.06px
       line-height: 20px
       min-height: 100px
+      white-space: pre-line
   &-reply__constols
     flex: 1 1 auto
     align-self: flex-end
@@ -2067,7 +2111,7 @@
     width: 100%
 
 
-// ASide Menu 
+// ASide Menu
 .admin
   &-menu
     height: 100%
@@ -2107,9 +2151,10 @@
         background-color: #353846
         color: #fff
         li.active &
-          background-color: darken(#353846,7)
-        &:hover
-          background-color: darken(#353846,1)
+          background-color: darken(#0499ff,7)
+        &:hover,
+        &:focus
+          background-color: darken(#0499ff,1)
           color: rgba(#fff,.9)
         .translator-menu__item__info
           background-color: #fff
@@ -2118,7 +2163,8 @@
         background-color: #262b3a
         li.active &
           background-color: darken(#262b3a,3)
-        &:hover
+        &:hover,
+        &:focus
           background-color: darken(#262b3a,1)
         .translator-menu__item__info
           background-color: #0099ff
@@ -2377,6 +2423,7 @@
       letter-spacing: -0.06px
       line-height: 20px
       font-size: 14px
+      white-space: pre-line
     &__bottombar
       +nosel
       color: $text-dark
@@ -2459,6 +2506,7 @@
       font-weight: 100
       letter-spacing: -0.06px
       line-height: 20px
+      white-space: pre-line
     &__bottombar
       +nosel
       color: $text-dark
@@ -2494,6 +2542,8 @@
     background-color: $bg-blue
     &__content
       padding: 5px 12px
+      &__text
+        white-space: pre-line
     &__date
       flex: 0 1 auto
       text-align: right
