@@ -334,7 +334,6 @@ class DashBoard extends React.Component {
   render() {
     let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator, translators, notShowWellcome } = this.state;
 
-    console.log(notShowWellcome)
     return (
       <div className="f f-col outer dashboard-user">
         <Header currentRole={this.props.currentRole}/>
@@ -486,12 +485,34 @@ class Wellcome extends React.Component{
   render(){
 
     return <div className="main__welcome">
-            <p>1. Спасибо за регистрацию на сервисе ручных переводов Taxtra. 
-            В знак благодарности мы предоставляем Вам на счет бонусные 50 грн для Ваших первых переводов. 
-            Чтобы создать запрос на первый перевод жмите кнопку:</p>
-            <p>2. Спасибо за регистрацию на сервисе ручных переводов Taxtra. 
-            В знак благодарности мы предоставляем Вам на счет бонусные 50 грн для Ваших первых переводов. 
-            Чтобы создать запрос на первый перевод жмите кнопку:</p>
+            <h1 className="h2 u-text-center u-my-3 u-text-font__light">Textra приветствует Вас!</h1>
+            <p>Теперь вы можете получать качественный перевод текста в максимально короткие сроки, как
+            если бы вы были всегда на связи с личным профессиональным переводчиком.</p>
+            <div className="main__welcome-table u-mt-5 u-mb-3">
+              <h2 className="h4 u-text-font__light u-my-1 u-text-center">ПОДАРОК</h2> 
+              <p>Чтобы протестировать качество и скорость переводов Textra - мы дарим
+              вам 50 грн. Этих денег вам хватит на перевод текста, объемом 267 симво-	
+              лов или примерно 50 слов.</p>
+            </div>
+            <div className="main__welcome-table u-mb-3">
+              <h2 className="h4 u-text-font__light u-my-1 u-text-center">БАЛАНС</h2> 
+              <p>По истечении баланса, чтобы продолжить размещать новые заказы, вам 		
+              необходимо будет пополнить личный счет. Сделать это можно нажав кноп-	
+              ку «Пополнить» в правом верхнем углу</p>
+            </div>
+            <div className="main__welcome-table u-mb-3">
+              <h2 className="h4 u-text-font__light u-my-1 u-text-center">КОНТРОЛЬ</h2> 
+              <p>При наборе текста вы можете отслеживать информацию о максимальном
+              времени перевода, количестве символов набранного вами текста, а также
+              стоимости перевода, которая будет списана с вашего баланса после разме	
+              щения заказа</p>
+            </div>
+            <div className="main__welcome-table u-mb-3">
+              <h2 className="h4 u-text-font__light u-my-1 u-text-center">БОНУС</h2> 
+              <p>Поскольку Textra ориентирована на переводы текста объемом до 1 стра-
+              ницы, мы не ограничиваем заказы по минимальному количеству слов.
+              Это значит, что вы можете перевести с Textra даже 1 предложение</p>
+            </div>
             <Link tabIndex={"1"} to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-2-2 main__welcome-button dashboard-user__create-tab" onClick={this.setShowWellcome}>
                 <div className="dashboard-user__create-tab-plus">
                 </div>

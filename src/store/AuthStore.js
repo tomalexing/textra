@@ -124,11 +124,9 @@ const  Auth = {
 
   refreshToken(){
     let self = this;
-    console.log('refreshToken pre')
     if( typeof window === 'undefined' ) return 
     if( this.isAuthenticated )
       return TxRest.getData('refreshToken').then(data => {
-        console.log('refreshToken')
         self.token = data.token;
         window.localStorage.setItem('token', self.token);
       })

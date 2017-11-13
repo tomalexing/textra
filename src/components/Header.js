@@ -241,7 +241,7 @@ class Header extends React.Component{
                   </button>
                   <ul ref={n => this.mobile_menu = n} className="f f-col f-align-2-2 header-menu__mobile__in">
                     <NavLink tabIndex='1' to={'/'} comp={isActive}>Рабочий стол</NavLink>
-                    {/* <NavLink to={'/about'}>О нас</NavLink> */}
+                    <NavLink tabIndex='1' to={'/about'}>О нас</NavLink>
                     <NavLink tabIndex='1' to={'/help'}>Поддержка</NavLink>
                   </ul>
                 </div>
@@ -250,7 +250,7 @@ class Header extends React.Component{
                 </div>
                 <ul className="f f-align-1-2 header-menu">
                   { Auth.isAuthenticated && <NavLink to={'/translator'} tabIndex='1' comp={isActive}>Рабочий стол</NavLink>}
-                  {/* <NavLink to={'/about'}>О нас</NavLink> */}
+                  <NavLink tabIndex='1' to={'/about'}>О нас</NavLink>
                   <NavLink tabIndex='1' to={'/help'}>Поддержка</NavLink>
                 </ul>
                 <div className="f f-align-2-2 header-account">

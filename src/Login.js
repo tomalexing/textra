@@ -168,7 +168,7 @@ class Login extends React.Component {
                 <div className="f f-gap-2 registform-regist__social"> 
                   {/* <button onClick={this.loginFb} className="btn btn-primiry btn-normal btn-block fb-color"><img className="f f-align-1-2 u-mx-auto"  src={fb} alt="fb"/></button> */}
                   <FacebookLogin
-                    appId={ process.env.NODE_ENV == 'development' ? "761774717317607" : "495884620782080" }  // for localhost and textra.iondigi.com
+                    appId={ process.env.NODE_ENV == 'development' ? "761774717317607" : "1877644735897191" }  // for localhost and textra.io
                     autoLoad={false}
                     fields="name,email,picture"
                     scope="public_profile,email,user_birthday"
@@ -181,7 +181,7 @@ class Login extends React.Component {
                   <GoogleLogin
                     clientId={ process.env.NODE_ENV == 'development'
                       ? "960245280639-apkq5ilofburuimjtte66313b9r41a44.apps.googleusercontent.com" 
-                      : "592190753761-7h6mnscbc9vjlegb899ikgm07agdh8lv.apps.googleusercontent.com"} // for localhost and textra.iondigi.com
+                      : "1010789146971-41i6g5qmr0s3jg20pt5b4bodtt9aq1vh.apps.googleusercontent.com"} // for localhost and textra.io
                     autoLoad={false}
                     cookiePolicy={'none'}
                     onSuccess={this.loginGoog}

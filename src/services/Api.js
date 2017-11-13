@@ -25,7 +25,6 @@ export const TxRest = (() => {
           
           })(document, 'script', 'sails-io', () => {
 
-              console.log(process.env.NODE_ENV)
               
               window.io.sails.url = socketHost + port;
               window.io.sails.environment = process.env.NODE_ENV;
@@ -75,7 +74,6 @@ export const TxRest = (() => {
       return new Promise( resolve => {
         clearTimeout(timerLiqpay);
         timerLiqpay = setTimeout( _ => {
-          console.log('timerLiqpay');
           TxRest.getData(`profile`)
             .then((data, err) => {
               if(!data.message && !data.err && !isNaN(data.balance)) {

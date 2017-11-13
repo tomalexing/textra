@@ -65,6 +65,9 @@ const Test = (props) => <Lazy {...props} load={() => import('./Test')}/>
 const Translator = (props) => <Lazy  {...props} load={() => import('./Translator')}/>
 
   // eslint-disable-next-line
+const About = (props) => <Lazy  {...props} load={() => import('./About')}/>
+
+// eslint-disable-next-line
 const Admin = (props) => <Lazy {...props} load={() => import('./Admin')}/>
 
   // eslint-disable-next-line
@@ -103,7 +106,7 @@ class App extends React.Component {
         FeedStore.loadSession()
         UserStore.loadSession()
         MessageStore.loadSession()
-        await TxRest.updateStatus({immediately:true});        
+        await TxRest.updateStatus({immediately:true});
       }else{
         Store.clearSession()
         UserStore.clearSession()
@@ -147,6 +150,7 @@ class App extends React.Component {
                       <Route path="/private" component={Private} location={location}  key={getUniqueKey()} />
                       <Route path="/term-of-use" component={Term} location={location}  key={getUniqueKey()} />
                       <Route path="/help" component={Support} location={location}  key={getUniqueKey()} />
+                      <Route path="/about" component={About} location={location}  key={getUniqueKey()} />
                       <Route path="/restorepassword" component={RestorePassword} location={location}  key={getUniqueKey()} />
 
                     </ReactCSSTransitionGroup>
