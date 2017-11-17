@@ -491,14 +491,12 @@ class Wellcome extends React.Component{
             <div className="main__welcome-table u-mt-5 u-mb-3">
               <h2 className="h4 u-text-font__light u-my-1 u-text-center">ПОДАРОК</h2> 
               <p>Чтобы протестировать качество и скорость переводов Textra - мы дарим
-              вам 50 грн. Этих денег вам хватит на перевод текста, объемом 267 симво-	
-              лов или примерно 50 слов.</p>
+              вам 50 грн. Этих денег вам хватит на перевод текста, объемом 267 символов или примерно 50 слов.</p>
             </div>
             <div className="main__welcome-table u-mb-3">
               <h2 className="h4 u-text-font__light u-my-1 u-text-center">БАЛАНС</h2> 
               <p>По истечении баланса, чтобы продолжить размещать новые заказы, вам 		
-              необходимо будет пополнить личный счет. Сделать это можно нажав кноп-	
-              ку «Пополнить» в правом верхнем углу</p>
+              необходимо будет пополнить личный счет. Сделать это можно нажав кнопку «Пополнить» в правом верхнем углу</p>
             </div>
             <div className="main__welcome-table u-mb-3">
               <h2 className="h4 u-text-font__light u-my-1 u-text-center">КОНТРОЛЬ</h2> 
@@ -509,14 +507,13 @@ class Wellcome extends React.Component{
             </div>
             <div className="main__welcome-table u-mb-3">
               <h2 className="h4 u-text-font__light u-my-1 u-text-center">БОНУС</h2> 
-              <p>Поскольку Textra ориентирована на переводы текста объемом до 1 стра-
-              ницы, мы не ограничиваем заказы по минимальному количеству слов.
+              <p>Поскольку Textra ориентирована на переводы текста объемом до 1 страницы, мы не ограничиваем заказы по минимальному количеству слов.
               Это значит, что вы можете перевести с Textra даже 1 предложение</p>
             </div>
             <Link tabIndex={"1"} to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-2-2 main__welcome-button dashboard-user__create-tab" onClick={this.setShowWellcome}>
                 <div className="dashboard-user__create-tab-plus">
                 </div>
-                <div className="dashboard-user__create-tab-content">Создать запрос на перевод
+                <div className="dashboard-user__create-tab-content">Создать запрос
                 </div>
             </Link>
           </div>
@@ -636,7 +633,7 @@ class HistoryList extends React.Component {
           <div className={'dashboard-user__history-reply__avatar'}></div>
           <Link to={{pathname:'/dashboard/create',state:{mainScreen:true, translator: translator,  page:{typePage: 'create', id: undefined}}}} className="f f-align-1-2 dashboard-user__history-create__content" >
             <div className="dashboard-user__history-create__content__plus"></div>
-            <div className="dashboard-user__history-create__content__text">Создать персональный запрос на перевод</div>
+            <div className="dashboard-user__history-create__content__text">Отправить заказ этому переводчику</div>
           </Link>
           <div className={'dashboard-user__history-reply__constols'}></div>
           <div className={'dashboard-user__history-post__date'}></div>
@@ -1192,7 +1189,23 @@ class Create extends React.Component {
       label: -1,
       value: 'Все переводчики',
       image: avatarAll
-    }].concat(translators.map(item => {
+    }, {
+        label: -1,
+        value: 'Все переводчики',
+        image: avatarAll
+      }, {
+        label: -1,
+        value: 'Все переводчики',
+        image: avatarAll
+      }, {
+        label: -1,
+        value: 'Все переводчики',
+        image: avatarAll
+      }, {
+        label: -1,
+        value: 'Все переводчики',
+        image: avatarAll
+      }].concat(translators.map(item => {
         return {
           label: item.id,
           value: item.first_name + ' ' + item.last_name,

@@ -28,3 +28,13 @@ See the section about [deployment](#deployment) for more information.
 ### `npm run eject`
 
 **Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+
+
+### deploy
+
+Navigate to projects folder
+scp -r ./textra ubuntu@ec2-54-93-78-212.eu-central-1.compute.amazonaws.com:~
+
+Then, at the server:
+docker build -t textra-app-image .
+docker run --name textra-app-container -d -p 80:80 textra-app-image

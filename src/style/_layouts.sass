@@ -405,9 +405,11 @@
     &-button
       border: 1px #eaeaea solid
       border-radius: 8px
-      min-width: 300px
+      min-width: 253px
       width: 60%
       margin: 35px auto
+      .dashboard-user__create-tab-plus
+        margin-left: 0
     &-table
       overflow: hidden
       +rmin(768)
@@ -586,6 +588,8 @@
           opacity: 1
           +tr(opacity .5s)
           z-index: 110
+          .Select-menu-outer > *
+            max-height: 108px
   &__create-bottombar
     .submit-post
       margin-left: auto

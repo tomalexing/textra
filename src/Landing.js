@@ -49,7 +49,7 @@ export default class Landing extends React.Component {
               <div className="container f f-col f-align-2-2 stuff">
                   <div className="text-center">
                     <h2 className="h1 text-header"><span className="text-highLight">Зарабатывайте</span> с Textra!</h2>
-                    <p className="text-subheader">Профессиональный переводчик, гибкий работы и стабильный доход – это про Вас? Будем рады рассмотреть Вашу кандидатуру для участия в нашей команде. Оставьте Вашу заявку на участие в разделе "Поддержка".</p>
+                    <p className="text-subheader">Профессиональный переводчик, гибкий график работы и стабильный доход – это про Вас? Будем рады рассмотреть Вашу кандидатуру для участия в нашей команде. Оставьте Вашу заявку на участие в разделе "Поддержка".</p>
                   </div>
                   <div className="intro2-block__featurePic">
                     <img  srcSet={`${translator2x} 2x, ${translator} 1x`}  src={translator} alt="Textra dashboard-translator"/>
