@@ -509,8 +509,9 @@ class SideList extends React.PureComponent{
         </div>
        {/* PENDINGS TABs */} 
         { pendingTabs.map(tab => {
+     
           return (
-            <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
+            <Link key={getUniqueKey()} to={{ pathname: `${route}/pending/${tab.id}`, state: { pageType: 'user', id: user.uuid, historyId:  tab.id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
               <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={tab.user && tab.user.image ||avatar } alt="Textra" /> </figure>
               <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                 <div className="dashboard-user__tab-title" title={tab.translator && `Ожидание переводчика ${tab.translator.first_name} ${tab.translator.last_name}`} 
@@ -529,9 +530,8 @@ class SideList extends React.PureComponent{
           let publishTime = new Date(tab.created_at);
           let outputPublishTime = getTabTime(publishTime);
           let attachedUser = tab.translator || tab.user; 
-
           return (
-            <Link key={getUniqueKey()} to={{pathname: `${route}/pending/${tab.id}`, state:{pageType: 'user', id: user.uuid, historyId: tab.source_messages.length > 0 &&  tab.source_messages[tab.source_messages.length-1].id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
+            <Link key={getUniqueKey()} to={{ pathname: `${route}/pending/${tab.id}`, state: { pageType: 'user', id: user.uuid, historyId: tab.id}}} className={`f f-align-1-2 dashboard-user__tab ${tab.id === activeTab ? 'selected' : ''}`} >
               <figure className="f f-align-2-2 dashboard-user__tab-avatar"> <img src={attachedUser && attachedUser.image||avatar} alt="Textra" /> </figure>
               <div className="f f-col f-align-1-1 dashboard-user__tab-details">
                 <div className="dashboard-user__tab-title">{ attachedUser.first_name + ' ' + attachedUser.last_name}</div>
@@ -1004,7 +1004,7 @@ class Users extends React.Component {
       search:{
         value
       }
-    }), () => {
+    }), debounce(() => {
       Promise.resolve().then( _ => {
             return new Promise(r => {
               if(_self.state.filter.value === 'a'){
@@ -1018,7 +1018,7 @@ class Users extends React.Component {
               },r)
             });
           })
-    })
+    },1000, false))
   }
 
   render() {
@@ -1436,7 +1436,6 @@ class Appeal extends React.Component {
 class Pending extends React.Component {
   constructor(p){
     super(p);
-    this.store = this.props.store;
     this.id = this.props.id;
     this.userId = this.props.usedId;
     this._isMounted = false;
@@ -1452,7 +1451,6 @@ class Pending extends React.Component {
   componentDidMount(){
     this._isMounted = true;
     let _self = this;
-    
     let currentDataFromStore = UserStore.getItem(this.userId, this.id);
     if( currentDataFromStore ) this.setState({currentData : currentDataFromStore})
     TxRest.getData(`topic/${this.id}`).then((data) => {
@@ -1460,7 +1458,6 @@ class Pending extends React.Component {
         if(_self.state.currentData)
           data =  Object.assign({}, _self.state.currentData, data, _self.state.currentData.index );
         _self.setState({ currentData: data, stale : data.status === '2' });
-        _self.store && _self.store.itemUpdated(data, _self.state.index);
     })
   }
 
@@ -1496,10 +1493,7 @@ class Pending extends React.Component {
     
     if(!currentData)
         return <div/> 
-    
-    if(currentData.status === '2'){
-       return <Redirect to={{pathname:`/dashboard/history/${currentData.translator_id}`,state:{page:{typePage:'history', id: currentData.translator_id},translator: currentData.translator}}} />
-    }
+  
     
     if(currentData.created_at){
       created_at = new Date(currentData.created_at);

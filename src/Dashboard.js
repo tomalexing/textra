@@ -918,7 +918,7 @@ class Pending extends React.Component {
               </div>
               <div className={'dashboard-user__searching-post__constols'}>
                 {currentData.status === '0' &&
-                  <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.cancel(currentData.source_messages[0].id)}>
+                  <button className={'btn btn-primiry btn-mini f f-align-2-2'} onClick={this.cancel(currentData.id)}>
                     <img src={cancel} alt="cancel" />
                     <span>Отменить</span>
                   </button>

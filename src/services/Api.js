@@ -3,12 +3,12 @@ import AuthStore from './../store/AuthStore.js';
 // Textra Rest Api
 
 export const TxRest = (() => {
-    const host = 'http://52.59.207.236' //'http://api-textra.iondigi.com';
-    const socketHost = 'ws://52.59.207.236' //'http://api-textra.iondigi.com';
+  const host = 'http://api.textra.io' //'http://api-textra.iondigi.com';
+    const socketHost = 'ws://api.textra.io' //'http://api-textra.iondigi.com';
     const port = ':80';
     let timerLiqpay = null;
     function initSocket(){
-        
+          
           if(!AuthStore.isAuthenticated || AuthStore.alreadyInitSocket || !AuthStore.socketPath ) return
 
           let _self = this;

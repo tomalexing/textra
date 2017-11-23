@@ -52,9 +52,9 @@ const Timer = ({ start, duration, isBig = false, isExpired = false, finish, chec
   ];
 
   return (
-    <svg className={`Timer ${isBig ? 'Timer-big' : ''} ${isExpired ? 'Timer-yellow' : ''}`} xmlns="http://www.w3.org/2000/svg">
+    <span title={`${isExpired ? 'Время истекло' : 'В процессе работы'}`}><svg className={`Timer ${isBig ? 'Timer-big' : ''} ${isExpired ? 'Timer-yellow' : ''}`} xmlns="http://www.w3.org/2000/svg">
       <path d={points.join(' ')} />
-    </svg>
+    </svg></span>
   )
 }
 

@@ -579,7 +579,7 @@
         top: 118%
         right: 0
         opacity: 0
-         z-index: -1
+        z-index: -1
         +tr(opacity .5s)
         +r(768)
           width: 0
@@ -588,6 +588,8 @@
           opacity: 1
           +tr(opacity .5s)
           z-index: 110
+          .Select-menu-outer
+            overflow: hidden
           .Select-menu-outer > *
             max-height: 108px
   &__create-bottombar
@@ -2247,9 +2249,9 @@
     text-decoration: none
     color: #228fd8
     padding: 7px
-    +nosel
   &__avatar
     flex: 0 1 65px
+    +nosel
     img
       width: 50px
       height: 50px

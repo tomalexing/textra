@@ -923,7 +923,8 @@ class FeedList extends React.Component {
           _self.feedStore.deleteItem(index, id, {feedCommon:feedCommon, feedPerson:feedPerson});
           _self.state.currentData.splice(index,1);
           _self.props.refresh('inwork');
-          _self.redirectToReply = {do: true, replyId: id};
+          console.log(!(_self.state.error && _self.state.error.message))
+          _self.redirectToReply = { do: false , replyId: id};
           _self.forceUpdate();
         })
     }
@@ -932,7 +933,7 @@ class FeedList extends React.Component {
   render() {
 
 
-    if( this.redirectToReply && this.redirectToReply.replyId){
+    if (this.redirectToReply && this.redirectToReply.replyId && this.redirectToReply.do){
       return <Redirect 
       to={{pathname: Routes['reply'].path + '/' + this.redirectToReply.replyId, state: {page:{typePage:'reply', id: this.redirectToReply.replyId}, historyUser: '', secondScreen: false, mainScreen: true}}} />
     }

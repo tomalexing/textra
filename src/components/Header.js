@@ -270,7 +270,7 @@ class Header extends React.Component{
                             
                                 <h3 className="h3 u-mb-2">Введите сумму пополнения:</h3>
 
-                                <TxInput tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} customValidator={v => Number(v) > 0 || "Сумма должна быть больше нуля"}className="field-block " placeholder="Сумма, грн"/>
+                                <TxInput autoComplete="off" tag="input" tabIndex='1' setFocusToInput={true} type="text" name="amount" validate={[{'minLength':1}, 'required', 'number']} customValidator={v => Number(v) > 0 || "Сумма должна быть больше нуля"}className="field-block " placeholder="Сумма, грн"/>
 
                                 <img className={`${loadingLiqpay?'show':''} header-payment__loading`} src={tail_spin}/>
                                 
