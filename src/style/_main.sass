@@ -168,12 +168,14 @@
     .header-replenish
       text-decoration: none
       height: 14px
-      color: $grey-light
+      text-transform: uppercase
+      color: $selected-blue
       font-size: 12px
-      font-weight: 400
       line-height: 14px
       cursor: pointer
       background: transparent
+      +rmin(768)
+        font-weight: 700
       &:hover
         text-decoration: underline
     .header-paymentwrapper

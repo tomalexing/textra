@@ -4,6 +4,23 @@ In the project directory, you can run:
 
 ### `npm start`
 
+Create file settings.js in src directory, with such structuring
+
+const settings = {
+    hostAmazon: " ",
+    wsAmazon: " ",
+    portAmazon: " ",
+    hostDefault: " ",
+    wsDefault: " ",
+    portDefault: " ",
+    FbLocal: " ",
+    FbServer: " ",
+    GoogleLocal: " ",
+    GoogleServer: " "
+
+}
+export default settings
+
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
@@ -32,8 +49,8 @@ See the section about [deployment](#deployment) for more information.
 
 ### deploy
 
-Navigate to projects folder
-scp -r ./textra ubuntu@ec2-54-93-78-212.eu-central-1.compute.amazonaws.com:~
+Navigate to project folder
+scp -r ./build ubuntu@ec2-54-93-78-212.eu-central-1.compute.amazonaws.com:~/textra
 
 Then, at the server:
 docker build -t textra-app-image .

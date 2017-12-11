@@ -6,13 +6,27 @@ import ln from "./../assets/ln.svg";
 import insta from "./../assets/insta.svg";
 
 export const Footer = () => { 
-    return(<div className="footer f f-align-13-2">
+    let now = new Date();
+    return <div className="footer f f-align-13-2">
         <div className="f f-align-1-2">
-        <p >© 2017 Textra. Все права защищены. <Link className="text-highLight" to="/private">Политика конфиденциальности</Link> и  <Link className="text-highLight"  to="/term-of-use">Правила использования.</Link></p>
+          <p> © { now.getFullYear() } Textra. Все права защищены. <Link className="text-highLight" to="/private">
+              Политика конфиденциальности
+            </Link> и <Link className="text-highLight" to="/term-of-use">
+              Правила использования.
+            </Link>
+          </p>
         </div>
         <ul className="footer__social f f-align-3-2">
-        <li><a href="https://www.facebook.com/textra.io/" rel="noopener noreferrer" target="_blank"><img src={f} alt="facebook"/></a></li>
-        <li><a href="https://www.instagram.com/textra.io/" rel="noopener noreferrer" target="_blank"><img src={insta} alt="instagram"/></a></li>
+          <li>
+            <a href="https://www.facebook.com/textra.io/" rel="noopener noreferrer" target="_blank">
+              <img src={f} alt="facebook" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.instagram.com/textra.io/" rel="noopener noreferrer" target="_blank">
+              <img src={insta} alt="instagram" />
+            </a>
+          </li>
         </ul>
-    </div>)
+      </div>;
 }

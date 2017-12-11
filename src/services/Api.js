@@ -1,12 +1,12 @@
 import AuthStore from './../store/AuthStore.js';
+import settings from './../settings';
 
 // Textra Rest Api
-
 export const TxRest = (() => {
-  const host = 'http://api.textra.io' //'http://api-textra.iondigi.com';
-    const socketHost = 'ws://api.textra.io' //'http://api-textra.iondigi.com';
-    const port = ':80';
-    let timerLiqpay = null;
+  const host = process.env.REACT_APP_DEFAULT_SERVER === "true" ? settings.hostDefault : settings.hostAmazon;
+  const socketHost = process.env.REACT_APP_DEFAULT_SERVER === "true" ? settings.wsDefault : settings.wsAmazon;
+  const port = process.env.REACT_APP_DEFAULT_SERVER === "true" ? settings.portDefault : settings.portAmazon;
+  let timerLiqpay = null;
     function initSocket(){
           
           if(!AuthStore.isAuthenticated || AuthStore.alreadyInitSocket || !AuthStore.socketPath ) return

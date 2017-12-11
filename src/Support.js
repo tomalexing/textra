@@ -84,78 +84,63 @@ export default class Support extends React.Component {
   render() {
     let {value, clearComment, options, redirectToReferrer, showOk} = this.state;
     const { from } = this.props.location.state || { from: { pathname: '/' } }    
-    return (
-    (redirectToReferrer) ? <Redirect to={from} /> :
-    <div className="page-layout f f-col">
-        <Header currentRole={this.props.currentRole}/>
+    return redirectToReferrer ? <Redirect to={from} /> : <div className="page-layout f f-col">
+        <Header currentRole={this.props.currentRole} />
         <div className="container f-v-gap-2 f-gap-5 u-mt-10">
-            <h1 className="h1-big u-my-5 u-text-center">Как мы можем помочь Вам?</h1>
-            <h1 className="h2 text-header">Оставьте заявку или задайте нам вопрос</h1>
-            <p>Если Вы желаете стать переводчиком нашего сервиса, то можете оставить заявку. Мы обязательно рассмотрим ее в кротчайшие сроки и свяжемся с Вами. Если же Вы хотите оставить отзыв или задать вопрос, то можете сделать это в поле ниже. Мы с радостью поможем Вам.</p>
-            {this.isAuthenticated &&
-              <TxForm submit={this.onSubmit} innerErrorFielsType={true} formClass=""> 
+          <h1 className="h1 u-my-6 u-text-center u-text-font__light">
+            Как мы можем помочь Вам?
+          </h1>
+          {this.isAuthenticated && <TxForm submit={this.onSubmit} innerErrorFielsType={true} formClass="">
+              <h3 className="h3 u-mt-4 u-mb-2 u-text-font__light">
+                Выберите тип заявки *
+              </h3>
+              <Select name="option" placeholder="Выбрать" autofocus options={options} disabled={false} simpleValue value={value} onChange={this.updateValue} searchable={false} autosize={true} clearable={false} arrowRenderer={this.arrowElementLangs} />
 
-                <h3 className="h3 u-mt-4 u-mb-2">Выберите тип заявки *</h3>
-                <Select
-                  name="option"
-                  placeholder="Выбрать"
-                  autofocus
-                  options={options}
-                  disabled={false}
-                  simpleValue
-                  value={value}
-                  onChange={this.updateValue}
-                  searchable={false}
-                  autosize={true}
-                  clearable={false}
-                  arrowRenderer={this.arrowElementLangs} />
-
-                  <h3 className="h3 u-mt-4 u-mb-2">Опишите детально Ваш вопрос *</h3>
-                  {/* <textarea name="comment" type="text" onChange={this.onMessage} value={comment} placeholder="Комментарий пользователя">
+              <h3 className="h3 u-mt-4 u-mb-2 u-text-font__light">
+                Опишите детально Ваш вопрос *
+              </h3>
+              {/* <textarea name="comment" type="text" onChange={this.onMessage} value={comment} placeholder="Комментарий пользователя">
                   </textarea> */}
-                  <TxInput tag="textarea" type="text" name="comment" validate={[{'minLength':1},'required']}  className="field-block" placeholder="Комментарий пользователя"/>
-                
-                <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry btn-mini'}/>
-              </TxForm>}
+              <TxInput tag="textarea" type="text" name="comment" validate={[{ minLength: 1 }, "required"]} className="field-block" placeholder="Комментарий пользователя" />
 
-            {!this.isAuthenticated &&
-              <TxForm submit={this.onSubmit} innerErrorFielsType={true} formClass=""> 
+              <TxInput type="submit" autoValidate={false} value="Отправить" style={{ float: "right" }} className={"submit-post btn btn-primiry btn-mini"} />
+            </TxForm>}
 
-                  <h3 className="h3 u-mt-4 u-mb-2">Выберите тип заявки *</h3>
-                  <Select
-                    name="option"
-                    placeholder="Выбрать"
-                    autofocus
-                    options={options}
-                    disabled={false}
-                    simpleValue
-                    value={value}
-                    onChange={this.updateValue}
-                    searchable={false}
-                    autosize={true}
-                    clearable={false}
-                    arrowRenderer={this.arrowElementLangs} />
+          {!this.isAuthenticated && <TxForm submit={this.onSubmit} innerErrorFielsType={true} formClass="">
+              <h3 className="h3 u-mt-4 u-mb-2 u-text-font__light">
+                Выберите тип заявки *
+              </h3>
+              <Select name="option" placeholder="Выбрать" autofocus options={options} disabled={false} simpleValue value={value} onChange={this.updateValue} searchable={false} autosize={true} clearable={false} arrowRenderer={this.arrowElementLangs} />
 
-                  <h3 className="h3 u-mt-4 u-mb-2">Ваш email *</h3>
-                  <TxInput type="email" name="email" validate={['email', 'required']} className="field-block" placeholder="Email"/>
-                  
-                  <h3 className="h3 u-mt-4 u-mb-2">Опишите детально Ваш вопрос *</h3>
-                  <TxInput tag="textarea" type="text" name="comment" validate={[{'minLength':1},'required']} {...clearComment&&{value:''}}  className="field-block" placeholder="Комментарий пользователя"/>
-                  
-                  <TxInput type="submit" autoValidate={false}  value='Отправить' style={{float: "right"}} className={'submit-post btn btn-primiry u-my-4 btn-mini'}/>
-                </TxForm>}
-  
-          { showOk && 
-              <div className={'f f-align-2-2 u-mx-2 page-layout-info '}>
-                <div className={'f f-align-2-2 page-layout-info__exclamation info__exclamation--info'}>i</div>
-                <div className={'f f-align-1-2  page-layout-info__message '}>{`
+              <h3 className="h3 u-mt-4 u-mb-2 u-text-font__light">
+                Ваш email *
+              </h3>
+              <TxInput type="email" name="email" validate={["email", "required"]} className="field-block" placeholder="Email" />
+
+              <h3 className="h3 u-mt-4 u-mb-2 u-text-font__light">
+                Опишите детально Ваш вопрос *
+              </h3>
+              <TxInput tag="textarea" type="text" name="comment" validate={[{ minLength: 1 }, "required"]} {...clearComment && { value: "" }} className="field-block" placeholder="Комментарий пользователя" />
+
+              <TxInput type="submit" autoValidate={false} value="Отправить" style={{ float: "right" }} className={"submit-post btn btn-primiry u-my-4 btn-mini"} />
+            </TxForm>}
+
+          {showOk && <div className={"f f-align-2-2 u-mx-2 page-layout-info "}>
+              <div
+                className={
+                  "f f-align-2-2 page-layout-info__exclamation info__exclamation--info"
+                }
+              >
+                i
+              </div>
+              <div className={"f f-align-1-2  page-layout-info__message "}>
+                {`
                     Ваше сообщение отправлено и будет рассмотрено службой поддержки "Textra" в течении 24 часов.
                   `}
-                </div>
               </div>
-          }
-        </div>
-        <Footer/>
-    </div>)
+            </div>}
+        </div> {/* .container */}
+        <Footer />
+      </div>;
   }
 }

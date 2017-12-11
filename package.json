@@ -41,6 +41,7 @@
     "start": "npm-run-all -p watch-css start-js",
     "build": "npm run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "flow": "flow"
+    "flow": "flow",
+    "serve": "set REACT_APP_DEFAULT_SERVER=true&&yarn run start"
   }
 }

@@ -97,7 +97,7 @@ class DashBoard extends React.Component {
       typePage: '',
       id: ''
     },
-    language: [],
+    languages: [],
     translator: {},
     translators: [],
     notShowWellcome: JSON.parse(window.localStorage.getItem('notShowWellcome'))
@@ -140,6 +140,7 @@ class DashBoard extends React.Component {
 
 
     this.languageStore = new Store('language');
+
     let languageStoredIds = Store.getIds('language');
     if(languageStoredIds && languageStoredIds.length) {
       let langsFromStore = languageStoredIds.map(id => Store.getItem(id));
@@ -276,7 +277,7 @@ class DashBoard extends React.Component {
 
   updateLanguageHandler({list}){
     if(!this._isMounted) return
-    this.setState({language: list})
+    this.setState({languages: list})
   }
 
   visitedIndex(visitedTranslatorId){
@@ -327,12 +328,23 @@ class DashBoard extends React.Component {
     return false
   }
 
-  getLangPropInObj({id,slug}){
-    return this.state.language.length > 0 ? this.state.language.find(o => o.id === id)[slug] : 0
+  getLangPropInObj({ sourceLanguageId, translateLanguageId, slug }) {
+    let propVal = 0;
+    if (this.state.languages && this.state.languages.length > 0) {
+
+      let currentLang = this.state.languages.filter(o => o.id === sourceLanguageId)[0];
+      if (translateLanguageId === -1 && currentLang[slug]) {
+        propVal = currentLang[slug];
+      } else {
+        propVal = currentLang.targets.filter(itm => itm.origin_id === sourceLanguageId && itm.target_id === translateLanguageId)[0][slug]
+      }
+    }
+
+    return propVal
   }
 
   render() {
-    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, language, translator, translators, notShowWellcome } = this.state;
+    let { isTablet, mainScreen,  page: { typePage, id: pageTypeId }, pendingTabs, historyTabs, workingTabs, languages, translator, translators, notShowWellcome } = this.state;
 
     return (
       <div className="f f-col outer dashboard-user">
@@ -392,13 +404,27 @@ class DashBoard extends React.Component {
                           debug={false}
                           render={(()=> {
                             let start = tab['updated_at'];
-                            let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+                            let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length - 1]['letters_count'] * this.getLangPropInObj({
+                              sourceLanguageId: tab.source_language_id,
+                              translateLanguageId: tab.translate_language_id,
+                              slug: 'letter_time'}) : 0;
                             //console.log(value)
                             return <Timer start={start} duration={duration} />
                           }).bind(this)}/>
                         <time>{`${outputPublishTime}`}</time>
                         </div>
-                        <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId && typePage === 'inwork'} />
+                        <LangLabel 
+                          from={this.getLangPropInObj({
+                            sourceLanguageId: tab.source_language_id,
+                            translateLanguageId: -1,
+                            slug: 'code'
+                          })}
+                          to={this.getLangPropInObj({
+                            sourceLanguageId: tab.translate_language_id,
+                            translateLanguageId: -1,
+                            slug: 'code'
+                          })} 
+                          selected={tab.id === pageTypeId && typePage === 'inwork'} />
                       <div className="dashboard-user__tab-info__money">{(tab.price/100).toFixed(2)}₴</div>
                     </div>
                   </Link>
@@ -416,7 +442,10 @@ class DashBoard extends React.Component {
                 let finishTime = new Date(tab.translated_at);
                 let outputPublishTime = getTabTime(finishTime);
                 let start = new Date(tab['started_at']);
-                let durationShouldBe = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
+                let durationShouldBe = tab.translate_messages[tab.translate_messages.length - 1]['letters_count'] * this.getLangPropInObj({
+                    sourceLanguageId: tab.source_language_id,
+                    translateLanguageId: tab.translate_language_id,
+                    slug: 'letter_time'})
                 let finishShouldBe = new Date(+start + durationShouldBe*1000);
                 let duration = (finishTime - start)/1000;
                 return (
@@ -433,7 +462,18 @@ class DashBoard extends React.Component {
                           !tab.viewed && <Timer start={new Date() - 990} duration={1}/>}
                         <time>{`${outputPublishTime}`}</time>
                       </div>
-                      <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === pageTypeId && typePage === 'history'} />
+                      <LangLabel 
+                        from={this.getLangPropInObj({
+                          sourceLanguageId: tab.source_language_id,
+                          translateLanguageId: -1,
+                          slug: 'code'
+                        })}
+                        to={this.getLangPropInObj({
+                          sourceLanguageId: tab.translate_language_id,
+                          translateLanguageId: -1,
+                          slug: 'code'
+                        })}  
+                        selected={tab.id === pageTypeId && typePage === 'history'} />
                       <div className="dashboard-user__tab-info__money">{(tab.price/100)}₴</div>
                     </div>
                   </Link>
@@ -450,14 +490,14 @@ class DashBoard extends React.Component {
                 </div>
               :''}
               <Switch>
-                <RoutePassProps exact redirect="/dashboard/create" path="/dashboard" component={Create} translator={translator}  store={this.store} languages={language} store={this.store} translators={translators}/> 
-                <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={language} store={this.store} translators={translators} isTablet={this.state.isTablet}/>
+                <RoutePassProps exact redirect="/dashboard/create" path="/dashboard" component={Create} translator={translator}  store={this.store} languages={languages} store={this.store} translators={translators}/> 
+                  <RoutePassProps path="/dashboard/create" component={Create} translator={translator} store={this.store} languages={languages} store={this.store} translators={translators} isTablet={this.state.isTablet}/>
                 <RoutePassProps path="/dashboard/pending/:id" component={Pending} typePage={typePage} id={pageTypeId} 
-                 data={Array.isArray(pendingTabs)? pendingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}/>
+                    data={Array.isArray(pendingTabs) ? pendingTabs.find(o => o.id == pageTypeId) : null} store={this.store} languages={languages}/>
                 <RoutePassProps path="/dashboard/inwork/:id" component={Pending} typePage={typePage} id={pageTypeId} 
-                 data={Array.isArray(pendingTabs)? workingTabs.find(o=> o.id == pageTypeId):null} store={this.store} languages={language}  />
+                    data={Array.isArray(pendingTabs) ? workingTabs.find(o => o.id == pageTypeId) : null} store={this.store} languages={languages}  />
                 <RoutePassProps path="/dashboard/history/:id" component={HistoryList} isTablet={this.state.isTablet} typePage={typePage} id={pageTypeId}
-                languages={language} store={this.store} translator={translator} visitedIndex={this.visitedIndex}/>
+                    languages={languages} store={this.store} translator={translator} visitedIndex={this.visitedIndex}/>
               </Switch>
             </div>
           </div>
@@ -485,38 +525,56 @@ class Wellcome extends React.Component{
   render(){
 
     return <div className="main__welcome">
-            <h1 className="h2 u-text-center u-my-3 u-text-font__light">Textra приветствует Вас!</h1>
-            <p>Теперь вы можете получать качественный перевод текста в максимально короткие сроки, как
-            если бы вы были всегда на связи с личным профессиональным переводчиком.</p>
-            <div className="main__welcome-table u-mt-5 u-mb-3">
-              <h2 className="h4 u-text-font__light u-my-1 u-text-center">ПОДАРОК</h2> 
-              <p>Чтобы протестировать качество и скорость переводов Textra - мы дарим
-              вам 50 грн. Этих денег вам хватит на перевод текста, объемом 267 символов или примерно 50 слов.</p>
-            </div>
-            <div className="main__welcome-table u-mb-3">
-              <h2 className="h4 u-text-font__light u-my-1 u-text-center">БАЛАНС</h2> 
-              <p>По истечении баланса, чтобы продолжить размещать новые заказы, вам 		
-              необходимо будет пополнить личный счет. Сделать это можно нажав кнопку «Пополнить» в правом верхнем углу</p>
-            </div>
-            <div className="main__welcome-table u-mb-3">
-              <h2 className="h4 u-text-font__light u-my-1 u-text-center">КОНТРОЛЬ</h2> 
-              <p>При наборе текста вы можете отслеживать информацию о максимальном
-              времени перевода, количестве символов набранного вами текста, а также
-              стоимости перевода, которая будет списана с вашего баланса после разме	
-              щения заказа</p>
-            </div>
-            <div className="main__welcome-table u-mb-3">
-              <h2 className="h4 u-text-font__light u-my-1 u-text-center">БОНУС</h2> 
-              <p>Поскольку Textra ориентирована на переводы текста объемом до 1 страницы, мы не ограничиваем заказы по минимальному количеству слов.
-              Это значит, что вы можете перевести с Textra даже 1 предложение</p>
-            </div>
-            <Link tabIndex={"1"} to={{pathname:'/dashboard/create', state: {mainScreen: true, page:{typePage: 'create', id: undefined}}}} className="f f-align-2-2 main__welcome-button dashboard-user__create-tab" onClick={this.setShowWellcome}>
-                <div className="dashboard-user__create-tab-plus">
-                </div>
-                <div className="dashboard-user__create-tab-content">Создать запрос
-                </div>
-            </Link>
+        <h1 className="h2 u-text-center u-my-4 u-text-font__light">
+          Textra приветствует Вас!
+        </h1>
+        <div className="u-my-3">
+          <p>
+            Теперь Вы можете получать профессиональный перевод текста онлайн
+            в максимально короткие сроки. Textra - Ваш личный переводчик,
+            который всегда на связи.
+          </p>
+        </div>
+        <div className="u-mb-3">
+          <h2 className="h4 u-my-1 u-text-left u-text-font__light">
+            ТЕСТИРУЙТЕ БЕСПЛАТНО
+          </h2>
+          <p>
+            Чтобы Вы могли убедиться в высоком качестве и скорости переводов
+            Textra, мы дарим Вам 100 гривен на личный счет. Этой суммы будет
+            достаточно, чтобы Вы могли протестировать все возможности нашей
+            системы.
+          </p>
+        </div>
+        <div className="u-mb-3">
+          <h2 className="h4 u-my-1 u-text-left u-text-font__light">
+            ВСЕ ПОД КОНТРОЛЕМ
+          </h2>
+          <p>
+            При наборе текста для перевода Вы можете отслеживать информацию
+            о количестве символов набранного текста, максимальном времени
+            перевода, а также его стоимости, которая будет списана с Вашего
+            счета при размещении заказа. В случае отмены Вами заказа деньги
+            будут возвращены на Ваш счет.
+          </p>
+        </div>
+        <div className="u-mb-3">
+          <h2 className="h4 u-my-1 u-text-left u-text-font__light">
+            УДОБНОЕ ПОПОЛНЕНИЕ СЧЕТА
+          </h2>
+          <p>
+            Для размещения новых заказов Вам потребуется пополнить личный
+            счет. Это можно сделать, нажав кнопку «ПОПОЛНИТЬ» в правом
+            верхнем углу на странице размещения заказа.
+          </p>
+        </div>
+        <Link tabIndex={"1"} to={{ pathname: "/dashboard/create", state: { mainScreen: true, page: { typePage: "create", id: undefined } } }} className="f f-align-2-2 main__welcome-button dashboard-user__create-tab" onClick={this.setShowWellcome}>
+          <div className="dashboard-user__create-tab-plus" />
+          <div className="dashboard-user__create-tab-content">
+            Создать запрос
           </div>
+        </Link>
+      </div>;
   }
 }
 
@@ -572,9 +630,19 @@ class HistoryList extends React.Component {
 
   }
 
-  getLangPropInObj({id,slug}){
-    if(!this._isMounted) return 
-    return this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  getLangPropInObj({ sourceLanguageId, translateLanguageId, slug }) {
+    let propVal = 0;
+    if (this.state.languages && this.state.languages.length > 0) {
+
+      let currentLang = this.state.languages.filter(o => o.id === sourceLanguageId)[0];
+      if (translateLanguageId === -1 && currentLang[slug]) {
+        propVal = currentLang[slug];
+      } else {
+        propVal = currentLang.targets.filter(itm => itm.origin_id === sourceLanguageId && itm.target_id === translateLanguageId)[0][slug]
+      }
+    }
+
+    return propVal
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -649,7 +717,10 @@ class HistoryList extends React.Component {
       let translated_at = new Date(currentData.translated_at);
       let started_at = new Date(currentData.started_at);
     
-      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'});
+      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({
+        sourceLanguageId: currentData.source_language_id,
+        translateLanguageId: currentData.translate_language_id,
+        slug: 'letter_time'});
       let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
       let duration =  (translated_at - started_at)/1000 ; //sec
 
@@ -673,10 +744,18 @@ class HistoryList extends React.Component {
               </div>
               <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
                 {currentData.source_language_id && currentData.translate_language_id &&  
-                    <LangLabel 
-                      from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
-                      to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
-                      />
+                  <LangLabel
+                    from={this.getLangPropInObj({
+                      sourceLanguageId: currentData.source_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}
+                    to={this.getLangPropInObj({
+                      sourceLanguageId: currentData.translate_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}
+                  />
                 } 
                 {currentData.source_messages.length > 0 &&
                     <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(durationShouldBe)} hint={'Длительность перевода'} /> }
@@ -841,8 +920,19 @@ class Pending extends React.Component {
     return false
   }
 
-  getLangPropInObj({id,slug}){
-    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  getLangPropInObj({ sourceLanguageId, translateLanguageId, slug}){
+    let propVal = 0;
+    if(this.state.languages && this.state.languages.length > 0 ){
+          
+      let currentLang = this.state.languages.filter(o => o.id === sourceLanguageId)[0];
+      if (translateLanguageId === -1 && currentLang[slug] ){
+        propVal = currentLang[slug];
+      }else{
+        propVal =  currentLang.targets.filter(itm => itm.origin_id === sourceLanguageId && itm.target_id === translateLanguageId)[0][slug] 
+      }
+    }
+
+    return propVal
   }
 
   render() {
@@ -864,7 +954,10 @@ class Pending extends React.Component {
     }
     
     if(currentData.source_messages && currentData.source_messages.length > 0){
-      var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
+      var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({
+        sourceLanguageId: currentData.source_language_id, 
+        translateLanguageId: currentData.translate_language_id, 
+        slug: 'letter_time'})
     }
 
     let isExpired = (new Date() - new Date(currentData.updated_at))/1000 > duration;
@@ -883,8 +976,14 @@ class Pending extends React.Component {
                 <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
                   {currentData.source_language_id && currentData.translate_language_id &&  
                   <LangLabel 
-                    from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
-                    to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
+                    from={this.getLangPropInObj({
+                      sourceLanguageId: currentData.source_language_id,
+                      translateLanguageId: -1 ,
+                      slug:'code'})} 
+                    to={this.getLangPropInObj({ 
+                        sourceLanguageId: currentData.translate_language_id,
+                        translateLanguageId: -1,
+                        slug:'code'})} 
                     />
                   }
                 {currentData.source_messages.length > 0 &&
@@ -976,6 +1075,7 @@ class Create extends React.Component {
     this.updateHandler = this.updateHandler.bind(this);
     this.getIdLang = this.getIdLang.bind(this);
     this.getTranslators = this.getTranslators.bind(this);
+    this.adjustOptionsLangTo = this.adjustOptionsLangTo.bind(this);
     this.disabled = false;
     this.store = props.store;
     this._isMounted = false;
@@ -984,6 +1084,7 @@ class Create extends React.Component {
 
   state = {
     optionsLang: [],
+    optionsLangTo: [],
     valueLangFrom: 'ENG',
     valueLangTo: 'RUS',
     valueTranslator: undefined,
@@ -1050,39 +1151,60 @@ class Create extends React.Component {
     this._isMounted = false;
   }
 
-  getIdLang(value){
+  getIdLang(value, optionsLangProps){
     if(!this._isMounted) return
-    return this.state.optionsLang.filter(o => o.value === value)[0]['id']
+    let optionsLang = this.state.optionsLang.length > 0 ? this.state.optionsLang : optionsLangProps;
+
+    if (!optionsLang.length || optionsLang.length === 0) return -1
+
+    return optionsLang.filter(o => o.value === value)[0]['id']
   }
   
-  getAttrByValue(list, prop){
-    return list.filter(o => o.value === prop)[0]
+  getAttrByValue(list){
+    if(list.length === 0 ) return {}
+
+    let {valueLangFrom, valueLangTo} = this.state,
+        currentLangObj = list.filter(o => o.value === valueLangFrom)[0],
+        originId = this.getIdLang(valueLangFrom, list),
+        targetId = this.getIdLang(valueLangTo, list),
+        currentTranslateOpt;
+
+    if (currentLangObj && Array.isArray(currentLangObj.targets) ) {
+        
+      currentTranslateOpt = currentLangObj.targets.filter(o => o.origin_id === originId && o.target_id === targetId)[0];
+    }
+
+    return { 
+      letterTime: currentTranslateOpt.letter_time, 
+      letterPrice: currentTranslateOpt.letter_price
+    };
   }
 
   convertToAproppriateObject(arr){
-    return arr.map(({code, created_at, id, letter_price, letter_time, name, updated_at}) => {return{
-      value: code,
-      created_at,
-      id,
-      letterPrice: letter_price,
-      letterTime : letter_time,
-      label: name,
-      updated_at
-    }})
+    return arr.map(({code, created_at, id, targets, name, updated_at}) => {
+      return { 
+        value: code, 
+        created_at, 
+        id, 
+        targets,
+        label: name, 
+        updated_at
+      };
+    })
   }
 
   updateHandler(list){
     if(!this._isMounted) return
 
     let optionsLang =  this.convertToAproppriateObject(list);
-    let toLangObj = this.getAttrByValue(optionsLang, this.state.valueLangTo);
-    
-    if(!toLangObj) return
+    let { letterTime, letterPrice} = this.getAttrByValue(optionsLang);
+
+    if (!letterTime || !letterPrice) return
     this.setState({
       optionsLang,
-      letterTime: toLangObj['letterTime'],
-      letterPrice: toLangObj['letterPrice']
-    });
+      letterTime,
+      letterPrice
+    }, this.adjustOptionsLangTo);
   
   }
 
@@ -1093,7 +1215,6 @@ class Create extends React.Component {
     this.state.blockSubmit = true;
     let {create:{to, from, message, translator}} = formSerialize(e.target, { hash: true, empty: true });
     if(message.length === 0) return
-
     let data = {
       "source_language_id": this.getIdLang(from),
       "translate_language_id": this.getIdLang(to),
@@ -1133,17 +1254,42 @@ class Create extends React.Component {
 
   updateValueLangFrom(valueLangFrom) {
     if(!this._isMounted) return
-    this.setState({ valueLangFrom });
+    this.setState({ valueLangFrom }, this.adjustOptionsLangTo);
+
+  }
+
+  adjustOptionsLangTo(){
+    if (!this._isMounted) return
+
+    let { optionsLang, valueLangFrom, valueLangTo } = this.state,
+        optionsLangTo = [];
+        
+    if (Array.isArray(optionsLang)) {
+
+      let alowedLangIds = optionsLang.filter(o => o.value === valueLangFrom)[0].targets.map(o => o.target_id)
+      
+      optionsLangTo = optionsLang.filter(o => alowedLangIds.includes(o.id))
+      if( optionsLangTo.length === 1 )
+        this.updateValueLangTo(optionsLangTo[0].value);
+    }
+
+    this.setState({ optionsLangTo });
   }
 
   updateValueLangTo(valueLangTo) {
     if(!this._isMounted) return
-
-    let toLangObj = this.getAttrByValue(this.state.optionsLang, valueLangTo);
+    
     this.setState({
-      valueLangTo,
-      letterTime: toLangObj['letterTime'],
-      letterPrice: toLangObj['letterPrice']
+      valueLangTo
+    },  () => {
+
+      let { letterTime, letterPrice } = this.getAttrByValue(this.state.optionsLang);
+      if (!letterTime || !letterPrice) return
+
+      this.setState({
+        letterTime: letterTime,
+        letterPrice: letterPrice
+      });
     });
   }
 
@@ -1189,23 +1335,7 @@ class Create extends React.Component {
       label: -1,
       value: 'Все переводчики',
       image: avatarAll
-    }, {
-        label: -1,
-        value: 'Все переводчики',
-        image: avatarAll
-      }, {
-        label: -1,
-        value: 'Все переводчики',
-        image: avatarAll
-      }, {
-        label: -1,
-        value: 'Все переводчики',
-        image: avatarAll
-      }, {
-        label: -1,
-        value: 'Все переводчики',
-        image: avatarAll
-      }].concat(translators.map(item => {
+    }].concat(translators.map(item => {
         return {
           label: item.id,
           value: item.first_name + ' ' + item.last_name,
@@ -1226,24 +1356,31 @@ class Create extends React.Component {
       return <img style={{ transform: 'rotate(90deg)' }} src={icon_arrow} />
   }
 
-  swapLang(e) {
+  async swapLang(e) {
     if(!this._isMounted) return
 
     e.preventDefault();
     let to = this.state.valueLangTo,
-      from = this.state.valueLangFrom,
-      toLangObj = this.getAttrByValue(this.state.optionsLang, to);
+        from = this.state.valueLangFrom;
 
-    this.setState({
+
+    await this.setState({
       valueLangFrom: to,
       valueLangTo: from,
-      letterTime: toLangObj['letterTime'],
-      letterPrice: toLangObj['letterPrice']
+    }, this.adjustOptionsLangTo); 
+        
+    let {letterTime, letterPrice} = this.getAttrByValue(this.state.optionsLang);
+    
+    if (!letterTime || !letterPrice) return
+
+    this.setState({
+      letterTime: letterTime,
+      letterPrice: letterPrice
     })
   }
 
   render() {
-    const { optionsLang, valueLangFrom, valueLangTo, currentNumberOfChar,
+    const { optionsLang, optionsLangTo,valueLangFrom, valueLangTo, currentNumberOfChar,
            valueTranslator, isSearchMenuTranslatorVisible, isBlocking, 
            translatorMessage, letterTime, letterPrice, isEnoughMoney, 
            blockSubmit, redirectToPending, newId, translatorsOpt: translatorsPool,
@@ -1252,6 +1389,7 @@ class Create extends React.Component {
     if( redirectToPending ){
      return <Redirect push={true} to={{pathname:`/dashboard/pending/${newId}`,state:{page:{typePage:'pending',id:newId}}}}/>
     }
+    
     
     if(!isEnoughMoney || blockSubmit){
         this.disabled = true;
@@ -1287,7 +1425,7 @@ class Create extends React.Component {
             <Select
               ref={(n) => this.createLangTo = n}
               name="create[to]"
-              options={optionsLang}
+              options={optionsLangTo}
               simpleValue
               disabled={false}
               value={valueLangTo}

@@ -92,7 +92,7 @@ const Roles = [
   },
   {
     text: 'Администратор',
-    value: 'd', // consroller
+    value: 'd', // super consroller
     icon: { name: 'circle', color: 'red', size: 'small' },
   },
   {
@@ -457,8 +457,19 @@ class SideList extends React.PureComponent{
     this.setState({...data});
   } 
 
-  getLangPropInObj({id,slug}){
-    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  getLangPropInObj({ sourceLanguageId, translateLanguageId, slug }) {
+    let propVal = 0;
+    if (this.state.languages && this.state.languages.length > 0) {
+
+      let currentLang = this.state.languages.filter(o => o.id === sourceLanguageId)[0];
+      if (translateLanguageId === -1 && currentLang[slug]) {
+        propVal = currentLang[slug];
+      } else {
+        propVal = currentLang.targets.filter(itm => itm.origin_id === sourceLanguageId && itm.target_id === translateLanguageId)[0][slug]
+      }
+    }
+
+    return propVal
   }
 
   render(){
@@ -525,7 +536,7 @@ class SideList extends React.PureComponent{
             </Link>
           )
         })}
-        {/* INWORK TABs */}
+        {/* INWORK TABs */} 
         { workingTabs.map(tab => {
           let publishTime = new Date(tab.created_at);
           let outputPublishTime = getTabTime(publishTime);
@@ -546,13 +557,27 @@ class SideList extends React.PureComponent{
                     debug={false}
                     render={(()=> {
                       let start = tab['updated_at'];
-                      let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'}) : 0;
+                      let duration = tab.source_messages.length > 0 ? tab.source_messages[tab.source_messages.length - 1]['letters_count'] * this.getLangPropInObj({
+                        sourceLanguageId: tab.source_language_id,
+                        translateLanguageId: tab.translate_language_id,
+                        slug: 'letter_time'}) : 0;
                       //console.log(value)
                       return <Timer start={start} duration={duration} />
                     }).bind(this)}/>
                   <time>{`${outputPublishTime}`}</time>
                   </div>
-                  <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
+                  <LangLabel 
+                    from={this.getLangPropInObj({
+                      sourceLanguageId: tab.source_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}
+                    to={this.getLangPropInObj({
+                      sourceLanguageId: tab.translate_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}  
+                    selected={tab.id === activeTab} />
                 <div className="dashboard-user__tab-info__money">{(tab.price/100).toFixed(2)}₴</div>
               </div>
             </Link>
@@ -569,7 +594,10 @@ class SideList extends React.PureComponent{
           let finishTime = new Date(tab.translated_at);
           let outputPublishTime = getTabTime(finishTime);
           let start = new Date(tab['started_at']);
-          let durationShouldBe = tab.translate_messages[tab.translate_messages.length-1]['letters_count'] * this.getLangPropInObj({id:tab.translate_language_id, slug:'letter_time'})
+          let durationShouldBe = tab.translate_messages[tab.translate_messages.length - 1]['letters_count'] * this.getLangPropInObj({
+            sourceLanguageId: tab.source_language_id,
+            translateLanguageId: tab.translate_language_id,
+            slug: 'letter_time'})
           let finishShouldBe = new Date(+start + durationShouldBe*1000);
           let duration = (finishTime - start)/1000;
           return (
@@ -585,7 +613,18 @@ class SideList extends React.PureComponent{
                   {  /* <Timer start={start} duration={duration} finish={finishShouldBe}/> */ }
                   <time>{`${outputPublishTime}`}</time>
                 </div>
-                <LangLabel from={this.getLangPropInObj({id:tab.source_language_id, slug:'code'})} to={this.getLangPropInObj({id:tab.translate_language_id, slug: 'code'})} selected={tab.id === activeTab} />
+                <LangLabel 
+                    from={this.getLangPropInObj({
+                      sourceLanguageId: tab.source_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}
+                    to={this.getLangPropInObj({
+                      sourceLanguageId: tab.translate_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}  
+                    selected={tab.id === activeTab} />
                 <div className="dashboard-user__tab-info__money">{(tab.price/100)}₴</div>
               </div>
             </Link>
@@ -752,7 +791,7 @@ class Users extends React.Component {
     let usedRoles = [],
         roles = [];
     if(this.state.page.pageType === 'users'){
-      usedRoles = ['u','c','d', 't'];
+      usedRoles = ['u','c','t'];
     }else{
       usedRoles = ['p', 'g', 'o'];
     }   
@@ -1182,8 +1221,19 @@ class UserFullHistory extends React.Component {
     this.massageStore = null;
   }
 
-  getLangPropInObj({id,slug}){
-    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  getLangPropInObj({ sourceLanguageId, translateLanguageId, slug }) {
+    let propVal = 0;
+    if (this.state.languages && this.state.languages.length > 0) {
+
+      let currentLang = this.state.languages.filter(o => o.id === sourceLanguageId)[0];
+      if (translateLanguageId === -1 && currentLang[slug]) {
+        propVal = currentLang[slug];
+      } else {
+        propVal = currentLang.targets.filter(itm => itm.origin_id === sourceLanguageId && itm.target_id === translateLanguageId)[0][slug]
+      }
+    }
+
+    return propVal
   }
 
   shouldComponentUpdate(nextProps, nextState){
@@ -1240,7 +1290,10 @@ class UserFullHistory extends React.Component {
       let translated_at = new Date(currentData.translated_at);
       let started_at = new Date(currentData.started_at);
     
-      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'});
+      let durationShouldBe = currentData.source_messages[0].letters_count * this.getLangPropInObj({
+        sourceLanguageId: currentData.source_language_id,
+        translateLanguageId: currentData.translate_language_id,
+        slug: 'letter_time'});
       let finishShouldBe = new Date(+started_at + durationShouldBe * 1000);
       let duration =  (translated_at - started_at)/1000 ; //sec
 
@@ -1264,10 +1317,18 @@ class UserFullHistory extends React.Component {
               </div>
               <div className={'f f-align-1-2 f-gap-4 dashboard-user__history-post__content__bottombar'}>
                 {currentData.source_language_id && currentData.translate_language_id &&  
-                    <LangLabel 
-                      from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
-                      to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
-                      />
+                  <LangLabel
+                    from={this.getLangPropInObj({
+                      sourceLanguageId: currentData.source_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}
+                    to={this.getLangPropInObj({
+                      sourceLanguageId: currentData.translate_language_id,
+                      translateLanguageId: -1,
+                      slug: 'code'
+                    })}
+                  />
                 } 
                 {currentData.source_messages.length > 0 &&
                     <Indicator className={'f f-align-2-2'} icon={icon_dur} value={humanReadableTime(durationShouldBe)} hint={'Длительность перевода'} /> }
@@ -1483,8 +1544,19 @@ class Pending extends React.Component {
     return false
   }
 
-  getLangPropInObj({id,slug}){
-    return this.state.languages && this.state.languages.length > 0 ? this.state.languages.find(o => o.id === id)[slug] : 0
+  getLangPropInObj({ sourceLanguageId, translateLanguageId, slug }) {
+    let propVal = 0;
+    if (this.state.languages && this.state.languages.length > 0) {
+
+      let currentLang = this.state.languages.filter(o => o.id === sourceLanguageId)[0];
+      if (translateLanguageId === -1 && currentLang[slug]) {
+        propVal = currentLang[slug];
+      } else {
+        propVal = currentLang.targets.filter(itm => itm.origin_id === sourceLanguageId && itm.target_id === translateLanguageId)[0][slug]
+      }
+    }
+
+    return propVal
   }
 
   render() {
@@ -1500,7 +1572,10 @@ class Pending extends React.Component {
     }
     
     if(currentData.source_messages && currentData.source_messages.length > 0){
-      var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({id: currentData.translate_language_id, slug:'letter_time'})
+      var duration = currentData.source_messages[0].letters_count * this.getLangPropInObj({
+        sourceLanguageId: currentData.source_language_id,
+        translateLanguageId: currentData.translate_language_id,
+        slug: 'letter_time'})
     }
     return (
         <div className={'f f-col f-align-1-1 dashboard-user__searching'}>
@@ -1515,9 +1590,17 @@ class Pending extends React.Component {
                 </div>
                 <div className={'f f-align-1-2 f-gap-4 dashboard-user__searching-post__content__bottombar'}>
                   {currentData.source_language_id && currentData.translate_language_id &&  
-                  <LangLabel 
-                    from={this.getLangPropInObj({id: currentData.source_language_id, slug:'code'})} 
-                    to={this.getLangPropInObj({id: currentData.translate_language_id, slug:'code'})} 
+                    <LangLabel
+                      from={this.getLangPropInObj({
+                        sourceLanguageId: currentData.source_language_id,
+                        translateLanguageId: -1,
+                        slug: 'code'
+                      })}
+                      to={this.getLangPropInObj({
+                        sourceLanguageId: currentData.translate_language_id,
+                        translateLanguageId: -1,
+                        slug: 'code'
+                      })}
                     />
                   }
                 {currentData.source_messages && currentData.source_messages.length > 0 &&

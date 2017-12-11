@@ -73,9 +73,9 @@ class FacebookLogin extends React.Component {
     size: 'metro',
     fields: 'name',
     cssClass: 'kep-login-facebook',
-    version: '2.9',
+    version: '2.11',
     language: 'en_US',
-    disableMobileRedirect: false,
+    disableMobileRedirect: true,
     isMobile: getIsMobile(),
     tag: 'button',
   };
@@ -176,7 +176,7 @@ class FacebookLogin extends React.Component {
       return;
     }
     this.setState({ isProcessing: true });
-    const { scope, appId, onClick, reAuthenticate, redirectUri, disableMobileRedirect } = this.props;
+    const { scope, appId, onClick, reAuthenticate, redirectUri, disableMobileRedirect, version } = this.props;
 
     if (typeof onClick === 'function') {
       onClick(e);
