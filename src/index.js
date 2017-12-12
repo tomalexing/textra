@@ -13,7 +13,7 @@ import {
   withRouter
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
-import  { Lazy, getUniqueKey, dump, addClass } from './utils';
+import { Lazy, getUniqueKey, dump, addClass, detectIE } from './utils';
 import Store from './store/Store.js';
 import UserStore from './store/UserStore.js';
 import FeedStore from './store/FeedStore.js';
@@ -39,6 +39,13 @@ injectTapEventPlugin();
 
 if (navigator.userAgent.indexOf('Safari') != -1 &&  navigator.userAgent.indexOf('Chrome') == -1) {
     addClass(document.body, "safari");
+}
+
+
+let ie = false;
+if (/Edge\/|Trident\/|MSIE /.test(window.navigator.userAgent)) {
+  ie = true;
+  addClass(document.body, 'ie');
 }
 
 
@@ -135,7 +142,7 @@ class App extends React.Component {
     return(<Router>
             <Route render={({ location }) => (
                     <ReactCSSTransitionGroup
-                      transitionName="fade"
+                      transitionName={ie?"":"fade"}
                       transitionEnterTimeout={300}
                       transitionLeaveTimeout={300}
                     >

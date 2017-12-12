@@ -12,6 +12,8 @@
       border-radius: 4px
       background-color: rgba(255, 255, 255, 0.8)
       margin: auto
+      .ie &
+        overflow: auto
       .registform
         flex-basis: 73%
         padding: 28px
@@ -321,6 +323,9 @@
     margin: auto
     min-height: 100%
     max-width: 700px
+    .ie &
+      min-height: 90vh
+
     +r(768)
       padding-top: 60px
   .p-darken

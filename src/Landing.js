@@ -16,7 +16,7 @@ export default class Landing extends React.Component {
     window.scrollTo(0, 0);
   }
 
-
+  
   render() {
     return <div className="landing-layout">
         <Header currentRole={this.props.currentRole} />
@@ -66,11 +66,13 @@ export default class Landing extends React.Component {
           <div className="container f f-col f-align-2-2 stuff">
             <div className="text-center">
               <h2 className="h1 text-header">
-                <span className="text-highLight">Удобный </span> кросс-браузерный адаптивный интерфейс
+              <span className="text-highLight">Зарабатывайте </span> с Textra!
               </h2>
               <p className="text-subheader">
-                Пользуйтесь нашим сервисом в любом месте на планете. Все,
-                что для этого нужно – смартфон, планшет или компьютер.
+                 Вы – профессиональный переводчик, которого интересует
+                  гибкий график работы и стабильный доход? Будем рады
+                  рассмотреть Вашу кандидатуру для работы в нашей системе.
+                  Оставьте Вашу заявку в разделе «ПОДДЕРЖКА».
               </p>
             </div>
             <div className="intro2-block__featurePic">
@@ -83,13 +85,12 @@ export default class Landing extends React.Component {
             <div className="f f-align-2-2 f-col service-block__description">
               <div className="text-moduleCenter">
                 <h2 className="h1 text-header u-text-right">
-                  <span className="text-highLight">Зарабатывайте </span> с Textra!
+                <span className="text-highLight">Удобный </span>кросс-браузерный адаптивный интерфейс
                 </h2>
                 <p className="text-subheader u-text-right">
-                  Вы – профессиональный переводчик, которого интересует
-                  гибкий график работы и стабильный доход? Будем рады
-                  рассмотреть Вашу кандидатуру для работы в нашей системе.
-                  Оставьте Вашу заявку в разделе «ПОДДЕРЖКА».
+                  Пользуйтесь нашим сервисом в любом месте на планете. Все,
+                  что для этого нужно – смартфон, планшет или компьютер.
+                  
                 </p>
               </div>
             </div>

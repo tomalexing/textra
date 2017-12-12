@@ -60,7 +60,7 @@ class Header extends React.Component{
       }, 200, false), false)
     );
 
-    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new CustomEvent('resize'));
   }
 
   componentWillUnmount(){
