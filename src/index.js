@@ -13,7 +13,7 @@ import {
   withRouter
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
-import { Lazy, getUniqueKey, dump, addClass, detectIE } from './utils';
+import { Lazy, getUniqueKey, dump, addClass } from './utils';
 import Store from './store/Store.js';
 import UserStore from './store/UserStore.js';
 import FeedStore from './store/FeedStore.js';
@@ -66,7 +66,7 @@ const Login = (props) => <Lazy {...props} load={() => import('./Login')}/>
 const DashBoard = (props) => <Lazy {...props} load={() => import('./Dashboard')}/>
 
   // eslint-disable-next-line
-const Test = (props) => <Lazy {...props} load={() => import('./Test')}/>
+// const Test = (props) => <Lazy {...props} load={() => import('./Test')}/>
 
   // eslint-disable-next-line
 const Translator = (props) => <Lazy  {...props} load={() => import('./Translator')}/>
@@ -152,7 +152,7 @@ class App extends React.Component {
                       <PrivateRoute path="/admin" component={Admin} location={location} role={['controller','admin','dev']} key={getUniqueKey()}/>
                       <Route path="/signup" component={SignUp} location={location}  key={getUniqueKey()}/>
                       <Route path="/login" component={Login} location={location}  key={getUniqueKey()} />
-                      <Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} />
+                      { /*<Route exact path="/test" component={Test} location={location}  key={getUniqueKey()} /> */}
                       <PrivateRoute path="/protected" component={PrivateRoute} location={location}  key={getUniqueKey()}/>
                       <Route path="/private" component={Private} location={location}  key={getUniqueKey()} />
                       <Route path="/term-of-use" component={Term} location={location}  key={getUniqueKey()} />

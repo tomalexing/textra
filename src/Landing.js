@@ -45,7 +45,7 @@ export default class Landing extends React.Component {
             <div className="f f-align-2-2 f-col service-block__description">
               <div className="text-moduleCenter">
                 <h2 className="h1 text-header">
-                  <span className="text-highLight">Доверьте </span> перевод своего текста профессионалам и получите результат гарантировано быстро.
+                  <span className="text-highLight">Доверьте </span> перевод своего текста профессионалам и получите результат гарантировано быстро
                 </h2>
                 <p className="text-subheader">
                   Наши квалифицированные переводчики приступают к работе
