@@ -330,15 +330,43 @@
       padding-top: 60px
   .p-darken
     color: darken(#6f6f6f,50)
+  .doc__header
+    display: inline-block
+    margin: 20px 5px
+  .doc__indentation
+    display: inline-block
+    margin: 5px 0
+    &__left
+      display: inline-block
+      margin: 5px 5px 5px 10px
   p
     color: #6f6f6f
     font-weight: 400
     line-height: 18px
   ol
-    list-style: decimal
-    list-style-position: outside
-    margin-left: 111px
+    counter-reset: item
     color: #6f6f6f
+    ul
+      margin-left: 3px
+      list-style-type: disc
+      list-style-position: inside
+      ul
+        margin-left: 20px
+      li
+        display: list-item
+        &:before
+          content: none
+    li 
+      display: block 
+      color: #6f6f6f
+      p
+        display: inline
+      &:before
+        content: counters(item, ".") " "
+        counter-increment: item
+        display: inline
+        color: #6f6f6f
+
   a[href*="mailto"]
     color: $blue
 

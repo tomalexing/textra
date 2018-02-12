@@ -1246,7 +1246,7 @@ class Create extends React.Component {
     if(!this._isMounted) return
 
     let currentNumberOfChar = value.replace(/\s/g,'').length;
-    let isEnoughMoney = Auth.user.balance  > currentNumberOfChar * this.state.letterPrice + 1000 ; // we start from 10₴    
+    let isEnoughMoney = Auth.user.balance  > currentNumberOfChar * this.state.letterPrice + 500 ; // we start from 5₴    (500 cents)
 
     let isNotExceedLetters = currentNumberOfChar <= 1800; // not more than 1800 symbols
     this.setState({ currentNumberOfChar, isBlocking: value.length >  0, translatorMessage: value, isEnoughMoney, isNotExceedLetters })
@@ -1482,7 +1482,7 @@ class Create extends React.Component {
 
             <Indicator className={'f f-align-2-2 '} icon={icon_dur} value={humanReadableTime(currentNumberOfChar * letterTime)} hint={'Длительность перевода'} />
             <Indicator className={`f f-align-2-2 ${isNotExceedLetters?'':'String-indicator__error'}`} icon={icon_letternum} value={currentNumberOfChar} hint={'Количество символов(не более 1800)'} /> 
-            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100 + 10).toFixed(2)}₴`} hint={'Стоимость перевода'} />{/* we start from 10₴  */}
+            <Indicator className={`f f-align-2-2 ${isEnoughMoney?'':'String-indicator__error'}`} icon={icon_cost} value={`${Number(letterPrice * currentNumberOfChar/100 + 5).toFixed(2)}₴`} hint={'Стоимость перевода'} />{/* we start from 5₴  */}
             {!isEnoughMoney && !isTablet && <p>Недостаточно денежных средств.</p>}
           <input tabIndex={"1"} id="submit" type="submit" {...this.disabled && {disabled:'true'}}  value='Отправить' className={'submit-post btn btn-primiry btn-mini'}/>
           </div>

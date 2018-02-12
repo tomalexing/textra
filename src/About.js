@@ -16,15 +16,19 @@ export default class About extends React.Component {
             <img src={logo} srcSet={`${logo2x} 2x, ${logo} 1x`} alt="Textra" />
           </h1>
           <p>
-            <h2 className="u-inline h3">Textra</h2> <p className="u-inline p-darken">
+            <span className="u-inline h3">Textra</span> <span className="u-inline p-darken">
               - это сервис быстрых профессиональных переводов онлайн.
-            </p>
+            </span>
           </p>
           <p>
-            Отправляя текст на перевод, Вы можете быть уверены, что
-            выполнение Вашего заказа начнется немедленно, а результат не
-            заставит себя долго ждать.
+            Отправляя текст на перевод, Вы можете быть уверены, что выполнение Вашего заказа начнется немедленно, а результат не заставит себя долго ждать.
           </p>
+          <p>
+            Стоимость размещения заказа составляет <span className="u-text-font__bold" >5 грн</span>. Стоимость перевода <span className="u-text-font__bold" >1 символа – 10 коп</span> (страницы формата <span className="u-text-font__bold" > А4 ~ 180 грн</span>).
+          </p>
+          <p>В режиме бета-версии, график работы сервиса Textra следующий:</p>
+          <p style={{"marginBottom":'-10px', "marginTop":'-10px'}}>Пн - Сб: <span className="u-text-font__bold">с 9.00 до 21.00</span></p>
+          <p>Вс - <span className="u-text-font__bold" >выходной</span></p>
           <p>
             Если у Вас возникли какие-либо отзывы, пожелания или предложения – отправьте нам сообщение через форму обратной связи в разделе «ПОДДЕРЖКА» или на адрес: <a href="mailto:hello@textra.io">
               hello@textra.io

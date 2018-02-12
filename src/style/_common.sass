@@ -423,6 +423,7 @@ input[type='submit']
 		&-undecor
 			text-decoration: none
 
+
 		&-font
 			&__light
 				font-weight: 100
@@ -432,6 +433,8 @@ input[type='submit']
 				font-weight: 400
 			&__bold
 				font-weight: 700
+			&__italic
+				font-style: italic
 
 	@each $prop in (block, inline-block, inline) 
 		&-#{$prop}

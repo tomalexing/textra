@@ -107,6 +107,10 @@ class App extends React.Component {
     TxRest.initSocket();
     await TxRest.initLiqPay();
 
+    if(!Auth.token && Auth.isAuthenticated){
+      Auth.setUnauthenticated();
+    }
+    
     if(!Auth.isAuthenticated){
       if( Auth.loadSession ){
         Store.loadSession()

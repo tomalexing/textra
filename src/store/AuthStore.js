@@ -113,6 +113,11 @@ const  Auth = {
       resolve();
     })
   },
+  setUnauthenticated(){
+    if( typeof window === 'undefined' ) return 
+      window.localStorage.setItem('isLoggedIn', false);
+    this.isAuthenticated = false;
+  },
   init(){
     if( typeof window === 'undefined' ) return 
     this.isAuthenticated = JSON.parse(window.localStorage.getItem('isLoggedIn'));

@@ -169,7 +169,7 @@ class SignUp extends React.Component {
                   <TxInput tabIndex='1' type="submit" autoValidate={false} className="btn btn-primiry btn-normal btn-block"   value="Зарегистрироваться"/>
                 </TxForm>
 
-              <div className="registform-textlink">Регистрируясь, вы принимаете <Link tabIndex="1" to='/' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>
+              <div className="registform-textlink">Регистрируясь, вы принимаете <Link tabIndex="1" to='/private' className="registform-textlink__blue u-text-undecor" >пользовательское соглашение</Link></div>
             </div>
         </div>
       </div>

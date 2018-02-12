@@ -10,9 +10,7 @@ export const Footer = () => {
     return <div className="footer f f-align-13-2">
         <div className="f f-align-1-2">
           <p> © { now.getFullYear() } Textra. Все права защищены. <Link className="text-highLight" to="/private">
-              Политика конфиденциальности
-            </Link> и <Link className="text-highLight" to="/term-of-use">
-              Правила использования.
+            Правила пользования и политика конфиденциальности
             </Link>
           </p>
         </div>
