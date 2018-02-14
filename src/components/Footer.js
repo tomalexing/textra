@@ -10,8 +10,9 @@ export const Footer = () => {
     return <div className="footer f f-align-13-2">
         <div className="f f-align-1-2">
           <p> © { now.getFullYear() } Textra. Все права защищены. <Link className="text-highLight" to="/private">
-            Правила пользования и политика конфиденциальности
+            Правила пользования и политика конфиденциальности.
             </Link>
+              Powered by <a className="text-highLight" href="http://iondigi.com" rel="noopener noreferrer" target="_blank">Iondigital</a>
           </p>
         </div>
         <ul className="footer__social f f-align-3-2">
@@ -25,6 +26,7 @@ export const Footer = () => {
               <img src={insta} alt="instagram" />
             </a>
           </li>
+          
         </ul>
       </div>;
 }

@@ -50,7 +50,7 @@ See the section about [deployment](#deployment) for more information.
 ### deploy
 
 Navigate to project folder
-scp -r ./build ubuntu@ec2-54-93-78-212.eu-central-1.compute.amazonaws.com:~/textra
+scp -r ./build ubuntu@18.196.192.116:~/textra
 
 Then, at the server:
 docker build -t textra-app-image .
